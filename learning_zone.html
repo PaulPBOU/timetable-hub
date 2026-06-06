@@ -141,6 +141,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         let playlistData = [];
+        let initialLoad = true; // Track if it's the first load
 
         signInAnonymously(auth).then(() => {
             const docRef = doc(db, "settings", "learning_zone");
@@ -152,6 +153,12 @@
                     setDoc(docRef, { videos: playlistData }, { merge: true });
                 }
                 renderPlaylist();
+                
+                // Play the first video automatically on initial load if available
+                if (initialLoad && playlistData.length > 0) {
+                    playVideo(playlistData[0].url);
+                    initialLoad = false;
+                }
             });
         });
 
