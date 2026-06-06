@@ -149,7 +149,6 @@
             });
         });
 
-        // --- YOUTUBE LOGIC ---
         function extractVideoID(url) {
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             const match = url.match(regExp);
@@ -171,8 +170,8 @@
         window.playVideo = (url) => {
             const vidId = extractVideoID(url);
             if(vidId) {
-                // To auto-loop, playlist needs to be the same ID
-                document.getElementById('yt-iframe').src = `https://www.youtube.com/embed/${vidId}?autoplay=1&mute=0&controls=0&loop=1&playlist=${vidId}`;
+                // Removed loop and playlist params to fix Error 153 on Live Streams
+                document.getElementById('yt-iframe').src = `https://www.youtube.com/embed/${vidId}?autoplay=1&controls=0`;
             }
         }
 
@@ -189,12 +188,12 @@
             }
             playlistData.forEach((vid, idx) => {
                 container.innerHTML += `
-                <div class="flex items-center justify-between bg-slate-800/80 p-3 rounded-lg border border-slate-600 hover:border-cyan-500 group transition-all mb-2">
-                    <button onclick="playVideo('${vid.url}')" class="flex-1 text-left flex items-center text-slate-200 hover:text-white transition-colors">
-                        <i class="fa-brands fa-youtube text-red-500 mr-3 text-xl drop-shadow"></i>
-                        <span class="text-sm font-bold truncate w-40">${vid.title}</span>
+                <div class="flex items-center justify-between bg-slate-800/40 p-2 rounded-lg border border-slate-600/50 hover:border-cyan-500/50 group transition-all mb-2 backdrop-blur-sm">
+                    <button onclick="playVideo('${vid.url}')" class="flex-1 text-left flex items-center text-slate-200/90 hover:text-white transition-colors">
+                        <i class="fa-brands fa-youtube text-red-500/80 mr-2 text-lg drop-shadow"></i>
+                        <span class="text-xs font-bold truncate w-32">${vid.title}</span>
                     </button>
-                    <button onclick="deleteVideo(${idx})" class="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-2"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="deleteVideo(${idx})" class="text-slate-400/60 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-1"><i class="fa-solid fa-trash text-xs"></i></button>
                 </div>`;
             });
         }
@@ -205,7 +204,6 @@
         let timeRemaining = 0; // for timer
         let timeElapsed = 0; // for stopwatch
 
-        // Generate Beep Sound for Timer Zero
         let audioCtx;
         function playBeep() {
             if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -251,13 +249,11 @@
         window.toggleStopwatch = () => {
             const btn = document.getElementById('stopwatch-btn');
             if(timeMode === 'stopwatch') {
-                // Pause it
                 clearInterval(timeInterval);
                 timeMode = null;
                 btn.innerHTML = '<i class="fa-solid fa-stopwatch mr-2"></i> Stopwatch';
                 btn.classList.replace('bg-slate-600', 'bg-rose-600/90');
             } else {
-                // Start it
                 clearInterval(timeInterval);
                 timeMode = 'stopwatch';
                 timeElapsed = 0;
@@ -311,7 +307,6 @@
                     for (let i = 0; i < array.length; i++) { values += array[i]; }
                     const average = values / array.length;
                     
-                    // Convert raw audio to a percentage (0 to 100)
                     let volumePercent = Math.min(Math.round(average * 1.5), 100);
                     updateMeter(volumePercent);
                 }
@@ -323,38 +318,37 @@
 
         function updateMeter(vol) {
             const bar = document.getElementById('meter-bar');
-            bar.style.height = vol + '%'; // Updated to vertical height
+            bar.style.height = vol + '%'; 
 
             if (vol < 60) {
-                bar.style.backgroundColor = '#10b981'; // Green
-                bar.style.boxShadow = '0 0 15px rgba(16,185,129,0.8)';
+                bar.style.backgroundColor = 'rgba(16, 185, 129, 0.8)'; // Green
+                bar.style.boxShadow = '0 0 15px rgba(16,185,129,0.5)';
                 redStartTime = null;
             } else if (vol >= 60 && vol < 85) {
-                bar.style.backgroundColor = '#eab308'; // Yellow
-                bar.style.boxShadow = '0 0 15px rgba(234,179,8,0.8)';
+                bar.style.backgroundColor = 'rgba(234, 179, 8, 0.8)'; // Yellow
+                bar.style.boxShadow = '0 0 15px rgba(234,179,8,0.5)';
                 redStartTime = null;
             } else {
-                bar.style.backgroundColor = '#ef4444'; // Red
-                bar.style.boxShadow = '0 0 25px rgba(239,68,68,1)';
+                bar.style.backgroundColor = 'rgba(239, 68, 68, 0.9)'; // Red
+                bar.style.boxShadow = '0 0 25px rgba(239,68,68,0.8)';
                 
-                // Track how long it stays red
                 if (!redStartTime) {
                     redStartTime = Date.now();
-                } else if (Date.now() - redStartTime > 5000) { // 5 SECONDS
+                } else if (Date.now() - redStartTime > 5000) { 
                     triggerAlarm();
                 }
             }
         }
 
         function triggerAlarm() {
-            if (alarmOscillator) return; // Already alarming
+            if (alarmOscillator) return; 
             
             document.getElementById('alarm-overlay').classList.remove('hidden');
             
             if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             alarmOscillator = audioCtx.createOscillator();
             alarmOscillator.type = 'sawtooth';
-            alarmOscillator.frequency.setValueAtTime(440, audioCtx.currentTime); // A4 note
+            alarmOscillator.frequency.setValueAtTime(440, audioCtx.currentTime); 
             alarmOscillator.connect(audioCtx.destination);
             alarmOscillator.start();
         }
