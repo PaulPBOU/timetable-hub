@@ -31,6 +31,13 @@
 </head>
 <body class="w-screen h-screen flex flex-col relative bg-transparent">
     
+    <!-- START OVERLAY TO BYPASS BROWSER AUTOPLAY BLOCKS -->
+    <div id="start-overlay" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center pointer-events-auto transition-opacity duration-500">
+        <button onclick="startZone()" class="bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 hover:text-white font-extrabold text-2xl md:text-4xl py-6 px-12 rounded-3xl shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)] transition-all hover:scale-105 border border-emerald-400/30 flex items-center backdrop-blur-md">
+            <i class="fa-solid fa-play mr-4"></i> Enter Learning Zone
+        </button>
+    </div>
+
     <!-- YOUTUBE BACKGROUND -->
     <div id="video-bg">
         <iframe id="yt-iframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -68,7 +75,7 @@
         <!-- MAIN LAYOUT -->
         <div class="flex-1 flex justify-between overflow-hidden">
             
-            <!-- LEFT COLUMN: Playlist Manager (Thinner & Highly Transparent) -->
+            <!-- LEFT COLUMN: Playlist Manager -->
             <div class="w-[180px] bg-slate-900/10 border border-white/10 rounded-2xl p-3 shadow-2xl flex flex-col pointer-events-auto backdrop-blur-md h-full">
                 <h2 class="text-sm md:text-base font-bold text-white/60 mb-3 drop-shadow-md flex items-center"><i class="fa-brands fa-youtube mr-2 text-white/50"></i> Focus Playlist</h2>
                 
@@ -140,8 +147,9 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        
         let playlistData = [];
-        let initialLoad = true; // Track if it's the first load
+        let zoneStarted = false; // Track if user clicked start
 
         signInAnonymously(auth).then(() => {
             const docRef = doc(db, "settings", "learning_zone");
@@ -154,13 +162,23 @@
                 }
                 renderPlaylist();
                 
-                // Play the first video automatically on initial load if available
-                if (initialLoad && playlistData.length > 0) {
-                    playVideo(playlistData[0].url);
-                    initialLoad = false;
+                // If they already clicked start but data loaded slow, play it now
+                if (zoneStarted && document.getElementById('yt-iframe').src === "") {
+                    if(playlistData.length > 0) playVideo(playlistData[0].url);
                 }
             });
         });
+
+        window.startZone = () => {
+            const overlay = document.getElementById('start-overlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.classList.add('hidden'), 500); // Wait for fade
+            
+            zoneStarted = true;
+            if (playlistData.length > 0) {
+                playVideo(playlistData[0].url);
+            }
+        };
 
         function extractVideoID(url) {
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -183,7 +201,6 @@
         window.playVideo = (url) => {
             const vidId = extractVideoID(url);
             if(vidId) {
-                // Added parameters to minimise YouTube UI dark gradients
                 document.getElementById('yt-iframe').src = `https://www.youtube.com/embed/${vidId}?autoplay=1&mute=0&controls=0&modestbranding=1&showinfo=0&rel=0&iv_load_policy=3`;
             }
         }
@@ -213,9 +230,9 @@
 
         // --- TIME CONTROLS ---
         let timeInterval = null;
-        let timeMode = null; // 'timer' or 'stopwatch'
-        let timeRemaining = 0; // for timer
-        let timeElapsed = 0; // for stopwatch
+        let timeMode = null; 
+        let timeRemaining = 0; 
+        let timeElapsed = 0; 
 
         let audioCtx;
         function playBeep() {
@@ -225,7 +242,7 @@
             osc.frequency.setValueAtTime(800, audioCtx.currentTime);
             osc.connect(audioCtx.destination);
             osc.start();
-            osc.stop(audioCtx.currentTime + 1); // beep for 1 sec
+            osc.stop(audioCtx.currentTime + 1); 
         }
 
         function formatTime(seconds) {
@@ -338,15 +355,15 @@
             bar.style.height = vol + '%'; 
 
             if (vol < 60) {
-                bar.style.backgroundColor = 'rgba(16, 185, 129, 0.7)'; // Green
+                bar.style.backgroundColor = 'rgba(16, 185, 129, 0.7)'; 
                 bar.style.boxShadow = '0 0 15px rgba(16,185,129,0.5)';
                 redStartTime = null;
             } else if (vol >= 60 && vol < 85) {
-                bar.style.backgroundColor = 'rgba(234, 179, 8, 0.7)'; // Yellow
+                bar.style.backgroundColor = 'rgba(234, 179, 8, 0.7)'; 
                 bar.style.boxShadow = '0 0 15px rgba(234,179,8,0.5)';
                 redStartTime = null;
             } else {
-                bar.style.backgroundColor = 'rgba(239, 68, 68, 0.8)'; // Red
+                bar.style.backgroundColor = 'rgba(239, 68, 68, 0.8)'; 
                 bar.style.boxShadow = '0 0 25px rgba(239,68,68,0.7)';
                 
                 if (!redStartTime) {
