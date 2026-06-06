@@ -146,14 +146,15 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        const firebaseConfig = {
+       // Your web app's Firebase configuration
+            const firebaseConfig = {
             apiKey: "AIzaSyCEGrh2SIC20vJj_nLm4x34ok01srxip7I",
             authDomain: "paul-s-2026.firebaseapp.com",
             projectId: "paul-s-2026",
             storageBucket: "paul-s-2026.firebasestorage.app",
             messagingSenderId: "524167059781",
             appId: "1:524167059781:web:57347f46b29c9d4a49862c"
-        };
+            };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
