@@ -38,16 +38,25 @@
         </button>
     </div>
 
+    <!-- CODE PATTERN BACKGROUND (Hidden by default) -->
+    <canvas id="pattern-canvas" class="hidden fixed top-0 left-0 w-screen h-screen z-0 pointer-events-none"></canvas>
+
     <!-- YOUTUBE BACKGROUND -->
     <div id="video-bg">
         <iframe id="yt-iframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
 
-    <!-- UI LAYER ON TOP OF VIDEO -->
+    <!-- UI LAYER ON TOP OF BACKGROUND -->
     <div class="absolute inset-0 z-10 flex flex-col p-4 md:p-6 pointer-events-none">
         
+        <!-- Ambient Floating Artifacts -->
+        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+            <div class="absolute w-[30vw] h-[30vw] bg-emerald-500/10 blur-[100px] rounded-full top-1/4 left-1/4 animate-[pulse_8s_ease-in-out_infinite]"></div>
+            <div class="absolute w-[40vw] h-[40vw] bg-cyan-500/10 blur-[120px] rounded-full bottom-1/4 right-1/4 animate-[pulse_12s_ease-in-out_infinite_alternate]"></div>
+        </div>
+
         <!-- HEADER ROW -->
-        <div class="flex justify-between items-center mb-6 shrink-0 pointer-events-auto">
+        <div class="relative z-10 flex justify-between items-center mb-6 shrink-0 pointer-events-auto">
             <div>
                 <h1 class="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 flex items-center drop-shadow-[0_0_10px_rgba(0,0,0,0.8)]">
                     <i class="fa-solid fa-headphones mr-4 text-emerald-400"></i> Learning Zone
@@ -73,15 +82,15 @@
         </div>
 
         <!-- MAIN LAYOUT -->
-        <div class="flex-1 flex justify-between overflow-hidden">
+        <div class="relative z-10 flex-1 flex justify-between overflow-hidden">
             
             <!-- LEFT COLUMN: Playlist Manager -->
-            <div class="w-[180px] bg-slate-900/10 border border-white/10 rounded-2xl p-3 shadow-2xl flex flex-col pointer-events-auto backdrop-blur-md h-full">
+            <div class="w-[180px] md:w-[220px] bg-slate-900/10 border border-white/10 rounded-2xl p-3 shadow-2xl flex flex-col pointer-events-auto backdrop-blur-md h-full">
                 <h2 class="text-sm md:text-base font-bold text-white/60 mb-3 drop-shadow-md flex items-center"><i class="fa-brands fa-youtube mr-2 text-white/50"></i> Focus Playlist</h2>
                 
-                <div class="flex gap-1.5 mb-3 shrink-0">
-                    <input type="text" id="new-yt-url" placeholder="Paste URL..." class="flex-1 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] md:text-xs text-white/70 focus:outline-none focus:border-white/30 placeholder-white/30 transition-colors">
-                    <button onclick="addVideo()" class="bg-white/10 hover:bg-white/20 px-2.5 py-1.5 rounded-lg text-white/60 font-bold shadow-md transition-colors"><i class="fa-solid fa-plus text-xs"></i></button>
+                <div class="flex gap-1.5 mb-3 shrink-0 w-full">
+                    <input type="text" id="new-yt-url" placeholder="Paste URL..." class="flex-1 w-0 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] md:text-xs text-white/70 focus:outline-none focus:border-white/30 placeholder-white/30 transition-colors">
+                    <button onclick="addVideo()" class="bg-white/10 hover:bg-white/20 px-2.5 py-1.5 rounded-lg text-white/60 font-bold shadow-md transition-colors shrink-0"><i class="fa-solid fa-plus text-[10px] md:text-xs"></i></button>
                 </div>
 
                 <div id="playlist" class="flex-1 overflow-y-auto custom-scrollbar space-y-1.5 pr-1">
@@ -149,7 +158,176 @@
         const db = getFirestore(app);
         
         let playlistData = [];
-        let zoneStarted = false; // Track if user clicked start
+        let zoneStarted = false; 
+
+        // --- CODE PATTERN ANIMATION LOGIC ---
+        let currentPattern = null; 
+        let animationId = null;
+        let patternTime = 0;
+        let tendrils = [];
+        let particles = [];
+
+        window.animatePattern = () => {
+            if (!currentPattern) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+                return;
+            }
+            
+            const canvas = document.getElementById('pattern-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            if(canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                tendrils = [];
+                particles = [];
+            }
+
+            if (currentPattern === 'ps3') {
+                let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                bgGrad.addColorStop(0, '#000000');
+                bgGrad.addColorStop(1, '#0f172a'); 
+                ctx.fillStyle = bgGrad;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                patternTime += 0.015;
+                
+                for(let i = 0; i < 3; i++) {
+                    ctx.beginPath();
+                    for(let x = 0; x <= canvas.width + 20; x += 20) {
+                        let y = canvas.height / 2 
+                              + Math.sin(x * 0.002 + patternTime + i * 1.5) * (150 + i * 30) 
+                              + Math.sin(x * 0.005 - patternTime * 0.8) * 80;
+                        if(x === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    for(let x = canvas.width + 20; x >= 0; x -= 20) {
+                        let y = canvas.height / 2 
+                              + Math.sin(x * 0.002 + patternTime + i * 1.5) * (150 + i * 30) 
+                              + Math.sin(x * 0.005 - patternTime * 0.8) * 80;
+                        ctx.lineTo(x, y + 60 + i * 20); 
+                    }
+                    ctx.closePath();
+                    
+                    let grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
+                    grad.addColorStop(0, `hsla(${patternTime*30 + i*80}, 80%, 60%, 0.3)`);
+                    grad.addColorStop(0.5, `hsla(${patternTime*30 + i*80 + 40}, 80%, 60%, 0.5)`);
+                    grad.addColorStop(1, `hsla(${patternTime*30 + i*80 + 80}, 80%, 60%, 0.1)`);
+                    
+                    ctx.fillStyle = grad;
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = `hsla(${patternTime*30 + i*80 + 20}, 100%, 70%, 0.6)`;
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                }
+
+            } else if (currentPattern === 'tendrils') {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; 
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                if(tendrils.length === 0) {
+                    for(let i=0; i<150; i++) {
+                        tendrils.push({
+                            x: Math.random() * canvas.width,
+                            y: Math.random() * canvas.height,
+                            speed: 2 + Math.random() * 6,
+                            length: 20 + Math.random() * 80,
+                            hue: 130 + Math.random() * 60,
+                            width: Math.random() * 1.5 + 0.5
+                        });
+                    }
+                }
+                
+                tendrils.forEach(t => {
+                    ctx.beginPath();
+                    let glow = ctx.createLinearGradient(t.x, t.y, t.x, t.y - t.length);
+                    glow.addColorStop(0, `hsla(${t.hue}, 100%, 60%, 1)`);
+                    glow.addColorStop(1, `hsla(${t.hue}, 100%, 60%, 0)`);
+                    
+                    ctx.moveTo(t.x, t.y);
+                    ctx.lineTo(t.x, t.y - t.length);
+                    ctx.strokeStyle = glow;
+                    ctx.lineWidth = t.width;
+                    ctx.stroke();
+                    
+                    t.y += t.speed;
+                    if (t.y - t.length > canvas.height) {
+                        t.y = -Math.random() * 100;
+                        t.x = Math.random() * canvas.width;
+                    }
+                });
+
+            } else if (currentPattern === 'nebula') {
+                // Calm, deep space background with slight motion blur
+                ctx.fillStyle = 'rgba(8, 5, 20, 0.2)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                if(particles.length === 0) {
+                    for(let i=0; i<600; i++) {
+                        particles.push({
+                            x: Math.random() * canvas.width,
+                            y: Math.random() * canvas.height,
+                            vx: (Math.random() - 0.5) * 0.3,
+                            vy: (Math.random() - 0.5) * 0.3,
+                            radius: Math.random() * 2 + 0.5, 
+                            pulseSpeed: 0.01 + Math.random() * 0.02,
+                            pulseTime: Math.random() * Math.PI * 2,
+                            hue: 240 + Math.random() * 100, // Blues, Purples, Pinks
+                            isLarge: Math.random() > 0.95 // Small chance to be a large depth-of-field orb
+                        });
+                    }
+                }
+
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.y -= 0.15; // Slow ambient rise
+
+                    if (p.x < -20) p.x = canvas.width + 20;
+                    if (p.x > canvas.width + 20) p.x = -20;
+                    if (p.y < -20) p.y = canvas.height + 20;
+                    if (p.y > canvas.height + 20) p.y = -20;
+
+                    p.pulseTime += p.pulseSpeed;
+                    let currentRadius = p.radius + Math.sin(p.pulseTime) * (p.radius * 0.4);
+
+                    ctx.beginPath();
+                    if (p.isLarge) {
+                        ctx.arc(p.x, p.y, currentRadius * 5, 0, Math.PI * 2);
+                        ctx.fillStyle = `hsla(${p.hue}, 80%, 60%, 0.08)`;
+                        ctx.shadowBlur = 30;
+                        ctx.shadowColor = `hsla(${p.hue}, 100%, 70%, 0.5)`;
+                    } else {
+                        ctx.arc(p.x, p.y, currentRadius, 0, Math.PI * 2);
+                        ctx.fillStyle = `hsla(${p.hue}, 80%, 70%, 0.6)`;
+                        ctx.shadowBlur = 10;
+                        ctx.shadowColor = `hsla(${p.hue}, 100%, 70%, 0.4)`;
+                    }
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                });
+            }
+            
+            animationId = requestAnimationFrame(window.animatePattern);
+        }
+
+        window.playPattern = (type = 'ps3') => {
+            document.getElementById('video-bg').classList.add('hidden');
+            document.getElementById('pattern-canvas').classList.remove('hidden');
+            document.getElementById('yt-iframe').src = ""; 
+            
+            if (currentPattern !== type) {
+                currentPattern = type;
+                tendrils = [];
+                particles = [];
+            }
+
+            if (!animationId) window.animatePattern();
+        };
+
+        // --- END PATTERN LOGIC ---
 
         signInAnonymously(auth).then(() => {
             const docRef = doc(db, "settings", "learning_zone");
@@ -162,7 +340,6 @@
                 }
                 renderPlaylist();
                 
-                // Enable button once data is loaded
                 const btn = document.getElementById('enter-zone-btn');
                 if (btn && !zoneStarted) {
                     btn.disabled = false;
@@ -170,9 +347,8 @@
                     btn.className = 'bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 hover:text-white font-extrabold text-2xl md:text-4xl py-6 px-12 rounded-3xl shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)] transition-all hover:scale-105 border border-emerald-400/30 flex items-center backdrop-blur-md cursor-pointer';
                 }
                 
-                // If they already clicked start but data loaded slow, play it now
-                if (zoneStarted && document.getElementById('yt-iframe').src === "") {
-                    if(playlistData.length > 0) playVideo(playlistData[0].url);
+                if (zoneStarted && document.getElementById('yt-iframe').src === "" && !currentPattern) {
+                    playPattern('ps3');
                 }
             });
         });
@@ -180,12 +356,9 @@
         window.startZone = () => {
             const overlay = document.getElementById('start-overlay');
             overlay.style.opacity = '0';
-            setTimeout(() => overlay.classList.add('hidden'), 500); // Wait for fade
-            
+            setTimeout(() => overlay.classList.add('hidden'), 500);
             zoneStarted = true;
-            if (playlistData.length > 0) {
-                playVideo(playlistData[0].url);
-            }
+            playPattern('ps3');
         };
 
         function extractVideoID(url) {
@@ -207,6 +380,14 @@
         }
 
         window.playVideo = (url) => {
+            currentPattern = null;
+            if(animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            document.getElementById('pattern-canvas').classList.add('hidden');
+            document.getElementById('video-bg').classList.remove('hidden');
+
             const vidId = extractVideoID(url);
             if(vidId) {
                 document.getElementById('yt-iframe').src = `https://www.youtube.com/embed/${vidId}?autoplay=1&mute=0&controls=0&modestbranding=1&showinfo=0&rel=0&iv_load_policy=3`;
@@ -221,17 +402,40 @@
         function renderPlaylist() {
             const container = document.getElementById('playlist');
             container.innerHTML = '';
+
+            container.innerHTML += `
+            <div class="flex flex-col gap-1.5 mb-2">
+                <div onclick="playPattern('ps3')" class="flex items-center justify-between bg-emerald-500/10 hover:bg-emerald-500/30 p-2 rounded-lg border border-emerald-500/20 group transition-all backdrop-blur-sm shadow-sm cursor-pointer">
+                    <div class="flex-1 text-left flex items-center text-emerald-400 group-hover:text-emerald-200 transition-colors overflow-hidden pr-2 pointer-events-none">
+                        <i class="fa-solid fa-wave-square text-emerald-500 mr-2 text-[10px] md:text-xs drop-shadow shrink-0"></i>
+                        <span class="text-[10px] md:text-xs font-bold truncate">PS3 Wave</span>
+                    </div>
+                </div>
+                <div onclick="playPattern('tendrils')" class="flex items-center justify-between bg-cyan-500/10 hover:bg-cyan-500/30 p-2 rounded-lg border border-cyan-500/20 group transition-all backdrop-blur-sm shadow-sm cursor-pointer">
+                    <div class="flex-1 text-left flex items-center text-cyan-400 group-hover:text-cyan-200 transition-colors overflow-hidden pr-2 pointer-events-none">
+                        <i class="fa-solid fa-cloud-showers-heavy text-cyan-500 mr-2 text-[10px] md:text-xs drop-shadow shrink-0"></i>
+                        <span class="text-[10px] md:text-xs font-bold truncate">Raining Tendrils</span>
+                    </div>
+                </div>
+                <div onclick="playPattern('nebula')" class="flex items-center justify-between bg-purple-500/10 hover:bg-purple-500/30 p-2 rounded-lg border border-purple-500/20 group transition-all backdrop-blur-sm shadow-sm cursor-pointer">
+                    <div class="flex-1 text-left flex items-center text-purple-400 group-hover:text-purple-200 transition-colors overflow-hidden pr-2 pointer-events-none">
+                        <i class="fa-solid fa-certificate text-purple-500 mr-2 text-[10px] md:text-xs drop-shadow shrink-0"></i>
+                        <span class="text-[10px] md:text-xs font-bold truncate">Cosmic Drift</span>
+                    </div>
+                </div>
+            </div>`;
+
             if(playlistData.length === 0) {
-                container.innerHTML = '<p class="text-white/30 text-center text-xs mt-4">Add a YouTube link above.</p>';
+                container.innerHTML += '<p class="text-white/30 text-center text-[10px] md:text-xs mt-4">Add a YouTube link above.</p>';
             }
             playlistData.forEach((vid, idx) => {
                 container.innerHTML += `
-                <div class="flex items-center justify-between bg-white/5 p-2 rounded-lg border border-white/5 hover:border-white/20 group transition-all mb-1.5 backdrop-blur-sm shadow-sm">
-                    <button onclick="playVideo('${vid.url}')" class="flex-1 text-left flex items-center text-white/60 hover:text-white transition-colors overflow-hidden pr-2">
-                        <i class="fa-brands fa-youtube text-white/40 mr-2 text-xs drop-shadow shrink-0"></i>
+                <div onclick="playVideo('${vid.url}')" class="flex items-center justify-between bg-white/5 p-2 rounded-lg border border-white/5 hover:border-white/20 hover:bg-white/10 group transition-all mb-1.5 backdrop-blur-sm shadow-sm cursor-pointer">
+                    <div class="flex-1 text-left flex items-center text-white/60 group-hover:text-white transition-colors overflow-hidden pr-2 pointer-events-none">
+                        <i class="fa-brands fa-youtube text-white/40 mr-2 text-[10px] md:text-xs drop-shadow shrink-0"></i>
                         <span class="text-[10px] md:text-xs font-medium truncate">${vid.title}</span>
-                    </button>
-                    <button onclick="deleteVideo(${idx})" class="text-white/20 hover:text-red-400/80 opacity-0 group-hover:opacity-100 transition-opacity p-1 shrink-0"><i class="fa-solid fa-trash text-[10px]"></i></button>
+                    </div>
+                    <button onclick="event.stopPropagation(); deleteVideo(${idx})" class="text-white/20 hover:text-red-400/80 opacity-0 group-hover:opacity-100 transition-opacity p-1 shrink-0 z-10"><i class="fa-solid fa-trash text-[10px]"></i></button>
                 </div>`;
             });
         }
