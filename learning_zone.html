@@ -224,7 +224,8 @@
                 }
 
             } else if (currentPattern === 'tendrils') {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; 
+                // Increased opacity from 0.2 to 0.35 to prevent fractional floating point canvas ghosting
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.35)'; 
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
                 if(tendrils.length === 0) {
@@ -260,8 +261,8 @@
                 });
 
             } else if (currentPattern === 'nebula') {
-                // Calm, deep space background with slight motion blur
-                ctx.fillStyle = 'rgba(8, 5, 20, 0.2)';
+                // Increased opacity from 0.2 to 0.35 to prevent fractional floating point canvas ghosting
+                ctx.fillStyle = 'rgba(8, 5, 20, 0.35)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                 if(particles.length === 0) {
@@ -322,6 +323,14 @@
                 currentPattern = type;
                 tendrils = [];
                 particles = [];
+                
+                // Force a hard clear of the canvas when switching patterns
+                // This guarantees no old pattern pixels get stuck on the screen
+                const canvas = document.getElementById('pattern-canvas');
+                if(canvas) {
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
             }
 
             if (!animationId) window.animatePattern();
