@@ -41,10 +41,15 @@
     <div class="absolute filter blur-[100px] md:blur-[120px] z-0 opacity-40 dark:opacity-30 rounded-full w-[250px] md:w-[400px] h-[250px] md:h-[400px] bg-cyan-200 dark:bg-cyan-600 bottom-[-10%] right-[-5%] pointer-events-none transition-colors duration-300"></div>
 
     <!-- GLOBAL CONTROLS -->
-    <!-- Home Button -->
-    <button onclick="navigate('landing')" class="fixed top-4 left-4 md:top-6 md:left-6 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 w-10 h-10 md:w-11 md:h-11 rounded-lg flex items-center justify-center transition-colors border border-slate-200 dark:border-slate-600 shadow-xl z-50" title="Home">
-        <i class="fa-solid fa-house"></i>
-    </button>
+    <!-- Top Left Group (Home & Theme) -->
+    <div class="fixed top-4 left-4 md:top-6 md:left-6 flex gap-2 md:gap-3 z-50">
+        <button onclick="navigate('landing')" class="bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 w-10 h-10 md:w-11 md:h-11 rounded-lg flex items-center justify-center transition-colors border border-slate-200 dark:border-slate-600 shadow-xl" title="Home">
+            <i class="fa-solid fa-house"></i>
+        </button>
+        <button onclick="toggleTheme()" class="bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 w-10 h-10 md:w-11 md:h-11 rounded-lg flex items-center justify-center transition-colors border border-slate-200 dark:border-slate-600 shadow-xl" title="Toggle Theme">
+            <i id="theme-icon" class="fa-solid fa-moon"></i>
+        </button>
+    </div>
 
     <!-- Back Button -->
     <button id="global-back-btn" class="hidden fixed top-4 right-4 md:top-6 md:right-6 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 px-4 h-10 md:h-11 text-sm font-bold rounded-lg flex items-center justify-center transition-colors border border-slate-200 dark:border-slate-600 shadow-xl z-50 min-w-[90px]" onclick="handleGlobalBack()">
@@ -57,16 +62,14 @@
         <span class="absolute right-16 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-emerald-200 dark:border-emerald-500/30 shadow-lg">Enter Learning Zone</span>
     </a>
 
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
     <!-- Main App Container -->
     <div class="relative w-full max-w-7xl h-full z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 rounded-2xl md:rounded-[2rem] shadow-2xl p-3 md:p-6 flex flex-col overflow-hidden min-h-0 transition-colors duration-300">
 
         <!-- LANDING PAGE -->
         <div id="view-landing" class="flex flex-col items-center justify-center h-full space-y-10 animate-in fade-in zoom-in duration-500">
-            <!-- Theme Toggle -->
-            <button onclick="toggleTheme()" class="absolute top-4 right-4 md:top-6 md:right-6 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 w-10 h-10 md:w-11 md:h-11 rounded-lg flex items-center justify-center transition-colors border border-slate-200 dark:border-slate-600 shadow-xl z-50" title="Toggle Theme">
-                <i id="theme-icon" class="fa-solid fa-moon"></i>
-            </button>
-
             <div class="text-center">
                 <i class="fa-solid fa-graduation-cap text-6xl text-cyan-500 dark:text-cyan-400 mb-6 drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]"></i>
                 <h1 class="text-4xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600 dark:from-cyan-400 dark:to-indigo-400 mb-4">Paul's School Day</h1>
@@ -100,7 +103,7 @@
 
         <!-- WEEK SELECTOR -->
         <div id="view-week-select" class="hidden flex-col h-full items-center justify-start animate-in fade-in duration-300 pt-10 md:pt-0 min-h-0">
-            <div class="w-full max-w-4xl border-b border-slate-300 dark:border-slate-700 pb-2 mb-4 shrink-0">
+            <div class="w-full max-w-4xl border-b border-slate-300 dark:border-slate-700 pb-2 mb-4 shrink-0 mt-8 md:mt-0">
                 <h1 id="week-selector-title" class="text-2xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600 dark:from-cyan-400 dark:to-indigo-400">Term</h1>
                 <p class="text-slate-500 dark:text-slate-400 text-xs md:text-sm">Select your week</p>
             </div>
@@ -111,7 +114,7 @@
 
         <!-- WEEK VIEW -->
         <div id="view-week" class="hidden flex-col h-full animate-in fade-in duration-300 pt-10 md:pt-0 min-h-0">
-            <div class="border-b border-slate-300 dark:border-slate-700/50 pb-2 mb-2 flex items-baseline gap-3 shrink-0">
+            <div class="border-b border-slate-300 dark:border-slate-700/50 pb-2 mb-2 flex items-baseline gap-3 shrink-0 mt-8 md:mt-0">
                 <h1 id="week-title" class="text-xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600 dark:from-cyan-400 dark:to-indigo-400 leading-none">Week</h1>
                 <p id="week-subtitle" class="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-semibold">Term, Week</p>
             </div>
@@ -122,7 +125,7 @@
 
         <!-- DAY VIEW -->
         <div id="view-day" class="hidden flex-col h-full animate-in slide-in-from-right-8 duration-300 pt-10 md:pt-0 min-h-0">
-            <div class="border-b border-slate-300 dark:border-slate-700 pb-2 mb-3 shrink-0">
+            <div class="border-b border-slate-300 dark:border-slate-700 pb-2 mb-3 shrink-0 mt-8 md:mt-0">
                 <div class="flex items-baseline gap-3">
                     <h1 id="day-title" class="text-xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600 dark:from-cyan-400 dark:to-indigo-400 leading-none">Schedule</h1>
                     <p id="day-subtitle" class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-semibold">Term, Week</p>
@@ -200,7 +203,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         // *** YOUR REAL FIREBASE CONFIG ***
         const firebaseConfig = {
@@ -234,11 +237,24 @@
                 localStorage.theme = 'dark';
             }
         };
-        // Initialize Theme
+        
         if (localStorage.theme === 'light' || (!('theme' in localStorage) && !window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.remove('dark');
             document.addEventListener("DOMContentLoaded", () => document.getElementById('theme-icon')?.classList.replace('fa-moon', 'fa-sun'));
         }
+
+        // Custom Toast Function
+        window.showToast = (msg) => {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'bg-slate-800 dark:bg-slate-700 text-white px-5 py-3 rounded-xl shadow-xl text-sm font-semibold animate-in slide-in-from-bottom-5 fade-in duration-300 flex items-center border border-slate-600';
+            toast.innerHTML = `<i class="fa-solid fa-circle-info text-cyan-400 mr-2"></i> ${msg}`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('animate-out', 'slide-out-to-bottom-5', 'fade-out', 'duration-300');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        };
 
         // URL ROUTER LOGIC
         window.addEventListener('hashchange', handleHashRouting);
@@ -395,31 +411,78 @@
             }
         };
 
-        // Added functionality to copy yesterday's links to an empty day
-        window.copyYesterdayToEmpty = (day) => {
-            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        // Helper to find the previous school week
+        const getPreviousSchoolWeek = (term, weekStr) => {
+            let termNum = parseInt(term.replace('Term ', ''));
+            let weekNum = parseInt(weekStr.replace('Week ', ''));
+            
+            if (weekNum > 1) {
+                return { term: term, week: `Week ${weekNum - 1}` };
+            } else if (termNum > 1) {
+                return { term: `Term ${termNum - 1}`, week: `Week 10` }; // Fallback to Week 10 of prev term
+            }
+            return null; // Term 1 Week 1 has no previous
+        };
+
+        // Copy Previous Day functionality (Handles Mondays correctly now)
+        window.copyPreviousDayToEmpty = async (day) => {
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday'];
             const curIdx = days.indexOf(day);
+            let prevData = null;
+            
             if(curIdx > 0) {
+                // Same week copy
                 const prevDay = days[curIdx - 1];
-                const prevData = window.appState.weekData[prevDay];
-                if(prevData && prevData.length > 0) {
-                    const newDayData = getSkeleton().map((block, idx) => {
-                        if (block.type === 'break') return block;
-                        const prevBlock = prevData[idx];
-                        if (prevBlock && prevBlock.type !== 'break') {
-                            return {
-                                ...block,
-                                lessonPlanLink: prevBlock.lessonPlanLink || '',
-                                slidesLink: prevBlock.slidesLink || '',
-                                printLink: prevBlock.printLink || ''
-                            };
+                prevData = window.appState.weekData[prevDay];
+            } else if (curIdx === 0) {
+                // Monday: Fetch Thursday of the previous week
+                const prevTime = getPreviousSchoolWeek(window.appState.term, window.appState.week);
+                if (prevTime) {
+                    try {
+                        const docRef = doc(db, "timetables", `2026_${prevTime.term.replace(' ', '')}_${prevTime.week.replace(' ', '')}`);
+                        const docSnap = await getDoc(docRef);
+                        if (docSnap.exists() && docSnap.data().days && docSnap.data().days['Thursday']) {
+                            prevData = docSnap.data().days['Thursday'];
                         }
-                        return block;
-                    });
-                    setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [day]: newDayData } }, { merge: true });
-                } else {
-                    alert("Yesterday has no lessons populated to copy links from.");
+                    } catch (e) { console.error("Failed to fetch prev week", e); }
                 }
+            }
+            
+            if(prevData && prevData.length > 0) {
+                const newDayData = getSkeleton().map((block, idx) => {
+                    if (block.type === 'break') return block;
+                    const prevBlock = prevData[idx];
+                    if (prevBlock && prevBlock.type !== 'break') {
+                        return {
+                            ...block,
+                            lessonPlanLink: prevBlock.lessonPlanLink || '',
+                            slidesLink: prevBlock.slidesLink || '',
+                            printLink: prevBlock.printLink || ''
+                        };
+                    }
+                    return block;
+                });
+                setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [day]: newDayData } }, { merge: true });
+            } else {
+                showToast("No lessons found in the previous day to copy from.");
+            }
+        };
+
+        // Clear a full day's lessons
+        window.clearDay = (day, btn) => {
+            if (btn.dataset.confirmed === "true") {
+                setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [day]: [] } }, { merge: true });
+            } else {
+                btn.dataset.confirmed = "true";
+                btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Click to confirm';
+                btn.classList.add('text-rose-600', 'dark:text-rose-400', 'bg-rose-50', 'dark:bg-rose-900/30', 'border-rose-200', 'dark:border-rose-800');
+                setTimeout(() => {
+                    if(btn) {
+                        btn.dataset.confirmed = "false";
+                        btn.innerHTML = '<i class="fa-solid fa-eraser mr-1.5"></i> Clear Day';
+                        btn.classList.remove('text-rose-600', 'dark:text-rose-400', 'bg-rose-50', 'dark:bg-rose-900/30', 'border-rose-200', 'dark:border-rose-800');
+                    }
+                }, 3000);
             }
         };
 
@@ -437,17 +500,15 @@
                 
                 let headerHTML = `<div onclick="navigate('${window.appState.term}/${window.appState.week}/${day}')" class="${isCurrentDay ? 'bg-cyan-100 dark:bg-cyan-900/60 text-cyan-800 dark:text-cyan-200' : 'bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200'} p-2 text-center border-b border-slate-300 dark:border-slate-700 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 flex justify-center items-center"><h2 class="text-sm md:text-base font-bold">${day}</h2></div>`;
                 
-                let bodyHTML = '<div class="p-2 space-y-2 overflow-y-auto custom-scrollbar flex-1">';
+                let bodyHTML = '<div class="p-2 flex flex-col overflow-y-auto custom-scrollbar flex-1">';
                 
                 if (data.length === 0) {
                     bodyHTML += `<div class="flex flex-col items-center justify-center h-full min-h-[120px] gap-2 p-2">
-                        <button onclick="initAddDay('${day}')" class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 p-3 border border-dashed border-slate-400 dark:border-slate-600 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 w-full transition-colors"><i class="fa-solid fa-circle-plus text-xl mb-1"></i><span class="text-[10px] md:text-xs font-bold">Populate Day</span></button>`;
-                    
-                    if (day !== 'Monday') {
-                        bodyHTML += `<button onclick="copyYesterdayToEmpty('${day}')" class="flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 p-2 border border-dashed border-slate-400 dark:border-slate-600 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 w-full transition-colors"><i class="fa-solid fa-copy mr-2 text-sm"></i><span class="text-[10px] md:text-xs font-bold">Copy Yesterday</span></button>`;
-                    }
-                    bodyHTML += `</div>`;
+                        <button onclick="initAddDay('${day}')" class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 p-3 border border-dashed border-slate-400 dark:border-slate-600 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 w-full transition-colors"><i class="fa-solid fa-circle-plus text-xl mb-1"></i><span class="text-[10px] md:text-xs font-bold">Populate Day</span></button>
+                        <button onclick="copyPreviousDayToEmpty('${day}')" class="flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 p-2 border border-dashed border-slate-400 dark:border-slate-600 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 w-full transition-colors"><i class="fa-solid fa-copy mr-2 text-sm"></i><span class="text-[10px] md:text-xs font-bold">Copy Previous Day</span></button>
+                    </div>`;
                 } else {
+                    bodyHTML += `<div class="space-y-2">`;
                     data.forEach((block, idx) => {
                         if(block.type === 'break') {
                             bodyHTML += `<div class="py-1 text-center text-slate-500 dark:text-slate-400 font-medium tracking-wider uppercase text-[9px] md:text-[10px] bg-slate-100 dark:bg-slate-900/50 rounded-md border border-dashed border-slate-300 dark:border-slate-700"><i class="fa-solid fa-${block.icon} mr-1"></i> ${block.topic}</div>`;
@@ -462,20 +523,21 @@
                                 <div class="flex w-full md:w-auto justify-end gap-1.5 relative mt-1 md:mt-0">
                                     ${block.slidesLink ? `<a href="${block.slidesLink}" target="_blank" class="relative group/btn flex items-center justify-center w-7 h-7 rounded-md bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200 dark:hover:bg-indigo-600 hover:text-indigo-800 dark:hover:text-white border border-indigo-200 dark:border-indigo-500/30">
                                         <i class="fa-solid fa-desktop text-xs"></i>
-                                        <span class="absolute -top-6 right-0 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover/btn:opacity-100 shadow pointer-events-none whitespace-nowrap z-20 border border-indigo-200 dark:border-indigo-500/30">Slides</span>
                                     </a>` : ''}
                                     ${block.printLink ? `<a href="${block.printLink}" target="_blank" class="relative group/btn flex items-center justify-center w-7 h-7 rounded-md bg-pink-100 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-600 hover:text-pink-800 dark:hover:text-white border border-pink-200 dark:border-pink-500/30">
                                         <i class="fa-solid fa-print text-xs"></i>
-                                        <span class="absolute -top-6 right-0 bg-white dark:bg-slate-800 text-pink-600 dark:text-pink-400 text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover/btn:opacity-100 shadow pointer-events-none whitespace-nowrap z-20 border border-pink-200 dark:border-pink-500/30">Print</span>
                                     </a>` : ''}
                                     ${block.lessonPlanLink ? `<a href="${block.lessonPlanLink}" target="_blank" class="relative group/btn flex items-center justify-center w-7 h-7 rounded-md bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-600 hover:text-emerald-800 dark:hover:text-white border border-emerald-200 dark:border-emerald-500/30">
                                         <i class="fa-solid fa-file-lines text-xs"></i>
-                                        <span class="absolute -top-6 right-0 bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover/btn:opacity-100 shadow pointer-events-none whitespace-nowrap z-20 border border-emerald-200 dark:border-emerald-500/30">Lesson Plan</span>
                                     </a>` : ''}
                                 </div>
                             </div>`;
                         }
                     });
+                    bodyHTML += `</div>`;
+                    
+                    // Clear Day Button at the bottom of populated column
+                    bodyHTML += `<div class="mt-auto pt-3"><button onclick="clearDay('${day}', this)" class="w-full flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 py-1.5 border border-transparent hover:border-rose-200 dark:hover:border-rose-900/50 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all text-[10px] md:text-xs font-semibold"><i class="fa-solid fa-eraser mr-1.5"></i> Clear Day</button></div>`;
                 }
                 bodyHTML += '</div>';
                 col.innerHTML = headerHTML + bodyHTML;
@@ -522,7 +584,7 @@
                         <div class="flex flex-col sm:flex-row items-start sm:items-center w-full cursor-pointer" onclick="toggleNote(${idx})">
                             <div class="sm:w-36 text-cyan-600 dark:text-cyan-400 font-bold text-sm md:text-base shrink-0 mb-1 sm:mb-0 flex items-center">
                                 ${block.time}
-                                ${hasNote ? '<i class="fa-solid fa-note-sticky text-amber-500 ml-2" title="Note added"></i>' : ''}
+                                ${hasNote ? '<span class="inline-block w-2 h-2 rounded-full bg-cyan-500 dark:bg-cyan-400 ml-2 shadow-sm" title="Note added"></span>' : ''}
                             </div>
                             <div class="flex-1 flex items-center w-full">
                                 <div class="mr-3 hidden md:block"><i class="fa-solid ${getIcon(block.subject)} text-xl"></i></div>
