@@ -3,93 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classroom Hub</title>
-    <!-- Tailwind CSS -->
+    <title>Paul's School Day</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap');
-        body { font-family: 'Outfit', sans-serif; background-color: #0f172a; color: #f8fafc; overflow: hidden; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        body { font-family: 'Outfit', sans-serif; background-color: #0f172a; color: #f8fafc; overflow-x: hidden; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(30, 41, 59, 0.5); border-radius: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
         .hidden { display: none !important; }
     </style>
 </head>
-<body class="relative w-screen h-screen flex flex-col items-center justify-center p-1 md:p-3">
+<body class="relative w-screen h-screen flex flex-col items-center justify-center p-2 md:p-4">
     <!-- Ambient Background Glows -->
     <div class="absolute filter blur-[100px] md:blur-[120px] z-0 opacity-30 rounded-full w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-indigo-600 top-[-10%] left-[-10%] pointer-events-none"></div>
     <div class="absolute filter blur-[100px] md:blur-[120px] z-0 opacity-30 rounded-full w-[250px] md:w-[400px] h-[250px] md:h-[400px] bg-cyan-600 bottom-[-10%] right-[-5%] pointer-events-none"></div>
 
+    <!-- GLOBAL CONTROLS -->
+    <button id="global-back-btn" class="hidden fixed top-4 right-4 md:top-6 md:right-6 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 text-sm md:text-base rounded-lg flex items-center justify-center transition-colors border border-slate-600 shadow-xl z-50 min-w-[100px]" onclick="handleGlobalBack()">
+        <i class="fa-solid fa-chevron-left mr-2"></i> <span id="global-back-text">Back</span>
+    </button>
+
+    <a href="learning_zone.html" class="fixed bottom-4 right-4 md:bottom-6 md:right-6 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-3 rounded-full flex items-center justify-center transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] z-50 border border-emerald-400 group">
+        <i class="fa-solid fa-headphones text-lg md:mr-2"></i>
+        <span class="hidden md:inline font-bold tracking-wide">Learning Zone</span>
+    </a>
+
     <!-- Main App Container -->
-    <div class="relative w-full max-w-6xl h-full max-h-[98vh] md:max-h-[94vh] z-10 bg-slate-900/70 backdrop-blur-xl border border-slate-700/50 rounded-2xl md:rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-2 md:p-4 flex flex-col overflow-hidden">
+    <div class="relative w-full max-w-7xl h-full max-h-[98vh] md:max-h-[94vh] z-10 bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-2xl md:rounded-[2rem] shadow-2xl p-4 md:p-6 flex flex-col overflow-hidden">
+
+        <!-- LANDING PAGE -->
+        <div id="view-landing" class="flex flex-col items-center justify-center h-full space-y-10 animate-in fade-in zoom-in duration-500">
+            <div class="text-center">
+                <i class="fa-solid fa-graduation-cap text-6xl text-cyan-400 mb-6 drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]"></i>
+                <h1 class="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400 mb-4">Paul's School Day</h1>
+                <p class="text-slate-400 text-lg md:text-xl font-medium tracking-wide">Classroom Management Hub</p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4 w-full max-w-2xl px-4">
+                <button onclick="jumpToCurrentWeek()" class="flex-1 bg-gradient-to-br from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-6 rounded-2xl shadow-lg border border-cyan-400/30 hover:border-cyan-400 transition-all text-xl md:text-2xl flex flex-col items-center justify-center group">
+                    <i class="fa-regular fa-calendar-check text-3xl mb-2 group-hover:scale-110 transition-transform"></i>
+                    Current Week
+                </button>
+                <button onclick="navigate('terms')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-6 rounded-2xl shadow-lg border border-slate-600 hover:border-slate-400 transition-all text-xl md:text-2xl flex flex-col items-center justify-center group">
+                    <i class="fa-solid fa-table-list text-3xl mb-2 group-hover:scale-110 transition-transform"></i>
+                    Daily Schedule
+                </button>
+            </div>
+        </div>
 
         <!-- TERM SELECTOR -->
-        <div id="view-term-select" class="flex flex-col items-center justify-center h-full space-y-8 animate-in fade-in zoom-in duration-500">
-            <div class="text-center">
-                <h1 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400 mb-2">2026 Timetable</h1>
+        <div id="view-term-select" class="hidden flex-col items-center justify-center h-full space-y-8 animate-in fade-in duration-300">
+            <div class="text-center mb-4">
+                <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-2">2026 Timetable</h1>
                 <p class="text-slate-400 text-base md:text-lg">Select a term to begin</p>
             </div>
-            <div class="grid grid-cols-2 gap-4 w-full max-w-md">
-                <button onclick="selectTerm('Term 1')" class="bg-slate-800/80 hover:bg-indigo-600 text-white font-bold py-6 rounded-2xl shadow-lg border border-slate-600 hover:border-indigo-500 transition-all text-xl">Term 1</button>
-                <button onclick="selectTerm('Term 2')" class="bg-slate-800/80 hover:bg-cyan-600 text-white font-bold py-6 rounded-2xl shadow-lg border border-slate-600 hover:border-cyan-500 transition-all text-xl">Term 2</button>
-                <button onclick="selectTerm('Term 3')" class="bg-slate-800/80 hover:bg-emerald-600 text-white font-bold py-6 rounded-2xl shadow-lg border border-slate-600 hover:border-emerald-500 transition-all text-xl">Term 3</button>
-                <button onclick="selectTerm('Term 4')" class="bg-slate-800/80 hover:bg-rose-600 text-white font-bold py-6 rounded-2xl shadow-lg border border-slate-600 hover:border-rose-500 transition-all text-xl">Term 4</button>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg">
+                <button onclick="navigate('Term 1')" class="bg-slate-800/80 hover:bg-indigo-600 text-white font-bold py-6 rounded-xl shadow-lg border border-slate-600 hover:border-indigo-500 transition-all text-xl">Term 1</button>
+                <button onclick="navigate('Term 2')" class="bg-slate-800/80 hover:bg-cyan-600 text-white font-bold py-6 rounded-xl shadow-lg border border-slate-600 hover:border-cyan-500 transition-all text-xl">Term 2</button>
+                <button onclick="navigate('Term 3')" class="bg-slate-800/80 hover:bg-emerald-600 text-white font-bold py-6 rounded-xl shadow-lg border border-slate-600 hover:border-emerald-500 transition-all text-xl">Term 3</button>
+                <button onclick="navigate('Term 4')" class="bg-slate-800/80 hover:bg-rose-600 text-white font-bold py-6 rounded-xl shadow-lg border border-slate-600 hover:border-rose-500 transition-all text-xl">Term 4</button>
             </div>
         </div>
 
         <!-- WEEK SELECTOR -->
-        <div id="view-week-select" class="hidden flex-col items-center justify-center h-full space-y-6 animate-in fade-in duration-500">
-            <div class="w-full max-w-3xl flex justify-between items-end border-b border-slate-700 pb-2 mb-2">
-                <div>
-                    <h1 id="week-selector-title" class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400">Term</h1>
-                    <p class="text-slate-400 text-sm">Select your week</p>
-                </div>
-                <button onclick="setView('term-select')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 md:px-4 md:py-2 text-sm rounded-lg flex items-center transition-colors border border-slate-600">
-                    <i class="fa-solid fa-chevron-left mr-2"></i> Terms
-                </button>
+        <div id="view-week-select" class="hidden flex-col items-center justify-center h-full space-y-4 animate-in fade-in duration-300 pt-8 md:pt-0">
+            <div class="w-full max-w-4xl border-b border-slate-700 pb-2 mb-4">
+                <h1 id="week-selector-title" class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400">Term</h1>
+                <p class="text-slate-400 text-sm">Select your week</p>
             </div>
-            
-            <div class="grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-4 w-full max-w-3xl custom-scrollbar overflow-y-auto pb-4">
-                <!-- Generate Weeks 1 to 12 -->
-                <script>
-                    for(let i=1; i<=12; i++) {
-                        document.write(`<button onclick="selectWeek('Week ${i}')" class="bg-slate-800/60 hover:bg-cyan-600/80 text-slate-200 hover:text-white font-semibold py-4 rounded-xl border border-slate-600 hover:border-cyan-400 transition-all text-base md:text-lg">Week ${i}</button>`);
-                    }
-                </script>
+            <div id="week-grid-container" class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 w-full max-w-4xl custom-scrollbar overflow-y-auto pb-4">
+                <!-- Injected dynamically -->
             </div>
         </div>
 
         <!-- WEEK VIEW -->
-        <div id="view-week" class="hidden flex-col h-full animate-in fade-in duration-500">
-            <div class="flex justify-between items-center mb-1 border-b border-slate-700/50 pb-1">
-                <div class="flex items-baseline gap-3">
-                    <h1 id="week-title" class="text-xl md:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400 leading-none">Week</h1>
-                    <p id="week-subtitle" class="text-slate-400 text-[10px] md:text-xs font-semibold">Term, Week</p>
-                </div>
-                <button onclick="setView('week-select')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 md:px-3 md:py-1.5 text-xs rounded-md flex items-center transition-colors border border-slate-600">
-                    <i class="fa-solid fa-chevron-left mr-1"></i> Weeks
-                </button>
+        <div id="view-week" class="hidden flex-col h-full animate-in fade-in duration-300 pt-8 md:pt-0">
+            <div class="border-b border-slate-700/50 pb-2 mb-2 flex items-baseline gap-3 shrink-0">
+                <h1 id="week-title" class="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400 leading-none">Week</h1>
+                <p id="week-subtitle" class="text-slate-400 text-xs md:text-sm font-semibold">Term, Week</p>
             </div>
-
-            <!-- Condensed Grid (4 Columns) -->
-            <div id="week-grid" class="grid grid-cols-4 gap-1 md:gap-2 flex-1 overflow-y-auto overflow-x-auto custom-scrollbar pb-1 min-w-full mt-2">
+            <!-- Stack vertically on mobile, 4 columns on desktop -->
+            <div id="week-grid" class="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar pb-4 min-w-full">
                 <!-- Columns injected dynamically -->
             </div>
         </div>
 
         <!-- DAY VIEW -->
-        <div id="view-day" class="hidden flex-col h-full animate-in slide-in-from-right-8 duration-300">
-            <div class="flex justify-between items-center border-b border-slate-700 pb-4 mb-4 shrink-0 mt-2">
+        <div id="view-day" class="hidden flex-col h-full animate-in slide-in-from-right-8 duration-300 pt-8 md:pt-0">
+            <div class="border-b border-slate-700 pb-3 mb-4 shrink-0">
                 <div class="flex items-baseline gap-3">
-                    <h1 id="day-title" class="text-xl md:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400 leading-none">Schedule</h1>
-                    <p id="day-subtitle" class="text-slate-400 text-[10px] md:text-xs font-semibold">Term, Week</p>
+                    <h1 id="day-title" class="text-2xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400 leading-none">Schedule</h1>
+                    <p id="day-subtitle" class="text-slate-400 text-xs md:text-sm font-semibold">Term, Week</p>
                 </div>
-                <button id="btn-back-to-week" onclick="setView('week')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm rounded-lg flex items-center transition-colors border border-slate-600 shadow-sm">
-                    <i class="fa-solid fa-chevron-left mr-2"></i> Week
-                </button>
             </div>
             <div id="day-blocks" class="flex-1 overflow-y-auto custom-scrollbar pr-2 md:pr-4 space-y-3 pb-4">
                 <!-- Blocks injected dynamically -->
@@ -100,21 +107,20 @@
 
     <!-- MODALS -->
     <!-- Add Full Day Modal -->
-    <div id="modal-add" class="hidden fixed inset-0 z-[100] items-center justify-center p-2 md:p-6 bg-slate-900/90 backdrop-blur-md">
+    <div id="modal-add" class="hidden fixed inset-0 z-[100] items-center justify-center p-2 md:p-6 bg-slate-900/95 backdrop-blur-sm">
         <div class="bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl w-full max-w-4xl h-full md:h-[90vh] flex flex-col overflow-hidden">
             <div class="flex justify-between items-center p-4 border-b border-slate-700 bg-slate-800/50 shrink-0">
                 <div>
                     <h3 class="text-lg md:text-xl font-bold text-white flex items-center"><i class="fa-solid fa-circle-plus text-cyan-400 mr-2"></i> Populate <span id="add-day-title" class="ml-1"></span></h3>
-                    <p class="text-xs text-slate-400">Fill in the links and topics for your standard schedule.</p>
                 </div>
-                <button onclick="closeModals()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <button onclick="closeModals()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-2xl"></i></button>
             </div>
-            <div id="add-day-form" class="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-6">
+            <div id="add-day-form" class="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar space-y-6">
                 <!-- Form injected dynamically -->
             </div>
             <div class="p-4 border-t border-slate-700 bg-slate-800/50 flex justify-end gap-3 shrink-0">
-                <button onclick="closeModals()" class="px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-700 text-sm font-semibold transition-colors">Cancel</button>
-                <button onclick="saveFullDay()" class="px-6 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-bold flex items-center transition-colors shadow-lg shadow-cyan-900/50">
+                <button onclick="closeModals()" class="px-5 py-2.5 rounded-lg text-slate-300 hover:bg-slate-700 font-semibold transition-colors">Cancel</button>
+                <button onclick="saveFullDay()" class="px-6 py-2.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold flex items-center transition-colors shadow-lg shadow-cyan-900/50">
                     <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Save Day
                 </button>
             </div>
@@ -122,38 +128,38 @@
     </div>
 
     <!-- Edit Single Block Modal -->
-    <div id="modal-edit" class="hidden fixed inset-0 z-[100] items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+    <div id="modal-edit" class="hidden fixed inset-0 z-[100] items-center justify-center p-4 bg-slate-900/95 backdrop-blur-sm">
         <div class="bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden">
-            <div class="flex justify-between items-center p-4 border-b border-slate-700 bg-slate-800/50">
+            <div class="flex justify-between items-center p-4 md:p-5 border-b border-slate-700 bg-slate-800/50">
                 <h3 class="text-lg md:text-xl font-bold text-white flex items-center"><i class="fa-solid fa-pen text-amber-400 mr-2"></i> Quick Edit</h3>
-                <button onclick="closeModals()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <button onclick="closeModals()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-2xl"></i></button>
             </div>
-            <div class="p-4 space-y-3">
+            <div class="p-4 md:p-6 space-y-4">
                 <div id="edit-badge" class="text-xs text-cyan-400 font-bold mb-2 bg-cyan-900/20 inline-block px-3 py-1 rounded-full border border-cyan-800/50"></div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1">Subject / Header</label>
-                    <input id="edit-subject" type="text" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500 text-sm" />
+                    <input id="edit-subject" type="text" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-cyan-500" />
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1">Topic / Description</label>
-                    <input id="edit-topic" type="text" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500 text-sm" />
+                    <input id="edit-topic" type="text" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-cyan-500" />
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1">Lesson Plan Link</label>
-                    <input id="edit-plan" type="url" placeholder="https://..." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 text-sm" />
+                    <input id="edit-plan" type="url" placeholder="https://..." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-emerald-500" />
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1">Slides Link</label>
-                    <input id="edit-slides" type="url" placeholder="https://..." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 text-sm" />
+                    <input id="edit-slides" type="url" placeholder="https://..." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500" />
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1">Print Link</label>
-                    <input id="edit-print" type="url" placeholder="https://..." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-pink-500 text-sm" />
+                    <input id="edit-print" type="url" placeholder="https://..." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-pink-500" />
                 </div>
             </div>
             <div class="p-4 border-t border-slate-700 bg-slate-800/50 flex justify-end gap-3">
-                <button onclick="closeModals()" class="px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-700 text-sm font-semibold transition-colors">Cancel</button>
-                <button onclick="saveEdit()" class="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-bold flex items-center shadow-lg shadow-cyan-900/50">
+                <button onclick="closeModals()" class="px-5 py-2.5 rounded-lg text-slate-300 hover:bg-slate-700 font-semibold transition-colors">Cancel</button>
+                <button onclick="saveEdit()" class="px-5 py-2.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold flex items-center shadow-lg shadow-cyan-900/50">
                     <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Save Edit
                 </button>
             </div>
@@ -166,7 +172,6 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // *** YOUR REAL FIREBASE CONFIG ***
         const firebaseConfig = {
             apiKey: "AIzaSyCEGrh2SIC20vJj_nLm4x34ok01srxip7I",
             authDomain: "paul-s-2026.firebaseapp.com",
@@ -175,96 +180,133 @@
             messagingSenderId: "524167059781",
             appId: "1:524167059781:web:57347f46b29c9d4a49862c"
         };
-        // **********************************
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        
         let unsubscribeDB = null;
 
-        // State Management
-        window.appState = {
-            view: 'term-select',
-            year: '2026',
-            term: '',
-            week: '',
-            day: '',
-            weekData: { Monday: [], Tuesday: [], Wednesday: [], Thursday: [] },
-            editingBlock: null,
-            addingDay: null,
-            newDayForm: []
+        window.appState = { view: 'landing', term: '', week: '', day: '', weekData: { Monday: [], Tuesday: [], Wednesday: [], Thursday: [] } };
+
+        // URL ROUTER LOGIC
+        window.addEventListener('hashchange', handleHashRouting);
+        
+        function handleHashRouting() {
+            const hash = decodeURIComponent(window.location.hash.replace('#', ''));
+            if (!hash || hash === 'landing') {
+                renderView('landing');
+            } else if (hash === 'terms') {
+                renderView('term-select');
+            } else {
+                const parts = hash.split('/');
+                if (parts.length >= 2) {
+                    const term = parts[0];
+                    const week = parts[1];
+                    window.appState.term = term;
+                    window.appState.week = week;
+                    loadWeekData(term, week);
+                    
+                    if (parts.length === 3) {
+                        window.appState.day = parts[2];
+                        renderView('day');
+                    } else {
+                        renderView('week');
+                    }
+                }
+            }
+        }
+
+        window.navigate = (path) => { window.location.hash = path; };
+
+        // Date Logic
+        window.getCurrentSchoolTime = () => {
+            const now = new Date(); 
+            const terms = [
+                { name: 'Term 1', start: new Date('2026-01-28') }, { name: 'Term 2', start: new Date('2026-04-20') },
+                { name: 'Term 3', start: new Date('2026-07-20') }, { name: 'Term 4', start: new Date('2026-10-12') }
+            ];
+            let curTerm = 'Term 2', weekNum = 1;
+            for(let i = terms.length - 1; i >= 0; i--) {
+                if(now >= terms[i].start) {
+                    curTerm = terms[i].name;
+                    weekNum = Math.floor((now - terms[i].start) / (7 * 24 * 60 * 60 * 1000)) + 1;
+                    break;
+                }
+            }
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            let curDay = days[now.getDay()];
+            if (curDay === 'Saturday' || curDay === 'Sunday' || curDay === 'Friday') {
+                curDay = 'Monday'; weekNum += 1;
+            }
+            return { term: curTerm, week: `Week ${Math.min(Math.max(weekNum, 1), 12)}`, day: curDay };
         };
 
-        // Initialize App
-        signInAnonymously(auth).then(() => {
-            setView('term-select');
-        });
+        window.jumpToCurrentWeek = () => {
+            const cur = window.getCurrentSchoolTime();
+            navigate(`${cur.term}/${cur.week}`);
+        };
 
-        // Load specific week data
+        signInAnonymously(auth).then(() => { handleHashRouting(); });
+
         window.loadWeekData = (term, week) => {
-            window.appState.term = term;
-            window.appState.week = week;
-            
-            // Clear current data while loading to prevent flashing old weeks
             window.appState.weekData = { Monday: [], Tuesday: [], Wednesday: [], Thursday: [] };
-            renderApp(); 
-            
-            if (unsubscribeDB) unsubscribeDB(); // Clear old listener
-            
-            const docId = `2026_${term.replace(' ', '')}_${week.replace(' ', '')}`;
-            const docRef = doc(db, "timetables", docId);
-            
+            if (unsubscribeDB) unsubscribeDB(); 
+            const docRef = doc(db, "timetables", `2026_${term.replace(' ', '')}_${week.replace(' ', '')}`);
             unsubscribeDB = onSnapshot(docRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    window.appState.weekData = docSnap.data().days;
-                } else {
-                    setDoc(docRef, { days: window.appState.weekData }, { merge: true });
-                }
-                renderApp();
+                if (docSnap.exists()) window.appState.weekData = docSnap.data().days;
+                else setDoc(docRef, { days: window.appState.weekData }, { merge: true });
+                if (window.appState.view === 'week') renderWeekGrid();
+                if (window.appState.view === 'day') renderDayBlocks();
             });
         };
 
-        // Navigation Controllers
-        window.selectTerm = (term) => {
-            window.appState.term = term;
-            document.getElementById('week-selector-title').innerText = term;
-            setView('week-select');
+        window.handleGlobalBack = () => {
+            if (window.appState.view === 'term-select') navigate('landing');
+            else if (window.appState.view === 'week-select') navigate('terms');
+            else if (window.appState.view === 'week') navigate(window.appState.term);
+            else if (window.appState.view === 'day') navigate(`${window.appState.term}/${window.appState.week}`);
         };
 
-        window.selectWeek = (week) => {
-            window.appState.week = week;
-            document.getElementById('week-title').innerText = week;
-            document.getElementById('week-subtitle').innerText = `${window.appState.term}, ${week}`;
-            document.getElementById('day-subtitle').innerText = `${window.appState.term}, ${week}`;
-            document.getElementById('btn-back-to-week').innerHTML = `<i class="fa-solid fa-chevron-left mr-2"></i> ${week}`;
-            
-            loadWeekData(window.appState.term, week);
-            setView('week');
-        };
-
-        window.setView = (view, day = '') => {
+        window.renderView = (view) => {
             window.appState.view = view;
-            if (day) window.appState.day = day;
-            
-            document.getElementById('view-term-select').classList.add('hidden');
-            document.getElementById('view-week-select').classList.add('hidden');
-            document.getElementById('view-week').classList.add('hidden');
-            document.getElementById('view-day').classList.add('hidden');
-            
+            ['landing', 'term-select', 'week-select', 'week', 'day'].forEach(v => {
+                document.getElementById('view-' + v).classList.add('hidden');
+                document.getElementById('view-' + v).classList.remove('flex');
+            });
             document.getElementById('view-' + view).classList.remove('hidden');
-            if(view !== 'term-select') document.getElementById('view-' + view).classList.add('flex');
-            renderApp();
+            document.getElementById('view-' + view).classList.add('flex');
+            
+            const backBtn = document.getElementById('global-back-btn');
+            const backText = document.getElementById('global-back-text');
+            if (view === 'landing') backBtn.classList.add('hidden');
+            else {
+                backBtn.classList.remove('hidden');
+                if (view === 'term-select') backText.innerText = 'Home';
+                if (view === 'week-select') {
+                    backText.innerText = 'Terms';
+                    document.getElementById('week-selector-title').innerText = window.appState.term;
+                    renderWeekSelector();
+                }
+                if (view === 'week') {
+                    backText.innerText = window.appState.term;
+                    document.getElementById('week-title').innerText = window.appState.week;
+                    document.getElementById('week-subtitle').innerText = `${window.appState.term}, ${window.appState.week}`;
+                    renderWeekGrid();
+                }
+                if (view === 'day') {
+                    backText.innerText = window.appState.week;
+                    document.getElementById('day-title').innerText = window.appState.day;
+                    document.getElementById('day-subtitle').innerText = `${window.appState.term}, ${window.appState.week}`;
+                    renderDayBlocks();
+                }
+            }
         };
 
         window.closeModals = () => {
-            document.getElementById('modal-add').classList.add('hidden');
-            document.getElementById('modal-edit').classList.add('hidden');
-            document.getElementById('modal-add').classList.remove('flex');
-            document.getElementById('modal-edit').classList.remove('flex');
+            document.getElementById('modal-add').classList.add('hidden'); document.getElementById('modal-edit').classList.add('hidden');
+            document.getElementById('modal-add').classList.remove('flex'); document.getElementById('modal-edit').classList.remove('flex');
         };
 
-        // Skeleton Data for Empty Days
         const getSkeleton = () => [
             { id: 'b1', type: 'lesson', time: '9:00am - 9:45am', subject: 'English', topic: '', slidesLink: '', printLink: '', lessonPlanLink: '' },
             { id: 'b2', type: 'lesson', time: '9:45am - 10:00am', subject: 'English', topic: 'Daily Write', slidesLink: '', printLink: '', lessonPlanLink: '' },
@@ -277,61 +319,69 @@
             { id: 'b7', type: 'lesson', time: '2:30pm - 3:00pm', subject: 'End of Day', topic: 'Wrap Up', slidesLink: '', printLink: '', lessonPlanLink: '' },
         ];
 
-        const getIcon = (subject) => {
-            if(subject === 'English') return 'fa-book-open text-indigo-400';
-            if(subject === 'Maths') return 'fa-pen text-rose-400';
-            if(subject === 'History') return 'fa-calendar text-emerald-400';
-            if(subject === 'Whole School') return 'fa-medal text-yellow-400';
+        const getIcon = (sub) => {
+            if(sub === 'English') return 'fa-book-open text-indigo-400';
+            if(sub === 'Maths') return 'fa-pen text-rose-400';
+            if(sub === 'History') return 'fa-calendar text-emerald-400';
+            if(sub === 'Whole School') return 'fa-medal text-yellow-400';
             return 'fa-backpack text-cyan-400';
         };
 
-        const renderApp = () => {
-            if (window.appState.view === 'week') renderWeekGrid();
-            if (window.appState.view === 'day') renderDayBlocks();
+        const renderWeekSelector = () => {
+            const container = document.getElementById('week-grid-container');
+            container.innerHTML = '';
+            const curTime = window.getCurrentSchoolTime();
+            for(let i=1; i<=12; i++) {
+                const isCurrent = (window.appState.term === curTime.term && `Week ${i}` === curTime.week);
+                const borderClass = isCurrent ? 'border-2 border-cyan-400 bg-slate-700/80 shadow-[inset_0_0_15px_rgba(34,211,238,0.2)]' : 'border border-slate-600 bg-slate-800/60';
+                container.innerHTML += `<button onclick="navigate('${window.appState.term}/Week ${i}')" class="${borderClass} hover:bg-cyan-600/80 text-slate-200 hover:text-white font-semibold py-6 rounded-xl transition-all text-xl">${i}</button>`;
+            }
         };
 
-        // Render the Condensed 4-Column Week View (WITH ICON HOVER TOOLTIPS)
         const renderWeekGrid = () => {
             const grid = document.getElementById('week-grid');
             grid.innerHTML = '';
+            const curTime = window.getCurrentSchoolTime();
             ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
                 const data = window.appState.weekData[day] || [];
+                const isCurrentDay = (window.appState.term === curTime.term && window.appState.week === curTime.week && day === curTime.day);
+                
                 const col = document.createElement('div');
-                col.className = "flex flex-col bg-slate-800/40 border border-slate-700/50 rounded-lg overflow-hidden backdrop-blur-sm min-w-[130px] md:min-w-[200px]";
+                // Added inner border to fix clipping, and nice padding
+                col.className = `flex flex-col bg-slate-800/50 rounded-xl overflow-hidden backdrop-blur-sm transition-all ${isCurrentDay ? 'border-2 border-cyan-400 shadow-[inset_0_0_15px_rgba(34,211,238,0.15)]' : 'border border-slate-700/50'}`;
                 
-                let headerHTML = `<div onclick="setView('day', '${day}')" class="bg-slate-800/80 p-1 md:p-1 text-center border-b border-slate-700 cursor-pointer hover:bg-slate-700 flex justify-center items-center"><h2 class="text-xs md:text-sm font-bold text-slate-200">${day}</h2></div>`;
+                let headerHTML = `<div onclick="navigate('${window.appState.term}/${window.appState.week}/${day}')" class="${isCurrentDay ? 'bg-cyan-900/60' : 'bg-slate-800/80'} p-2 md:p-3 text-center border-b border-slate-700 cursor-pointer hover:bg-slate-700 flex justify-center items-center"><h2 class="text-base md:text-lg font-bold text-slate-200">${day}</h2></div>`;
                 
-                let bodyHTML = '<div class="p-1 md:p-1.5 space-y-1 overflow-y-auto custom-scrollbar flex-1">';
+                let bodyHTML = '<div class="p-2 md:p-3 space-y-2 overflow-y-auto custom-scrollbar flex-1">';
                 
                 if (data.length === 0) {
-                    bodyHTML += `<div class="flex items-center justify-center h-full"><button onclick="initAddDay('${day}')" class="flex flex-col items-center justify-center text-slate-400 hover:text-cyan-400 p-2 border border-dashed border-slate-600 rounded hover:bg-slate-800 w-full"><i class="fa-solid fa-circle-plus text-xl mb-1"></i><span class="text-[10px] md:text-xs font-bold">Populate Day</span></button></div>`;
+                    bodyHTML += `<div class="flex items-center justify-center h-full min-h-[100px]"><button onclick="initAddDay('${day}')" class="flex flex-col items-center justify-center text-slate-400 hover:text-cyan-400 p-4 border border-dashed border-slate-600 rounded-lg hover:bg-slate-800 w-full"><i class="fa-solid fa-circle-plus text-2xl mb-2"></i><span class="text-xs md:text-sm font-bold">Populate Day</span></button></div>`;
                 } else {
                     data.forEach((block, idx) => {
                         if(block.type === 'break') {
-                            bodyHTML += `<div class="py-0.5 text-center text-slate-400 font-medium tracking-wider uppercase text-[8px] md:text-[9px] bg-slate-900/50 rounded border border-dashed border-slate-700"><i class="fa-solid fa-${block.icon} mr-1"></i> ${block.topic}</div>`;
+                            bodyHTML += `<div class="py-1 text-center text-slate-400 font-medium tracking-wider uppercase text-[10px] md:text-xs bg-slate-900/50 rounded-md border border-dashed border-slate-700"><i class="fa-solid fa-${block.icon} mr-1"></i> ${block.topic}</div>`;
                         } else {
+                            // Bigger fonts and buttons here!
                             bodyHTML += `
-                            <div class="bg-slate-900/60 p-1 px-1.5 md:p-1.5 md:px-2 rounded border border-slate-700 group flex flex-row items-center justify-between">
-                                <div class="flex flex-col w-[70%] pr-1">
-                                    <div class="text-cyan-400 text-[9px] md:text-[11px] font-bold leading-none">${block.time}</div>
-                                    <div class="text-slate-200 font-bold text-[10px] md:text-xs leading-tight mt-0.5">${block.subject}</div>
-                                    <div class="text-slate-400 text-[9px] md:text-[11px] truncate leading-tight">${block.topic}</div>
+                            <div class="bg-slate-900/80 p-2 md:p-3 rounded-lg border border-slate-700 group flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
+                                <div class="flex flex-col w-full md:w-[65%]">
+                                    <div class="text-cyan-400 text-[10px] md:text-xs font-bold leading-none mb-1">${block.time}</div>
+                                    <div class="text-slate-100 font-bold text-sm md:text-base leading-tight">${block.subject}</div>
+                                    <div class="text-slate-400 text-xs md:text-sm truncate leading-tight mt-0.5">${block.topic}</div>
                                 </div>
-                                <div class="flex flex-col items-end w-[30%] justify-center">
-                                    <div class="flex gap-1 justify-end relative">
-                                        ${block.slidesLink ? `<a href="${block.slidesLink}" target="_blank" class="relative group/btn text-indigo-400 hover:text-indigo-300">
-                                            <i class="fa-solid fa-desktop text-[10px] md:text-xs"></i>
-                                            <span class="absolute -top-6 right-0 bg-slate-800 text-indigo-400 text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity shadow z-50 pointer-events-none whitespace-nowrap">Slides</span>
-                                        </a>` : ''}
-                                        ${block.printLink ? `<a href="${block.printLink}" target="_blank" class="relative group/btn text-pink-400 hover:text-pink-300">
-                                            <i class="fa-solid fa-print text-[10px] md:text-xs"></i>
-                                            <span class="absolute -top-6 right-0 bg-slate-800 text-pink-400 text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity shadow z-50 pointer-events-none whitespace-nowrap">Print</span>
-                                        </a>` : ''}
-                                        ${block.lessonPlanLink ? `<a href="${block.lessonPlanLink}" target="_blank" class="relative group/btn text-emerald-400 hover:text-emerald-300">
-                                            <i class="fa-solid fa-file-lines text-[10px] md:text-xs"></i>
-                                            <span class="absolute -top-6 right-0 bg-slate-800 text-emerald-400 text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity shadow z-50 pointer-events-none whitespace-nowrap">Lesson Plan</span>
-                                        </a>` : ''}
-                                    </div>
+                                <div class="flex w-full md:w-auto justify-end gap-1.5 relative mt-1 md:mt-0">
+                                    ${block.slidesLink ? `<a href="${block.slidesLink}" target="_blank" class="relative group/btn flex items-center justify-center w-8 h-8 rounded-md bg-indigo-500/10 text-indigo-400 hover:bg-indigo-600 hover:text-white border border-indigo-500/30">
+                                        <i class="fa-solid fa-desktop text-sm"></i>
+                                        <span class="absolute -top-7 right-0 bg-slate-800 text-indigo-400 text-xs px-2 py-1 rounded opacity-0 group-hover/btn:opacity-100 shadow pointer-events-none whitespace-nowrap z-20">Slides</span>
+                                    </a>` : ''}
+                                    ${block.printLink ? `<a href="${block.printLink}" target="_blank" class="relative group/btn flex items-center justify-center w-8 h-8 rounded-md bg-pink-500/10 text-pink-400 hover:bg-pink-600 hover:text-white border border-pink-500/30">
+                                        <i class="fa-solid fa-print text-sm"></i>
+                                        <span class="absolute -top-7 right-0 bg-slate-800 text-pink-400 text-xs px-2 py-1 rounded opacity-0 group-hover/btn:opacity-100 shadow pointer-events-none whitespace-nowrap z-20">Print</span>
+                                    </a>` : ''}
+                                    ${block.lessonPlanLink ? `<a href="${block.lessonPlanLink}" target="_blank" class="relative group/btn flex items-center justify-center w-8 h-8 rounded-md bg-emerald-500/10 text-emerald-400 hover:bg-emerald-600 hover:text-white border border-emerald-500/30">
+                                        <i class="fa-solid fa-file-lines text-sm"></i>
+                                        <span class="absolute -top-7 right-0 bg-slate-800 text-emerald-400 text-xs px-2 py-1 rounded opacity-0 group-hover/btn:opacity-100 shadow pointer-events-none whitespace-nowrap z-20">Lesson Plan</span>
+                                    </a>` : ''}
                                 </div>
                             </div>`;
                         }
@@ -343,9 +393,7 @@
             });
         };
 
-        // Render Expanded Day View
         const renderDayBlocks = () => {
-            document.getElementById('day-title').innerText = window.appState.day;
             const container = document.getElementById('day-blocks');
             container.innerHTML = '';
             const data = window.appState.weekData[window.appState.day] || [];
@@ -356,124 +404,63 @@
                 } else {
                     container.innerHTML += `
                     <div class="flex flex-col sm:flex-row bg-slate-800/60 hover:bg-slate-700/80 transition-colors border border-slate-600/30 rounded-xl p-3 md:px-4 md:py-3 group relative items-start sm:items-center">
-                        
-                        <!-- Floating Edit Button -->
-                        <button onclick="initEdit('${window.appState.day}', ${idx})" class="absolute -top-2 -right-2 flex items-center justify-center w-6 h-6 rounded-full bg-amber-500 text-slate-900 shadow-md md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10" title="Edit Lesson"><i class="fa-solid fa-pen text-[10px]"></i></button>
-
-                        <div class="sm:w-32 text-cyan-400 font-bold text-xs md:text-sm shrink-0">${block.time}</div>
-                        <div class="flex-1 flex items-center w-full mt-1 sm:mt-0">
-                            <div class="mr-2 hidden md:block"><i class="fa-solid ${getIcon(block.subject)} text-sm"></i></div>
+                        <button onclick="initEdit('${window.appState.day}', ${idx})" class="absolute -top-2 -right-2 flex items-center justify-center w-8 h-8 rounded-full bg-amber-500 text-slate-900 shadow-lg md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10 hover:scale-110" title="Edit Lesson"><i class="fa-solid fa-pen text-xs"></i></button>
+                        <div class="sm:w-32 text-cyan-400 font-bold text-xs md:text-sm shrink-0 mb-2 sm:mb-0">${block.time}</div>
+                        <div class="flex-1 flex items-center w-full">
+                            <div class="mr-3 hidden md:block"><i class="fa-solid ${getIcon(block.subject)} text-lg"></i></div>
                             <div class="flex-1 pr-6">
-                                <div class="text-slate-100 font-bold text-sm md:text-base leading-tight">
+                                <div class="text-slate-100 font-bold text-base md:text-xl leading-tight">
                                     ${block.subject} <span class="text-slate-400 font-normal ml-1">- ${block.topic}</span>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Buttons with Custom Hover Popups -->
-                        <div class="flex gap-1.5 mt-2 sm:mt-0 ml-auto w-full sm:w-auto justify-end pr-2">
-                            ${block.lessonPlanLink ? `<a href="${block.lessonPlanLink}" target="_blank" class="relative group/btn flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white border border-emerald-500/30">
-                                <i class="fa-solid fa-file-lines text-sm"></i>
-                                <span class="absolute -top-7 bg-slate-800 text-emerald-400 text-[10px] px-2 py-1 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none shadow-lg whitespace-nowrap">Lesson Plan</span>
-                            </a>` : ''}
-                            
-                            ${block.slidesLink ? `<a href="${block.slidesLink}" target="_blank" class="relative group/btn flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white border border-indigo-500/30">
-                                <i class="fa-solid fa-desktop text-sm"></i>
-                                <span class="absolute -top-7 bg-slate-800 text-indigo-400 text-[10px] px-2 py-1 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none shadow-lg whitespace-nowrap">Slides</span>
-                            </a>` : ''}
-                            
-                            ${block.printLink ? `<a href="${block.printLink}" target="_blank" class="relative group/btn flex items-center justify-center w-8 h-8 rounded-lg bg-pink-500/10 text-pink-400 hover:bg-pink-500 hover:text-white border border-pink-500/30">
-                                <i class="fa-solid fa-print text-sm"></i>
-                                <span class="absolute -top-7 bg-slate-800 text-pink-400 text-[10px] px-2 py-1 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none shadow-lg whitespace-nowrap">Print Links</span>
-                            </a>` : ''}
+                        <div class="flex gap-2 mt-3 sm:mt-0 ml-auto w-full sm:w-auto justify-end">
+                            ${block.lessonPlanLink ? `<a href="${block.lessonPlanLink}" target="_blank" class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-600 hover:text-white border border-emerald-500/30 shadow-sm" title="Lesson Plan"><i class="fa-solid fa-file-lines text-lg"></i></a>` : ''}
+                            ${block.slidesLink ? `<a href="${block.slidesLink}" target="_blank" class="flex items-center justify-center w-10 h-10 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-600 hover:text-white border border-indigo-500/30 shadow-sm" title="Slides"><i class="fa-solid fa-desktop text-lg"></i></a>` : ''}
+                            ${block.printLink ? `<a href="${block.printLink}" target="_blank" class="flex items-center justify-center w-10 h-10 rounded-lg bg-pink-500/10 text-pink-400 hover:bg-pink-600 hover:text-white border border-pink-500/30 shadow-sm" title="Print Links"><i class="fa-solid fa-print text-lg"></i></a>` : ''}
                         </div>
                     </div>`;
                 }
             });
         };
 
-        // Edit Single Lesson Modal
         window.initEdit = (day, idx) => {
-            window.appState.day = day;
-            window.appState.editingBlock = { ...window.appState.weekData[day][idx], index: idx };
+            window.appState.day = day; window.appState.editingBlock = { ...window.appState.weekData[day][idx], index: idx };
             document.getElementById('edit-badge').innerText = day + ' | ' + window.appState.editingBlock.time;
             document.getElementById('edit-subject').value = window.appState.editingBlock.subject || '';
             document.getElementById('edit-topic').value = window.appState.editingBlock.topic || '';
             document.getElementById('edit-plan').value = window.appState.editingBlock.lessonPlanLink || '';
             document.getElementById('edit-slides').value = window.appState.editingBlock.slidesLink || '';
             document.getElementById('edit-print').value = window.appState.editingBlock.printLink || '';
-            document.getElementById('modal-edit').classList.remove('hidden');
-            document.getElementById('modal-edit').classList.add('flex');
+            document.getElementById('modal-edit').classList.remove('hidden'); document.getElementById('modal-edit').classList.add('flex');
         };
 
-        // Save Edit to Cloud
         window.saveEdit = () => {
-            const day = window.appState.day;
+            const updated = [...window.appState.weekData[window.appState.day]];
             const idx = window.appState.editingBlock.index;
-            const updated = [...window.appState.weekData[day]];
             updated[idx].subject = document.getElementById('edit-subject').value;
             updated[idx].topic = document.getElementById('edit-topic').value;
             updated[idx].lessonPlanLink = document.getElementById('edit-plan').value;
             updated[idx].slidesLink = document.getElementById('edit-slides').value;
             updated[idx].printLink = document.getElementById('edit-print').value;
-            
-            const docId = `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`;
-            const docRef = doc(db, "timetables", docId);
-            setDoc(docRef, { days: { ...window.appState.weekData, [day]: updated } }, { merge: true });
+            setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [window.appState.day]: updated } }, { merge: true });
             closeModals();
         };
 
-        // Populate Full Day Modal
         window.initAddDay = (day) => {
-            window.appState.addingDay = day;
-            window.appState.newDayForm = getSkeleton();
+            window.appState.addingDay = day; window.appState.newDayForm = getSkeleton();
             document.getElementById('add-day-title').innerText = day;
-            
-            const form = document.getElementById('add-day-form');
-            form.innerHTML = '';
-            
+            const form = document.getElementById('add-day-form'); form.innerHTML = '';
             window.appState.newDayForm.forEach((block, idx) => {
-                if(block.type === 'break') {
-                    form.innerHTML += `<div class="py-1.5 text-center text-slate-500 font-medium tracking-widest uppercase text-[10px] border border-dashed border-slate-700 rounded">${block.topic} (${block.time})</div>`;
-                } else {
-                    form.innerHTML += `
-                    <div class="bg-slate-900/50 p-3 rounded border border-slate-700 space-y-2">
-                        <div class="flex justify-between items-center border-b border-slate-700 pb-1.5 mb-1.5">
-                            <span class="text-cyan-400 font-bold text-xs">${block.time}</span>
-                            <input type="text" id="add-sub-${idx}" value="${block.subject}" class="bg-transparent text-slate-200 font-bold text-xs text-right focus:outline-none border-b border-transparent focus:border-cyan-500" />
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            <div><label class="block text-[9px] uppercase text-slate-400 mb-0.5">Topic</label><input type="text" id="add-top-${idx}" value="${block.topic}" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-cyan-500" /></div>
-                            <div><label class="block text-[9px] uppercase text-emerald-400 mb-0.5">Plan Link</label><input type="url" id="add-plan-${idx}" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-emerald-500" /></div>
-                            <div><label class="block text-[9px] uppercase text-indigo-400 mb-0.5">Slides</label><input type="url" id="add-slide-${idx}" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-indigo-500" /></div>
-                            <div><label class="block text-[9px] uppercase text-pink-400 mb-0.5">Print Link</label><input type="url" id="add-print-${idx}" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-pink-500" /></div>
-                        </div>
-                    </div>`;
-                }
+                if(block.type === 'break') form.innerHTML += `<div class="py-1.5 text-center text-slate-500 font-medium tracking-widest uppercase text-xs border border-dashed border-slate-700 rounded">${block.topic} (${block.time})</div>`;
+                else form.innerHTML += `<div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700 space-y-2"><div class="flex justify-between items-center border-b border-slate-700 pb-2 mb-2"><span class="text-cyan-400 font-bold text-sm">${block.time}</span><input type="text" id="add-sub-${idx}" value="${block.subject}" class="bg-transparent text-slate-200 font-bold text-sm text-right focus:outline-none border-b border-transparent focus:border-cyan-500" /></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="block text-[10px] uppercase text-slate-400 mb-1">Topic</label><input type="text" id="add-top-${idx}" value="${block.topic}" class="w-full bg-slate-900 border border-slate-600 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500" /></div><div><label class="block text-[10px] uppercase text-emerald-400 mb-1">Plan Link</label><input type="url" id="add-plan-${idx}" class="w-full bg-slate-900 border border-slate-600 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" /></div><div><label class="block text-[10px] uppercase text-indigo-400 mb-1">Slides</label><input type="url" id="add-slide-${idx}" class="w-full bg-slate-900 border border-slate-600 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" /></div><div><label class="block text-[10px] uppercase text-pink-400 mb-1">Print</label><input type="url" id="add-print-${idx}" class="w-full bg-slate-900 border border-slate-600 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-pink-500" /></div></div></div>`;
             });
-            
-            document.getElementById('modal-add').classList.remove('hidden');
-            document.getElementById('modal-add').classList.add('flex');
+            document.getElementById('modal-add').classList.remove('hidden'); document.getElementById('modal-add').classList.add('flex');
         };
 
-        // Save Full Day to Cloud
         window.saveFullDay = () => {
-            const day = window.appState.addingDay;
-            const updated = window.appState.newDayForm.map((block, idx) => {
-                if (block.type === 'break') return block;
-                return {
-                    ...block,
-                    subject: document.getElementById(`add-sub-${idx}`).value,
-                    topic: document.getElementById(`add-top-${idx}`).value,
-                    lessonPlanLink: document.getElementById(`add-plan-${idx}`).value,
-                    slidesLink: document.getElementById(`add-slide-${idx}`).value,
-                    printLink: document.getElementById(`add-print-${idx}`).value,
-                };
-            });
-
-            const docId = `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`;
-            const docRef = doc(db, "timetables", docId);
-            setDoc(docRef, { days: { ...window.appState.weekData, [day]: updated } }, { merge: true });
+            const updated = window.appState.newDayForm.map((b, idx) => b.type === 'break' ? b : { ...b, subject: document.getElementById(`add-sub-${idx}`).value, topic: document.getElementById(`add-top-${idx}`).value, lessonPlanLink: document.getElementById(`add-plan-${idx}`).value, slidesLink: document.getElementById(`add-slide-${idx}`).value, printLink: document.getElementById(`add-print-${idx}`).value });
+            setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [window.appState.addingDay]: updated } }, { merge: true });
             closeModals();
         };
     </script>
