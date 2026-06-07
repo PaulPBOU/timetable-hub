@@ -31,31 +31,25 @@
 </head>
 <body class="w-screen h-screen flex flex-col relative bg-transparent">
     
-    <!-- START OVERLAY TO BYPASS BROWSER AUTOPLAY BLOCKS -->
     <div id="start-overlay" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center pointer-events-auto transition-opacity duration-500">
         <button id="enter-zone-btn" onclick="startZone()" disabled class="bg-slate-500/20 text-slate-400 font-extrabold text-2xl md:text-4xl py-6 px-12 rounded-3xl transition-all border border-slate-400/30 flex items-center backdrop-blur-md cursor-not-allowed">
             <i class="fa-solid fa-spinner fa-spin mr-4"></i> Loading...
         </button>
     </div>
 
-    <!-- CODE PATTERN BACKGROUND (Hidden by default) -->
     <canvas id="pattern-canvas" class="hidden fixed top-0 left-0 w-screen h-screen z-0 pointer-events-none"></canvas>
 
-    <!-- YOUTUBE BACKGROUND -->
     <div id="video-bg">
         <iframe id="yt-iframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
 
-    <!-- UI LAYER ON TOP OF BACKGROUND -->
     <div class="absolute inset-0 z-10 flex flex-col p-4 md:p-6 pointer-events-none">
         
-        <!-- Ambient Floating Artifacts -->
         <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
             <div class="absolute w-[30vw] h-[30vw] bg-emerald-500/10 blur-[100px] rounded-full top-1/4 left-1/4 animate-[pulse_8s_ease-in-out_infinite]"></div>
             <div class="absolute w-[40vw] h-[40vw] bg-cyan-500/10 blur-[120px] rounded-full bottom-1/4 right-1/4 animate-[pulse_12s_ease-in-out_infinite_alternate]"></div>
         </div>
 
-        <!-- HEADER ROW -->
         <div class="relative z-10 flex justify-between items-center mb-6 shrink-0 pointer-events-auto">
             <div>
                 <h1 class="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 flex items-center drop-shadow-[0_0_10px_rgba(0,0,0,0.8)]">
@@ -64,27 +58,22 @@
             </div>
             
             <div class="flex items-center gap-2 md:gap-3">
-                <!-- Square Timer Button -->
                 <button onclick="promptTimer()" class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white/70 w-11 h-11 md:w-12 md:h-12 rounded-xl flex justify-center items-center transition-all shadow-lg border border-white/10">
                     <i class="fa-solid fa-hourglass-start text-lg md:text-xl"></i>
                 </button>
                 
-                <!-- Square Stopwatch Button -->
                 <button onclick="toggleStopwatch()" id="stopwatch-btn" class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white/70 w-11 h-11 md:w-12 md:h-12 rounded-xl flex justify-center items-center transition-all shadow-lg border border-white/10">
                     <i class="fa-solid fa-stopwatch text-lg md:text-xl"></i>
                 </button>
 
-                <!-- Square Exit Button -->
                 <button onclick="window.history.back()" class="bg-rose-500/20 hover:bg-rose-500/40 backdrop-blur-md text-rose-200 hover:text-white w-11 h-11 md:w-12 md:h-12 rounded-xl flex justify-center items-center transition-all border border-rose-500/30 shadow-lg ml-2">
                     <i class="fa-solid fa-xmark text-xl md:text-2xl"></i>
                 </button>
             </div>
         </div>
 
-        <!-- MAIN LAYOUT -->
         <div class="relative z-10 flex-1 flex justify-between overflow-hidden">
             
-            <!-- LEFT COLUMN: Playlist Manager -->
             <div class="w-[180px] md:w-[220px] bg-slate-900/10 border border-white/10 rounded-2xl p-3 shadow-2xl flex flex-col pointer-events-auto backdrop-blur-md h-full">
                 <h2 class="text-sm md:text-base font-bold text-white/60 mb-3 drop-shadow-md flex items-center"><i class="fa-brands fa-youtube mr-2 text-white/50"></i> Focus Playlist</h2>
                 
@@ -98,7 +87,6 @@
                 </div>
             </div>
 
-            <!-- RIGHT COLUMN: Giant Vertical Noise Meter -->
             <div class="w-[120px] md:w-[140px] bg-slate-900/10 border border-white/10 rounded-2xl p-4 shadow-2xl flex flex-col items-center pointer-events-auto backdrop-blur-md h-full">
                 <h2 class="text-base md:text-lg font-bold text-white/70 mb-4 text-center leading-tight drop-shadow-md"><i class="fa-solid fa-volume-high text-cyan-400/80 block text-xl md:text-2xl mb-1"></i> Noise</h2>
                 
@@ -107,10 +95,8 @@
                 </button>
 
                 <div id="meter-container" class="flex-1 w-full bg-black/20 rounded-full border border-white/10 overflow-hidden relative hidden flex flex-col-reverse shadow-inner backdrop-blur-sm">
-                    <!-- The Bar grows from bottom to top -->
                     <div id="meter-bar" class="w-full h-[0%] bg-emerald-500/70 meter-fill rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
                     
-                    <!-- Horizontal Markers -->
                     <div class="absolute bottom-[60%] left-0 right-0 border-b-2 md:border-b-4 border-yellow-500/50 z-10 w-full drop-shadow-md"></div>
                     <div class="absolute bottom-[85%] left-0 right-0 border-b-2 md:border-b-4 border-red-500/50 z-10 w-full drop-shadow-md"></div>
                 </div>
@@ -119,7 +105,6 @@
         </div>
     </div>
 
-    <!-- MASSIVE TIME DISPLAY OVERLAY -->
     <div id="time-display-container" class="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none hidden bg-transparent">
         <div class="bg-black/20 backdrop-blur-md rounded-[3rem] p-8 md:p-12 flex flex-col items-center border border-white/10 pointer-events-auto shadow-2xl">
             <h1 id="huge-time-text" class="text-[12vw] md:text-[14vw] font-black text-white/90 drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)] tracking-tighter leading-none">00:00</h1>
@@ -129,7 +114,6 @@
         </div>
     </div>
 
-    <!-- FULLSCREEN NOISE ALARM OVERLAY -->
     <div id="alarm-overlay" class="hidden fixed inset-0 z-[999] bg-red-600/95 backdrop-blur-xl flex flex-col items-center justify-center animate-pulse">
         <i class="fa-solid fa-triangle-exclamation text-white text-9xl mb-8 drop-shadow-2xl"></i>
         <h1 class="text-6xl md:text-8xl font-black text-white text-center tracking-tight mb-8 drop-shadow-2xl">TOO LOUD</h1>
@@ -159,6 +143,14 @@
         
         let playlistData = [];
         let zoneStarted = false; 
+
+        // --- NEW AUDIO VARIABLES ---
+        let currentAudio = null;
+        const patternMusic = {
+            'ps3': 'https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/Enchanted%20Fern%20Hollow.mp3?alt=media&token=3f23becf-85e0-450a-a9bf-ae6fc1970262', 
+            'tendrils': 'https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/Magical%20Mossy%20Glade.mp3?alt=media&token=2521aae3-74c0-4d21-a43c-2f9782211bf1',
+            'nebula': 'https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/Steady%20Glade%20Meditation.mp3?alt=media&token=088385a4-363f-4bc4-8088-d6216db9a046'
+        };
 
         // --- CODE PATTERN ANIMATION LOGIC ---
         let currentPattern = null; 
@@ -224,7 +216,6 @@
                 }
 
             } else if (currentPattern === 'tendrils') {
-                // Increased opacity from 0.2 to 0.35 to prevent fractional floating point canvas ghosting
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.35)'; 
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
@@ -261,7 +252,6 @@
                 });
 
             } else if (currentPattern === 'nebula') {
-                // Increased opacity from 0.2 to 0.35 to prevent fractional floating point canvas ghosting
                 ctx.fillStyle = 'rgba(8, 5, 20, 0.35)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -275,8 +265,8 @@
                             radius: Math.random() * 2 + 0.5, 
                             pulseSpeed: 0.01 + Math.random() * 0.02,
                             pulseTime: Math.random() * Math.PI * 2,
-                            hue: 240 + Math.random() * 100, // Blues, Purples, Pinks
-                            isLarge: Math.random() > 0.95 // Small chance to be a large depth-of-field orb
+                            hue: 240 + Math.random() * 100,
+                            isLarge: Math.random() > 0.95 
                         });
                     }
                 }
@@ -284,7 +274,7 @@
                 particles.forEach(p => {
                     p.x += p.vx;
                     p.y += p.vy;
-                    p.y -= 0.15; // Slow ambient rise
+                    p.y -= 0.15;
 
                     if (p.x < -20) p.x = canvas.width + 20;
                     if (p.x > canvas.width + 20) p.x = -20;
@@ -324,12 +314,23 @@
                 tendrils = [];
                 particles = [];
                 
-                // Force a hard clear of the canvas when switching patterns
-                // This guarantees no old pattern pixels get stuck on the screen
                 const canvas = document.getElementById('pattern-canvas');
                 if(canvas) {
                     const ctx = canvas.getContext('2d');
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+
+                // Stop current audio before switching
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                }
+
+                // Start new audio
+                if (patternMusic[type] && patternMusic[type] !== 'YOUR_PS3_MP3_URL_HERE') {
+                    currentAudio = new Audio(patternMusic[type]);
+                    currentAudio.loop = true;
+                    currentAudio.play().catch(e => console.log("Audio autoplay blocked until user interacts:", e));
                 }
             }
 
@@ -394,6 +395,13 @@
                 cancelAnimationFrame(animationId);
                 animationId = null;
             }
+
+            // Stop pattern music when youtube plays
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
+
             document.getElementById('pattern-canvas').classList.add('hidden');
             document.getElementById('video-bg').classList.remove('hidden');
 
