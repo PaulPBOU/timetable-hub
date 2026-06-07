@@ -33,6 +33,15 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.6); border-radius: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(71, 85, 105, 0.9); }
         .hidden { display: none !important; }
+        
+        .bg-stripes-red {
+            background-color: rgba(254, 226, 226, 0.4);
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(244, 63, 94, 0.05) 10px, rgba(244, 63, 94, 0.05) 20px);
+        }
+        .dark .bg-stripes-red {
+            background-color: rgba(159, 18, 57, 0.15);
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(244, 63, 94, 0.05) 10px, rgba(244, 63, 94, 0.05) 20px);
+        }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center p-2 md:p-4 bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
@@ -41,8 +50,12 @@
     <div class="absolute filter blur-[100px] md:blur-[120px] z-0 opacity-40 dark:opacity-30 rounded-full w-[250px] md:w-[400px] h-[250px] md:h-[400px] bg-cyan-200 dark:bg-cyan-600 bottom-[-10%] right-[-5%] pointer-events-none transition-colors duration-300"></div>
 
     <!-- GLOBAL CONTROLS -->
-    <!-- Top Left Group (Home & Theme) -->
-    <div class="fixed top-2 left-2 md:top-3 md:left-3 flex gap-1.5 md:gap-2 z-50">
+    <!-- Top Right Group (Back, Home & Theme) -->
+    <div class="fixed top-2 right-2 md:top-3 md:right-3 flex gap-1.5 md:gap-2 z-50">
+        <!-- Back Button -->
+        <button id="global-back-btn" class="hidden bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 px-3 h-8 md:h-9 text-xs md:text-sm font-bold rounded-lg flex items-center justify-center transition-colors border border-slate-200 dark:border-slate-600 shadow-md min-w-[70px]" onclick="handleGlobalBack()">
+            <i class="fa-solid fa-chevron-left mr-1.5"></i> <span id="global-back-text">Back</span>
+        </button>
         <button onclick="navigate('landing')" class="bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 w-8 h-8 md:w-9 md:h-9 text-xs md:text-sm rounded-lg flex items-center justify-center transition-colors border border-slate-200 dark:border-slate-600 shadow-md" title="Home">
             <i class="fa-solid fa-house"></i>
         </button>
@@ -50,11 +63,6 @@
             <i id="theme-icon" class="fa-solid fa-moon"></i>
         </button>
     </div>
-
-    <!-- Back Button -->
-    <button id="global-back-btn" class="hidden fixed top-2 right-2 md:top-3 md:right-3 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 px-3 h-8 md:h-9 text-xs md:text-sm font-bold rounded-lg flex items-center justify-center transition-colors border border-slate-200 dark:border-slate-600 shadow-md z-50 min-w-[70px]" onclick="handleGlobalBack()">
-        <i class="fa-solid fa-chevron-left mr-1.5"></i> <span id="global-back-text">Back</span>
-    </button>
 
     <a href="learning_zone.html" class="fixed bottom-4 right-4 md:bottom-6 md:right-6 w-14 h-14 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full flex items-center justify-center transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] z-50 border border-emerald-400 group">
         <i class="fa-solid fa-headphones text-xl"></i>
@@ -72,7 +80,7 @@
         <div id="view-landing" class="flex flex-col items-center justify-center h-full space-y-10 animate-in fade-in zoom-in duration-500">
             <div class="text-center">
                 <i class="fa-solid fa-graduation-cap text-6xl text-cyan-500 dark:text-cyan-400 mb-6 drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]"></i>
-                <h1 class="text-4xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600 dark:from-cyan-400 dark:to-indigo-400 mb-4">Paul's School Day</h1>
+                <h1 class="text-4xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600 dark:from-cyan-400 dark:to-indigo-400 mb-4">Paul 2026</h1>
                 <p class="text-slate-500 dark:text-slate-400 text-base md:text-xl font-medium tracking-wide">Classroom Management Hub</p>
             </div>
             <div class="flex flex-col sm:flex-row gap-4 w-full max-w-2xl px-4">
@@ -114,9 +122,13 @@
 
         <!-- WEEK VIEW -->
         <div id="view-week" class="hidden flex-col h-full animate-in fade-in duration-300 pt-10 md:pt-0 min-h-0">
-            <div class="border-b border-slate-300 dark:border-slate-700/50 pb-2 mb-2 flex items-baseline gap-3 shrink-0 mt-8 md:mt-0">
-                <h1 id="week-title" class="text-xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600 dark:from-cyan-400 dark:to-indigo-400 leading-none">Week</h1>
-                <p id="week-subtitle" class="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-semibold">Term, Week</p>
+            <div class="border-b border-slate-300 dark:border-slate-700/50 pb-2 mb-2 shrink-0 mt-8 md:mt-0">
+                <div class="flex items-center gap-2 md:gap-3">
+                    <button onclick="navigateWeek(-1)" class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors shrink-0"><i class="fa-solid fa-chevron-left text-xs md:text-sm"></i></button>
+                    <h1 id="week-title" class="text-xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600 dark:from-cyan-400 dark:to-indigo-400 leading-none">Week</h1>
+                    <button onclick="navigateWeek(1)" class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors shrink-0"><i class="fa-solid fa-chevron-right text-xs md:text-sm"></i></button>
+                    <p id="week-subtitle" class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-semibold ml-1 md:ml-2">Term, Week</p>
+                </div>
             </div>
             <div id="week-grid" class="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar pb-4 min-w-full">
                 <!-- Columns injected dynamically -->
@@ -126,9 +138,11 @@
         <!-- DAY VIEW -->
         <div id="view-day" class="hidden flex-col h-full animate-in slide-in-from-right-8 duration-300 pt-10 md:pt-0 min-h-0">
             <div class="border-b border-slate-300 dark:border-slate-700 pb-2 mb-3 shrink-0 mt-8 md:mt-0">
-                <div class="flex items-baseline gap-3">
+                <div class="flex items-center gap-2 md:gap-3">
+                    <button onclick="navigateDay(-1)" class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors shrink-0"><i class="fa-solid fa-chevron-left text-xs md:text-sm"></i></button>
                     <h1 id="day-title" class="text-xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600 dark:from-cyan-400 dark:to-indigo-400 leading-none">Schedule</h1>
-                    <p id="day-subtitle" class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-semibold">Term, Week</p>
+                    <button onclick="navigateDay(1)" class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors shrink-0"><i class="fa-solid fa-chevron-right text-xs md:text-sm"></i></button>
+                    <p id="day-subtitle" class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-semibold ml-1 md:ml-2">Term, Week</p>
                 </div>
             </div>
             <div id="day-blocks" class="flex-1 overflow-y-auto custom-scrollbar pr-2 md:pr-4 space-y-3 pb-4">
@@ -212,6 +226,28 @@
                 <button onclick="closeModals()" class="px-5 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold transition-colors">Cancel</button>
                 <button onclick="saveEdit()" class="px-5 py-2.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold flex items-center shadow-lg shadow-cyan-900/50">
                     <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Save Edit
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Day Modal -->
+    <div id="modal-cancel" class="hidden fixed inset-0 z-[100] items-center justify-center p-4 bg-slate-900/95 backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-2xl shadow-2xl w-full max-w-sm flex flex-col overflow-hidden">
+            <div class="p-5 border-b border-slate-300 dark:border-slate-700 bg-rose-50 dark:bg-rose-900/20 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-rose-700 dark:text-rose-400 flex items-center"><i class="fa-solid fa-ban mr-2"></i> Cancel <span id="cancel-day-title" class="ml-1"></span></h3>
+                <button onclick="closeModals()" class="text-rose-500 hover:text-rose-800 dark:text-rose-400 dark:hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Reason / Note (e.g., Public Holiday)</label>
+                    <input id="cancel-day-note" type="text" placeholder="Public Holiday" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-rose-500" />
+                </div>
+            </div>
+            <div class="p-4 border-t border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex justify-end gap-3">
+                <button onclick="closeModals()" class="px-5 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold transition-colors text-sm">Back</button>
+                <button onclick="saveCancelDay()" class="px-5 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold transition-colors shadow-lg shadow-rose-900/50 text-sm">
+                    Confirm
                 </button>
             </div>
         </div>
@@ -338,6 +374,51 @@
             return [];
         };
 
+        window.navigateWeek = (dir) => {
+            let termNum = parseInt(window.appState.term.replace('Term ', ''));
+            let weekNum = parseInt(window.appState.week.replace('Week ', ''));
+            weekNum += dir;
+            if (weekNum < 1) {
+                termNum -= 1;
+                if (termNum < 1) return; 
+                weekNum = 12; 
+            } else if (weekNum > 12) {
+                termNum += 1;
+                if (termNum > 4) return; 
+                weekNum = 1;
+            }
+            navigate(`Term ${termNum}/Week ${weekNum}`);
+        };
+
+        window.navigateDay = (dir) => {
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+            let curIdx = days.indexOf(window.appState.day);
+            curIdx += dir;
+            if (curIdx < 0) {
+                let termNum = parseInt(window.appState.term.replace('Term ', ''));
+                let weekNum = parseInt(window.appState.week.replace('Week ', ''));
+                weekNum -= 1;
+                if (weekNum < 1) {
+                    termNum -= 1;
+                    if(termNum < 1) return;
+                    weekNum = 12;
+                }
+                navigate(`Term ${termNum}/Week ${weekNum}/Thursday`);
+            } else if (curIdx >= days.length) {
+                let termNum = parseInt(window.appState.term.replace('Term ', ''));
+                let weekNum = parseInt(window.appState.week.replace('Week ', ''));
+                weekNum += 1;
+                if (weekNum > 12) {
+                    termNum += 1;
+                    if(termNum > 4) return;
+                    weekNum = 1;
+                }
+                navigate(`Term ${termNum}/Week ${weekNum}/Monday`);
+            } else {
+                navigate(`${window.appState.term}/${window.appState.week}/${days[curIdx]}`);
+            }
+        };
+
         // Date Logic
         window.getCurrentSchoolTime = () => {
             const now = new Date(); 
@@ -425,8 +506,10 @@
         };
 
         window.closeModals = () => {
-            document.getElementById('modal-add').classList.add('hidden'); document.getElementById('modal-edit').classList.add('hidden');
-            document.getElementById('modal-add').classList.remove('flex'); document.getElementById('modal-edit').classList.remove('flex');
+            ['modal-add', 'modal-edit', 'modal-cancel'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) { el.classList.add('hidden'); el.classList.remove('flex'); }
+            });
         };
 
         const getSkeleton = () => [
@@ -553,12 +636,20 @@
                     bodyHTML += `<div class="flex flex-col items-center justify-center h-full min-h-[120px] gap-2 p-2">
                         <button onclick="initAddDay('${day}')" class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 p-3 border border-dashed border-slate-400 dark:border-slate-600 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 w-full transition-colors"><i class="fa-solid fa-circle-plus text-xl mb-1"></i><span class="text-[10px] md:text-xs font-bold">Populate Day</span></button>
                         <button onclick="copyPreviousDayToEmpty('${day}')" class="flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 p-2 border border-dashed border-slate-400 dark:border-slate-600 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 w-full transition-colors"><i class="fa-solid fa-copy mr-2 text-sm"></i><span class="text-[10px] md:text-xs font-bold">Copy Previous Day</span></button>
+                        <button onclick="initCancelDay('${day}')" class="flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 p-2 border border-dashed border-slate-400 dark:border-slate-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 w-full transition-colors"><i class="fa-solid fa-xmark mr-2 text-sm"></i><span class="text-[10px] md:text-xs font-bold">Cancel Day</span></button>
+                    </div>`;
+                } else if (data.length === 1 && data[0].type === 'cancelled') {
+                    bodyHTML += `<div class="flex flex-col items-center justify-center h-full p-4 text-center rounded-lg bg-stripes-red flex-1 border border-rose-200 dark:border-rose-900/30 m-2">
+                        <i class="fa-solid fa-mug-hot text-3xl md:text-4xl text-rose-400/60 dark:text-rose-500/50 mb-3 drop-shadow-sm"></i>
+                        <h3 class="text-rose-700 dark:text-rose-300 font-bold text-sm md:text-base uppercase tracking-wider mb-1">No Learning</h3>
+                        <p class="text-rose-600 dark:text-rose-400 text-xs md:text-sm italic font-medium">${data[0].note || 'Day Cancelled'}</p>
+                        <button onclick="clearDay('${day}', this)" class="mt-auto pt-3 flex items-center justify-center text-rose-500 hover:text-rose-700 dark:hover:text-rose-300 py-1.5 text-[10px] md:text-xs font-bold transition-colors w-full"><i class="fa-solid fa-rotate-left mr-1.5"></i> Restore Day</button>
                     </div>`;
                 } else {
                     bodyHTML += `<div class="space-y-2">`;
                     data.forEach((block, idx) => {
                         if(block.type === 'break') {
-                            bodyHTML += `<div class="py-1 text-center text-slate-500 dark:text-slate-400 font-medium tracking-wider uppercase text-[9px] md:text-[10px] bg-slate-100 dark:bg-slate-900/50 rounded-md border border-dashed border-slate-300 dark:border-slate-700"><i class="fa-solid fa-${block.icon} mr-1"></i> ${block.topic}</div>`;
+                            bodyHTML += `<div class="py-1 text-center text-amber-600 dark:text-amber-400 font-medium tracking-wider uppercase text-[9px] md:text-[10px] bg-amber-100 dark:bg-amber-900/30 rounded-md border border-dashed border-amber-300 dark:border-amber-700/50"><i class="fa-solid fa-${block.icon} mr-1"></i> ${block.topic}</div>`;
                         } else {
                             // Compile Print HTML
                             let printLinks = getPrintLinks(block.printLink);
@@ -644,9 +735,20 @@
             container.innerHTML = '';
             const data = window.appState.weekData[window.appState.day] || [];
             
+            if (data.length === 1 && data[0].type === 'cancelled') {
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full p-6 text-center rounded-2xl bg-stripes-red border border-rose-200 dark:border-rose-900/30 mt-4 min-h-[300px]">
+                        <i class="fa-solid fa-mug-hot text-5xl md:text-6xl text-rose-400/60 dark:text-rose-500/50 mb-4 drop-shadow-sm"></i>
+                        <h3 class="text-rose-700 dark:text-rose-300 font-black text-xl md:text-2xl uppercase tracking-widest mb-2">Day Cancelled</h3>
+                        <p class="text-rose-600 dark:text-rose-400 text-sm md:text-lg italic font-medium">${data[0].note || 'No learning planned'}</p>
+                    </div>
+                `;
+                return;
+            }
+
             data.forEach((block, idx) => {
                 if(block.type === 'break') {
-                    container.innerHTML += `<div class="py-2 text-center text-slate-500 dark:text-slate-400 font-bold tracking-widest uppercase text-xs bg-slate-100 dark:bg-slate-800/30 rounded-lg border border-dashed border-slate-300 dark:border-slate-600/50 my-3"><i class="fa-solid fa-${block.icon} mr-1"></i> ${block.topic} (${block.time})</div>`;
+                    container.innerHTML += `<div class="py-2 text-center text-amber-600 dark:text-amber-400 font-bold tracking-widest uppercase text-xs bg-amber-100 dark:bg-amber-900/30 rounded-lg border border-dashed border-amber-300 dark:border-amber-700/50 my-3"><i class="fa-solid fa-${block.icon} mr-1"></i> ${block.topic} (${block.time})</div>`;
                 } else {
                     const hasNote = block.note && block.note.trim() !== "";
                     
@@ -781,7 +883,7 @@
             document.getElementById('add-day-title').innerText = day;
             const form = document.getElementById('add-day-form'); form.innerHTML = '';
             window.appState.newDayForm.forEach((block, idx) => {
-                if(block.type === 'break') form.innerHTML += `<div class="py-1 text-center text-slate-500 dark:text-slate-400 font-medium tracking-widest uppercase text-[10px] border border-dashed border-slate-300 dark:border-slate-700 rounded">${block.topic} (${block.time})</div>`;
+                if(block.type === 'break') form.innerHTML += `<div class="py-1 text-center text-amber-600 dark:text-amber-400 font-medium tracking-widest uppercase text-[10px] bg-amber-50 dark:bg-amber-900/20 border border-dashed border-amber-300 dark:border-amber-700/50 rounded">${block.topic} (${block.time})</div>`;
                 else form.innerHTML += `
                     <div class="bg-white dark:bg-slate-900/50 p-2.5 rounded border border-slate-200 dark:border-slate-700 space-y-2">
                         <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-1.5 mb-1.5">
@@ -830,6 +932,21 @@
                     </div>`;
             });
             document.getElementById('modal-add').classList.remove('hidden'); document.getElementById('modal-add').classList.add('flex');
+        };
+
+        window.initCancelDay = (day) => {
+            window.appState.cancellingDay = day;
+            document.getElementById('cancel-day-title').innerText = day;
+            document.getElementById('cancel-day-note').value = '';
+            document.getElementById('modal-cancel').classList.remove('hidden');
+            document.getElementById('modal-cancel').classList.add('flex');
+        };
+
+        window.saveCancelDay = () => {
+            const note = document.getElementById('cancel-day-note').value.trim();
+            const cancelledData = [{ type: 'cancelled', note: note }];
+            setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [window.appState.cancellingDay]: cancelledData } }, { merge: true });
+            closeModals();
         };
 
         window.addPopulatePrintInput = (idx) => {

@@ -66,7 +66,7 @@
                     <i class="fa-solid fa-stopwatch text-lg md:text-xl"></i>
                 </button>
 
-                <button onclick="window.history.back()" class="bg-rose-500/20 hover:bg-rose-500/40 backdrop-blur-md text-rose-200 hover:text-white w-11 h-11 md:w-12 md:h-12 rounded-xl flex justify-center items-center transition-all border border-rose-500/30 shadow-lg ml-2">
+                <button onclick="goBack()" class="bg-rose-500/20 hover:bg-rose-500/40 backdrop-blur-md text-rose-200 hover:text-white w-11 h-11 md:w-12 md:h-12 rounded-xl flex justify-center items-center transition-all border border-rose-500/30 shadow-lg ml-2">
                     <i class="fa-solid fa-xmark text-xl md:text-2xl"></i>
                 </button>
             </div>
@@ -143,6 +143,33 @@
         
         let playlistData = [];
         let zoneStarted = false; 
+
+        window.goBack = () => {
+            if (window.history.length > 1 && document.referrer.includes('index.html')) {
+                window.history.back();
+            } else {
+                const now = new Date(); 
+                const terms = [
+                    { name: 'Term 1', start: new Date('2026-01-28') }, { name: 'Term 2', start: new Date('2026-04-20') },
+                    { name: 'Term 3', start: new Date('2026-07-20') }, { name: 'Term 4', start: new Date('2026-10-12') }
+                ];
+                let curTerm = 'Term 2', weekNum = 1;
+                for(let i = terms.length - 1; i >= 0; i--) {
+                    if(now >= terms[i].start) {
+                        curTerm = terms[i].name;
+                        weekNum = Math.floor((now - terms[i].start) / (7 * 24 * 60 * 60 * 1000)) + 1;
+                        break;
+                    }
+                }
+                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                let curDay = days[now.getDay()];
+                if (curDay === 'Saturday' || curDay === 'Sunday' || curDay === 'Friday') {
+                    weekNum += 1;
+                }
+                weekNum = Math.min(Math.max(weekNum, 1), 12);
+                window.location.href = `index.html#${curTerm}/Week ${weekNum}`;
+            }
+        };
 
         let currentAudio = null;
         const patternMusic = {
