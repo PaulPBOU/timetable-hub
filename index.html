@@ -132,7 +132,7 @@
                 </div>
             </div>
             <div id="day-blocks" class="flex-1 overflow-y-auto custom-scrollbar pr-2 md:pr-4 space-y-3 pb-4">
-                <!-- Blocks injected dynamically (Enlarged) -->
+                <!-- Blocks injected dynamically -->
             </div>
         </div>
 
@@ -199,10 +199,12 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Print Link</label>
-                    <div class="relative flex items-center">
-                        <i class="fa-solid fa-print absolute left-3 text-pink-500"></i>
-                        <input id="edit-print" type="url" placeholder="https://..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg pl-9 pr-3 py-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-pink-500" />
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400">Print Link(s)</label>
+                        <button onclick="addEditPrintInput()" class="text-[10px] bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400 px-2 py-0.5 rounded font-bold hover:bg-pink-200 dark:hover:bg-pink-500/40 transition-colors shadow-sm"><i class="fa-solid fa-plus mr-1"></i>Add Link</button>
+                    </div>
+                    <div id="edit-print-container" class="space-y-1.5">
+                        <!-- Dynamic inputs injected here -->
                     </div>
                 </div>
             </div>
@@ -305,6 +307,13 @@
 
         window.navigate = (path) => { window.location.hash = path; };
 
+        // Normalizes printLink to always be an array
+        const getPrintLinks = (linkData) => {
+            if (Array.isArray(linkData)) return linkData.filter(l => l.trim() !== '');
+            if (typeof linkData === 'string' && linkData.trim() !== '') return [linkData.trim()];
+            return [];
+        };
+
         // Date Logic
         window.getCurrentSchoolTime = () => {
             const now = new Date(); 
@@ -397,15 +406,15 @@
         };
 
         const getSkeleton = () => [
-            { id: 'b1', type: 'lesson', time: '9:00am - 9:45am', subject: 'English', topic: '', unitOutlineLink: '', slidesLink: '', printLink: '', lessonPlanLink: '' },
-            { id: 'b2', type: 'lesson', time: '9:45am - 10:00am', subject: 'English', topic: 'Daily Write', unitOutlineLink: '', slidesLink: '', printLink: '', lessonPlanLink: '' },
-            { id: 'b3', type: 'lesson', time: '10:00am - 11:00am', subject: 'English', topic: 'Imaginative Writing', unitOutlineLink: '', slidesLink: '', printLink: '', lessonPlanLink: '' },
+            { id: 'b1', type: 'lesson', time: '9:00am - 9:45am', subject: 'English', topic: '', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
+            { id: 'b2', type: 'lesson', time: '9:45am - 10:00am', subject: 'English', topic: 'Daily Write', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
+            { id: 'b3', type: 'lesson', time: '10:00am - 11:00am', subject: 'English', topic: 'Imaginative Writing', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
             { id: 'br1', type: 'break', time: '11:00am - 11:30am', topic: 'Break 1', icon: 'mug-hot' },
-            { id: 'b4', type: 'lesson', time: '11:30am - 12:30pm', subject: 'History', topic: '', unitOutlineLink: '', slidesLink: '', printLink: '', lessonPlanLink: '' },
-            { id: 'b5', type: 'lesson', time: '12:30pm - 1:30pm', subject: 'Maths', topic: '', unitOutlineLink: '', slidesLink: '', printLink: '', lessonPlanLink: '' },
+            { id: 'b4', type: 'lesson', time: '11:30am - 12:30pm', subject: 'History', topic: '', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
+            { id: 'b5', type: 'lesson', time: '12:30pm - 1:30pm', subject: 'Maths', topic: '', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
             { id: 'br2', type: 'break', time: '1:30pm - 2:00pm', topic: 'Break 2', icon: 'apple-whole' },
-            { id: 'b6', type: 'lesson', time: '2:00pm - 2:30pm', subject: 'Whole School', topic: 'Assembly', unitOutlineLink: '', slidesLink: '', printLink: '', lessonPlanLink: '' },
-            { id: 'b7', type: 'lesson', time: '2:30pm - 3:00pm', subject: 'End of Day', topic: 'Wrap Up', unitOutlineLink: '', slidesLink: '', printLink: '', lessonPlanLink: '' },
+            { id: 'b6', type: 'lesson', time: '2:00pm - 2:30pm', subject: 'Whole School', topic: 'Assembly', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
+            { id: 'b7', type: 'lesson', time: '2:30pm - 3:00pm', subject: 'End of Day', topic: 'Wrap Up', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
         ];
 
         const getIcon = (sub) => {
@@ -469,7 +478,7 @@
                             ...block,
                             lessonPlanLink: prevBlock.lessonPlanLink || '',
                             slidesLink: prevBlock.slidesLink || '',
-                            printLink: prevBlock.printLink || '',
+                            printLink: prevBlock.printLink || [],
                             unitOutlineLink: prevBlock.unitOutlineLink || ''
                         };
                     }
@@ -525,6 +534,28 @@
                         if(block.type === 'break') {
                             bodyHTML += `<div class="py-1 text-center text-slate-500 dark:text-slate-400 font-medium tracking-wider uppercase text-[9px] md:text-[10px] bg-slate-100 dark:bg-slate-900/50 rounded-md border border-dashed border-slate-300 dark:border-slate-700"><i class="fa-solid fa-${block.icon} mr-1"></i> ${block.topic}</div>`;
                         } else {
+                            // Compile Print HTML
+                            let printLinks = getPrintLinks(block.printLink);
+                            let printBtnHTML = '';
+                            if (printLinks.length === 1) {
+                                printBtnHTML = `<a href="${printLinks[0]}" target="_blank" onclick="event.stopPropagation()" class="relative group/btn flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded bg-pink-100 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-500 hover:text-white border border-pink-300 dark:border-pink-500/30 transition-colors shadow-sm">
+                                    <i class="fa-solid fa-print text-[8px] md:text-[9px]"></i>
+                                    <span class="absolute top-full mt-1.5 right-0 bg-white dark:bg-slate-800 text-pink-600 dark:text-pink-400 text-[9px] font-bold px-1.5 py-1 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-pink-200 dark:border-pink-500/30 shadow-lg z-50">Print</span>
+                                </a>`;
+                            } else if (printLinks.length > 1) {
+                                let multiLinks = printLinks.map((link, i) => `<a href="${link}" target="_blank" onclick="event.stopPropagation()" class="block px-2 py-1.5 hover:bg-pink-100 dark:hover:bg-pink-800 text-pink-700 dark:text-pink-300 text-[10px] font-bold transition-colors whitespace-nowrap border-b border-pink-100 dark:border-pink-500/20 last:border-0 text-center">Print ${i + 1}</a>`).join('');
+                                printBtnHTML = `
+                                <div class="relative group/multi" onclick="event.stopPropagation()">
+                                    <button class="relative flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded bg-pink-100 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-500 hover:text-white border border-pink-300 dark:border-pink-500/30 transition-colors shadow-sm cursor-pointer">
+                                        <i class="fa-solid fa-print text-[8px] md:text-[9px]"></i>
+                                        <span class="absolute top-full mt-1.5 right-0 bg-white dark:bg-slate-800 text-pink-600 dark:text-pink-400 text-[9px] font-bold px-1.5 py-1 rounded opacity-0 group-hover/multi:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-pink-200 dark:border-pink-500/30 shadow-lg z-[60]">Print Files</span>
+                                    </button>
+                                    <div class="absolute top-full mt-1 right-0 hidden group-hover/multi:flex flex-col bg-white dark:bg-slate-800 rounded shadow-xl border border-pink-200 dark:border-pink-500/30 z-[70] overflow-hidden min-w-[60px]">
+                                        ${multiLinks}
+                                    </div>
+                                </div>`;
+                            }
+
                             bodyHTML += `
                             <div class="bg-white dark:bg-slate-900/80 p-2 md:p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 group flex flex-col gap-1 shadow-sm">
                                 <div class="flex justify-between items-start w-full">
@@ -542,10 +573,7 @@
                                             <i class="fa-solid fa-desktop text-[8px] md:text-[9px]"></i>
                                             <span class="absolute top-full mt-1.5 right-0 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 text-[9px] font-bold px-1.5 py-1 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-indigo-200 dark:border-indigo-500/30 shadow-lg z-50">Slides</span>
                                         </a>` : ''}
-                                        ${block.printLink ? `<a href="${block.printLink}" target="_blank" class="relative group/btn flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded bg-pink-100 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-500 hover:text-white border border-pink-300 dark:border-pink-500/30 transition-colors shadow-sm">
-                                            <i class="fa-solid fa-print text-[8px] md:text-[9px]"></i>
-                                            <span class="absolute top-full mt-1.5 right-0 bg-white dark:bg-slate-800 text-pink-600 dark:text-pink-400 text-[9px] font-bold px-1.5 py-1 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-pink-200 dark:border-pink-500/30 shadow-lg z-50">Print</span>
-                                        </a>` : ''}
+                                        ${printBtnHTML}
                                     </div>
                                 </div>
                                 <div class="flex flex-col flex-1 min-w-0 mt-0.5">
@@ -595,6 +623,28 @@
                 } else {
                     const hasNote = block.note && block.note.trim() !== "";
                     
+                    // Compile Print HTML for Day View
+                    let printLinks = getPrintLinks(block.printLink);
+                    let printBtnHTML = '';
+                    if (printLinks.length === 1) {
+                        printBtnHTML = `<a href="${printLinks[0]}" target="_blank" onclick="event.stopPropagation()" class="relative group/btn flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-lg bg-pink-100 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-500 hover:text-white border border-pink-300 dark:border-pink-500/30 shadow-sm transition-colors">
+                            <i class="fa-solid fa-print text-sm md:text-base"></i>
+                            <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 text-pink-600 dark:text-pink-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-pink-200 dark:border-pink-500/30 shadow-lg z-[60]">Print</span>
+                        </a>`;
+                    } else if (printLinks.length > 1) {
+                        let multiLinks = printLinks.map((link, i) => `<a href="${link}" target="_blank" onclick="event.stopPropagation()" class="block px-4 py-2 hover:bg-pink-100 dark:hover:bg-pink-800 text-pink-700 dark:text-pink-300 text-xs md:text-sm font-bold transition-colors whitespace-nowrap border-b border-pink-100 dark:border-pink-500/20 last:border-0 text-center">Print ${i + 1}</a>`).join('');
+                        printBtnHTML = `
+                        <div class="relative group/multi" onclick="event.stopPropagation()">
+                            <button class="relative flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-lg bg-pink-100 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-500 hover:text-white border border-pink-300 dark:border-pink-500/30 shadow-sm transition-colors cursor-pointer">
+                                <i class="fa-solid fa-print text-sm md:text-base"></i>
+                                <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 text-pink-600 dark:text-pink-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover/multi:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-pink-200 dark:border-pink-500/30 shadow-lg z-[60]">Print Files</span>
+                            </button>
+                            <div class="absolute top-full mt-2 right-0 hidden group-hover/multi:flex flex-col bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-pink-200 dark:border-pink-500/30 z-[70] overflow-hidden min-w-[80px]">
+                                ${multiLinks}
+                            </div>
+                        </div>`;
+                    }
+
                     container.innerHTML += `
                     <div class="flex flex-col bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-700/80 transition-colors border border-slate-200 dark:border-slate-600/30 rounded-xl p-3 md:px-5 md:py-3 group relative mb-3 shadow-sm hover:shadow-md">
                         <button onclick="event.stopPropagation(); initEdit('${window.appState.day}', ${idx})" class="absolute -top-2 -right-2 flex items-center justify-center w-8 h-8 rounded-full bg-amber-500 text-slate-900 shadow-md md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10 hover:scale-110" title="Edit Lesson"><i class="fa-solid fa-pen text-sm"></i></button>
@@ -602,7 +652,7 @@
                         <div class="flex flex-col sm:flex-row items-start sm:items-center w-full cursor-pointer" onclick="toggleNote(${idx})">
                             <div class="sm:w-36 text-cyan-600 dark:text-cyan-400 font-bold text-sm md:text-base shrink-0 mb-1 sm:mb-0 flex items-center">
                                 ${block.time}
-                                ${hasNote ? '<span class="inline-block w-2 h-2 rounded-full bg-cyan-500 dark:bg-cyan-400 ml-2 shadow-sm" title="Note added"></span>' : ''}
+                                ${hasNote ? '<i class="fa-solid fa-note-sticky text-amber-500 ml-2" title="Note added"></i>' : ''}
                             </div>
                             <div class="flex-1 flex items-center w-full">
                                 <div class="mr-3 hidden md:block"><i class="fa-solid ${getIcon(block.subject)} text-xl"></i></div>
@@ -612,7 +662,7 @@
                                         <span class="text-slate-500 dark:text-slate-400 font-normal ml-1 mr-2">- ${block.topic}</span>
                                         ${block.unitOutlineLink ? `<a href="${block.unitOutlineLink}" target="_blank" onclick="event.stopPropagation()" class="relative group/btn inline-flex items-center justify-center w-6 h-6 rounded bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-500 hover:text-white border border-amber-300 dark:border-amber-500/30 transition-colors shadow-sm">
                                             <i class="fa-solid fa-folder-open text-xs"></i>
-                                            <span class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-amber-200 dark:border-amber-500/30 shadow-lg z-50">Paul's Unit Outline</span>
+                                            <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-amber-200 dark:border-amber-500/30 shadow-lg z-[60]">Paul's Unit Outline</span>
                                         </a>` : ''}
                                     </div>
                                 </div>
@@ -620,16 +670,13 @@
                             <div class="flex gap-2 mt-2 sm:mt-0 ml-auto w-full sm:w-auto justify-end pr-1">
                                 ${block.lessonPlanLink ? `<a href="${block.lessonPlanLink}" target="_blank" onclick="event.stopPropagation()" class="relative group/btn flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-lg bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-500 hover:text-white border border-emerald-300 dark:border-emerald-500/30 shadow-sm transition-colors">
                                     <i class="fa-solid fa-file-lines text-sm md:text-base"></i>
-                                    <span class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-emerald-200 dark:border-emerald-500/30 shadow-lg z-50">Lesson Plan</span>
+                                    <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-emerald-200 dark:border-emerald-500/30 shadow-lg z-[60]">Lesson Plan</span>
                                 </a>` : ''}
-                                ${block.slidesLink ? `<a href="${block.slidesLink}" target="_blank" onclick="event.stopPropagation()" class="relative group/btn flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-lg bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200 dark:hover:bg-indigo-500 hover:text-white border border-indigo-300 dark:border-indigo-500/30 shadow-sm transition-colors">
+                                ${block.slidesLink ? `<a href="${block.slidesLink}" target="_blank" onclick="event.stopPropagation()" class="relative group/btn flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-lg bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200 dark:hover:bg-indigo-600 hover:text-indigo-800 dark:hover:text-white border border-indigo-300 dark:border-indigo-500/30 shadow-sm transition-colors">
                                     <i class="fa-solid fa-desktop text-sm md:text-base"></i>
-                                    <span class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-indigo-200 dark:border-indigo-500/30 shadow-lg z-50">Slides</span>
+                                    <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-indigo-200 dark:border-indigo-500/30 shadow-lg z-[60]">Slides</span>
                                 </a>` : ''}
-                                ${block.printLink ? `<a href="${block.printLink}" target="_blank" onclick="event.stopPropagation()" class="relative group/btn flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-lg bg-pink-100 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-500 hover:text-white border border-pink-300 dark:border-pink-500/30 shadow-sm transition-colors">
-                                    <i class="fa-solid fa-print text-sm md:text-base"></i>
-                                    <span class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 text-pink-600 dark:text-pink-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-pink-200 dark:border-pink-500/30 shadow-lg z-50">Print</span>
-                                </a>` : ''}
+                                ${printBtnHTML}
                             </div>
                         </div>
 
@@ -657,19 +704,47 @@
             document.getElementById('edit-outline').value = window.appState.editingBlock.unitOutlineLink || '';
             document.getElementById('edit-plan').value = window.appState.editingBlock.lessonPlanLink || '';
             document.getElementById('edit-slides').value = window.appState.editingBlock.slidesLink || '';
-            document.getElementById('edit-print').value = window.appState.editingBlock.printLink || '';
+            
+            // Build Multiple Print Inputs
+            const printLinks = getPrintLinks(window.appState.editingBlock.printLink);
+            if (printLinks.length === 0) printLinks.push(''); 
+            const printContainer = document.getElementById('edit-print-container');
+            printContainer.innerHTML = '';
+            printLinks.forEach((link, i) => {
+                printContainer.innerHTML += `
+                <div class="relative flex items-center mt-1 print-input-group">
+                    <i class="fa-solid fa-print absolute left-3 text-pink-500"></i>
+                    <input type="url" value="${link}" placeholder="https://..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg pl-9 pr-8 py-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-pink-500 edit-print-input" />
+                    ${i > 0 ? `<button onclick="this.parentElement.remove()" class="absolute right-2 text-slate-400 hover:text-red-500 p-1"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                </div>`;
+            });
+
             document.getElementById('modal-edit').classList.remove('hidden'); document.getElementById('modal-edit').classList.add('flex');
+        };
+
+        window.addEditPrintInput = () => {
+            const container = document.getElementById('edit-print-container');
+            container.insertAdjacentHTML('beforeend', `
+            <div class="relative flex items-center mt-1.5 print-input-group">
+                <i class="fa-solid fa-print absolute left-3 text-pink-500"></i>
+                <input type="url" placeholder="https://..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg pl-9 pr-8 py-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-pink-500 edit-print-input" />
+                <button onclick="this.parentElement.remove()" class="absolute right-2 text-slate-400 hover:text-red-500 p-1"><i class="fa-solid fa-xmark"></i></button>
+            </div>`);
         };
 
         window.saveEdit = () => {
             const updated = [...window.appState.weekData[window.appState.day]];
             const idx = window.appState.editingBlock.index;
+            
+            const printInputs = Array.from(document.querySelectorAll('.edit-print-input')).map(inp => inp.value.trim()).filter(val => val !== '');
+
             updated[idx].subject = document.getElementById('edit-subject').value;
             updated[idx].topic = document.getElementById('edit-topic').value;
             updated[idx].unitOutlineLink = document.getElementById('edit-outline').value;
             updated[idx].lessonPlanLink = document.getElementById('edit-plan').value;
             updated[idx].slidesLink = document.getElementById('edit-slides').value;
-            updated[idx].printLink = document.getElementById('edit-print').value;
+            updated[idx].printLink = printInputs;
+            
             setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [window.appState.day]: updated } }, { merge: true });
             closeModals();
         };
@@ -713,10 +788,15 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-[9px] uppercase text-pink-600 dark:text-pink-400 mb-0.5">Print Link</label>
-                                <div class="relative flex items-center">
-                                    <i class="fa-solid fa-print absolute left-2 text-pink-500 text-[10px]"></i>
-                                    <input type="url" id="add-print-${idx}" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded pl-7 pr-2 py-1 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-pink-500" />
+                                <div class="flex justify-between items-center mb-0.5">
+                                    <label class="block text-[9px] uppercase text-pink-600 dark:text-pink-400">Print Link(s)</label>
+                                    <button onclick="addPopulatePrintInput(${idx})" class="text-[9px] bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400 px-1.5 rounded hover:bg-pink-200 dark:hover:bg-pink-500/40 transition-colors shadow-sm"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                                <div id="add-print-container-${idx}" class="space-y-1">
+                                    <div class="relative flex items-center">
+                                        <i class="fa-solid fa-print absolute left-2 text-pink-500 text-[10px]"></i>
+                                        <input type="url" class="add-print-${idx} w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded pl-7 pr-2 py-1 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-pink-500" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -725,8 +805,33 @@
             document.getElementById('modal-add').classList.remove('hidden'); document.getElementById('modal-add').classList.add('flex');
         };
 
+        window.addPopulatePrintInput = (idx) => {
+            const container = document.getElementById(`add-print-container-${idx}`);
+            container.insertAdjacentHTML('beforeend', `
+            <div class="relative flex items-center mt-1">
+                <i class="fa-solid fa-print absolute left-2 text-pink-500 text-[10px]"></i>
+                <input type="url" class="add-print-${idx} w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded pl-7 pr-6 py-1 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-pink-500" />
+                <button onclick="this.parentElement.remove()" class="absolute right-1 text-slate-400 hover:text-red-500 p-0.5"><i class="fa-solid fa-xmark text-[10px]"></i></button>
+            </div>`);
+        };
+
         window.saveFullDay = () => {
-            const updated = window.appState.newDayForm.map((b, idx) => b.type === 'break' ? b : { ...b, subject: document.getElementById(`add-sub-${idx}`).value, topic: document.getElementById(`add-top-${idx}`).value, unitOutlineLink: document.getElementById(`add-outline-${idx}`).value, lessonPlanLink: document.getElementById(`add-plan-${idx}`).value, slidesLink: document.getElementById(`add-slide-${idx}`).value, printLink: document.getElementById(`add-print-${idx}`).value });
+            const updated = window.appState.newDayForm.map((b, idx) => {
+                if (b.type === 'break') return b;
+                
+                const printLinks = Array.from(document.querySelectorAll(`.add-print-${idx}`)).map(inp => inp.value.trim()).filter(val => val !== '');
+
+                return {
+                    ...b, 
+                    subject: document.getElementById(`add-sub-${idx}`).value, 
+                    topic: document.getElementById(`add-top-${idx}`).value, 
+                    unitOutlineLink: document.getElementById(`add-outline-${idx}`).value, 
+                    lessonPlanLink: document.getElementById(`add-plan-${idx}`).value, 
+                    slidesLink: document.getElementById(`add-slide-${idx}`).value, 
+                    printLink: printLinks 
+                };
+            });
+            
             setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [window.appState.addingDay]: updated } }, { merge: true });
             closeModals();
         };
