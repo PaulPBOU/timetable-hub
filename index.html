@@ -500,6 +500,8 @@
                     if (prevBlock && prevBlock.type !== 'break') {
                         return {
                             ...block,
+                            subject: prevBlock.subject || block.subject,
+                            topic: prevBlock.topic || '',
                             lessonPlanLink: prevBlock.lessonPlanLink || '',
                             slidesLink: prevBlock.slidesLink || '',
                             printLink: prevBlock.printLink || [],
