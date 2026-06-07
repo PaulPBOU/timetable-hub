@@ -144,7 +144,6 @@
         let playlistData = [];
         let zoneStarted = false; 
 
-        // --- NEW AUDIO VARIABLES ---
         let currentAudio = null;
         const patternMusic = {
             'ps3': 'https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/Enchanted%20Fern%20Hollow.mp3?alt=media&token=3f23becf-85e0-450a-a9bf-ae6fc1970262', 
@@ -152,12 +151,10 @@
             'nebula': 'https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/Steady%20Glade%20Meditation.mp3?alt=media&token=088385a4-363f-4bc4-8088-d6216db9a046'
         };
 
-        // --- CODE PATTERN ANIMATION LOGIC ---
         let currentPattern = null; 
         let animationId = null;
         let patternTime = 0;
-        let tendrils = [];
-        let particles = [];
+        let particles = []; 
 
         window.animatePattern = () => {
             if (!currentPattern) {
@@ -172,132 +169,242 @@
             if(canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
-                tendrils = [];
-                particles = [];
+                particles = []; 
             }
 
+            patternTime += 0.015;
+
+            // --- ETHEREAL PLASMA (Aurora Borealis / Smoke Ribbons) ---
             if (currentPattern === 'ps3') {
-                let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-                bgGrad.addColorStop(0, '#000000');
-                bgGrad.addColorStop(1, '#0f172a'); 
-                ctx.fillStyle = bgGrad;
+                ctx.fillStyle = '#02050a'; 
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                patternTime += 0.015;
-                
-                for(let i = 0; i < 3; i++) {
+                if (particles.length === 0) {
+                    // Increased floating background sparks for more density
+                    for (let i = 0; i < 300; i++) {
+                        particles.push({ 
+                            type: 'spark', 
+                            basex: Math.random() * canvas.width, 
+                            y: Math.random() * canvas.height, 
+                            speed: 0.1 + Math.random() * 0.4, 
+                            size: Math.random() * 1.8,
+                            driftPhase: Math.random() * Math.PI * 2,
+                            driftSpeed: 0.005 + Math.random() * 0.01
+                        });
+                    }
+                }
+
+                // Aurora / Smoke Ribbons - Slower and higher contrast
+                ctx.globalCompositeOperation = 'screen';
+                for (let i = 0; i < 8; i++) {
                     ctx.beginPath();
-                    for(let x = 0; x <= canvas.width + 20; x += 20) {
-                        let y = canvas.height / 2 
-                              + Math.sin(x * 0.002 + patternTime + i * 1.5) * (150 + i * 30) 
-                              + Math.sin(x * 0.005 - patternTime * 0.8) * 80;
-                        if(x === 0) ctx.moveTo(x, y);
+                    for (let x = -50; x <= canvas.width + 50; x += 40) {
+                        // Slowed down the wave movement multipliers
+                        let y = (canvas.height * 0.4) 
+                              + Math.sin(x * 0.002 + patternTime * 0.3 + i) * (120 + i * 20) 
+                              + Math.sin(x * 0.001 - patternTime * 0.15 + i * 1.5) * 160;
+                        
+                        if (x === -50) ctx.moveTo(x, y);
                         else ctx.lineTo(x, y);
                     }
-                    for(let x = canvas.width + 20; x >= 0; x -= 20) {
-                        let y = canvas.height / 2 
-                              + Math.sin(x * 0.002 + patternTime + i * 1.5) * (150 + i * 30) 
-                              + Math.sin(x * 0.005 - patternTime * 0.8) * 80;
-                        ctx.lineTo(x, y + 60 + i * 20); 
-                    }
+                    ctx.lineTo(canvas.width + 50, canvas.height + 50);
+                    ctx.lineTo(-50, canvas.height + 50);
                     ctx.closePath();
                     
-                    let grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
-                    grad.addColorStop(0, `hsla(${patternTime*30 + i*80}, 80%, 60%, 0.3)`);
-                    grad.addColorStop(0.5, `hsla(${patternTime*30 + i*80 + 40}, 80%, 60%, 0.5)`);
-                    grad.addColorStop(1, `hsla(${patternTime*30 + i*80 + 80}, 80%, 60%, 0.1)`);
+                    let hue = (160 + patternTime * 5 + i * 25) % 360; 
+                    
+                    // Higher contrast gradient
+                    let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                    grad.addColorStop(0, `hsla(${hue}, 100%, 65%, 0.25)`);
+                    grad.addColorStop(1, `hsla(${(hue + 40) % 360}, 100%, 15%, 0)`);
                     
                     ctx.fillStyle = grad;
                     ctx.fill();
-                    
-                    ctx.strokeStyle = `hsla(${patternTime*30 + i*80 + 20}, 100%, 70%, 0.6)`;
-                    ctx.lineWidth = 1.5;
-                    ctx.stroke();
                 }
+                
+                // Reset composite to draw sparks normally on top
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                particles.forEach(p => {
+                    p.y -= p.speed;
+                    // Smooth drift using a base x to prevent flickering
+                    let currentX = p.basex + Math.sin(patternTime + p.driftPhase) * 20;
+                    if (p.y < -10) { p.y = canvas.height + 10; p.basex = Math.random() * canvas.width; }
+                    ctx.beginPath(); ctx.arc(currentX, p.y, p.size, 0, Math.PI*2); ctx.fill();
+                });
 
+            // --- RAINING TENDRILS (Curving Bioluminescent Vines + Gold Dust) ---
             } else if (currentPattern === 'tendrils') {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.35)'; 
+                ctx.fillStyle = '#020608';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                if(tendrils.length === 0) {
-                    for(let i=0; i<150; i++) {
-                        tendrils.push({
-                            x: Math.random() * canvas.width,
+                if(particles.length === 0) {
+                    for(let i=0; i<80; i++) {
+                        particles.push({
+                            type: 'tendril',
+                            basex: Math.random() * canvas.width, // Fixed base to prevent flicker
                             y: Math.random() * canvas.height,
-                            speed: 2 + Math.random() * 6,
-                            length: 20 + Math.random() * 80,
-                            hue: 130 + Math.random() * 60,
-                            width: Math.random() * 1.5 + 0.5
+                            vx: (Math.random() - 0.5) * 0.5, 
+                            speed: 0.3 + Math.random() * 1.0, 
+                            length: 150 + Math.random() * 250, 
+                            hue: Math.random() * 360,
+                            width: Math.random() * 2 + 1.5,
+                            swing: 15 + Math.random() * 30, // Sway amplitude
+                            offset: Math.random() * Math.PI * 2
+                        });
+                    }
+                    for(let i=0; i<60; i++) {
+                        particles.push({
+                            type: 'gold',
+                            basex: Math.random() * canvas.width,
+                            y: Math.random() * canvas.height,
+                            vy: -0.2 - Math.random() * 0.5,
+                            size: Math.random() * 2 + 0.5,
+                            pulse: Math.random() * Math.PI * 2,
+                            offset: Math.random() * Math.PI * 2
                         });
                     }
                 }
                 
-                tendrils.forEach(t => {
-                    ctx.beginPath();
-                    let glow = ctx.createLinearGradient(t.x, t.y, t.x, t.y - t.length);
-                    glow.addColorStop(0, `hsla(${t.hue}, 100%, 60%, 1)`);
-                    glow.addColorStop(1, `hsla(${t.hue}, 100%, 60%, 0)`);
-                    
-                    ctx.moveTo(t.x, t.y);
-                    ctx.lineTo(t.x, t.y - t.length);
-                    ctx.strokeStyle = glow;
-                    ctx.lineWidth = t.width;
-                    ctx.stroke();
-                    
-                    t.y += t.speed;
-                    if (t.y - t.length > canvas.height) {
-                        t.y = -Math.random() * 100;
-                        t.x = Math.random() * canvas.width;
+                particles.forEach(p => {
+                    if (p.type === 'tendril') {
+                        p.basex += p.vx;
+                        p.y += p.speed;
+                        p.hue += 0.1; 
+
+                        if (p.y - p.length > canvas.height) {
+                            p.y = -Math.random() * 100;
+                            p.basex = Math.random() * canvas.width;
+                        }
+
+                        // Smooth physics relying on time rather than Y position
+                        let headX = p.basex + Math.sin(patternTime * 1.5 + p.offset) * p.swing;
+                        let midX = p.basex - (p.vx * p.length * 0.5) + Math.sin(patternTime * 1.5 - 0.5 + p.offset) * (p.swing * 1.2);
+                        let tailX = p.basex - (p.vx * p.length) + Math.sin(patternTime * 1.5 - 1.0 + p.offset) * p.swing;
+
+                        let glow = ctx.createLinearGradient(headX, p.y, tailX, p.y - p.length);
+                        glow.addColorStop(0, `hsla(${p.hue}, 100%, 70%, 0.9)`);
+                        glow.addColorStop(1, `hsla(${p.hue}, 100%, 70%, 0)`);
+                        
+                        ctx.shadowBlur = 15;
+                        ctx.shadowColor = `hsla(${p.hue}, 100%, 50%, 0.6)`;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(headX, p.y);
+                        ctx.quadraticCurveTo(midX, p.y - p.length/2, tailX, p.y - p.length);
+                        ctx.strokeStyle = glow;
+                        ctx.lineWidth = p.width;
+                        ctx.stroke();
+
+                        ctx.beginPath();
+                        ctx.arc(headX, p.y, p.width * 1.5, 0, Math.PI*2);
+                        ctx.fillStyle = `hsla(${p.hue}, 100%, 90%, 1)`;
+                        ctx.fill();
+                        
+                        ctx.shadowBlur = 0; 
+                        
+                    } else if (p.type === 'gold') {
+                        let currentX = p.basex + Math.sin(patternTime + p.offset) * 10;
+                        p.y += p.vy;
+                        p.pulse += 0.05;
+                        
+                        if (p.y < -10) {
+                            p.y = canvas.height + 10;
+                            p.basex = Math.random() * canvas.width;
+                        }
+                        
+                        let currentSize = p.size + Math.sin(p.pulse) * 0.5;
+                        if (currentSize < 0) currentSize = 0;
+                        
+                        ctx.shadowBlur = 10;
+                        ctx.shadowColor = 'rgba(255, 215, 0, 0.8)';
+                        ctx.beginPath();
+                        ctx.arc(currentX, p.y, currentSize, 0, Math.PI*2);
+                        ctx.fillStyle = `hsla(45, 100%, 70%, ${0.6 + Math.sin(p.pulse)*0.4})`;
+                        ctx.fill();
+                        ctx.shadowBlur = 0; 
                     }
                 });
 
+            // --- COSMIC DRIFT (Constellation Network) ---
             } else if (currentPattern === 'nebula') {
-                ctx.fillStyle = 'rgba(8, 5, 20, 0.35)';
+                ctx.fillStyle = '#080514';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                 if(particles.length === 0) {
-                    for(let i=0; i<600; i++) {
-                        particles.push({
-                            x: Math.random() * canvas.width,
-                            y: Math.random() * canvas.height,
-                            vx: (Math.random() - 0.5) * 0.3,
-                            vy: (Math.random() - 0.5) * 0.3,
-                            radius: Math.random() * 2 + 0.5, 
-                            pulseSpeed: 0.01 + Math.random() * 0.02,
-                            pulseTime: Math.random() * Math.PI * 2,
-                            hue: 240 + Math.random() * 100,
-                            isLarge: Math.random() > 0.95 
-                        });
+                    for(let i=0; i<300; i++) particles.push({ type: 'star', x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*1.2, speed: Math.random()*0.1 });
+                    for(let i=0; i<60; i++) particles.push({ 
+                        type: 'sprite', 
+                        x: Math.random() * canvas.width, 
+                        y: Math.random() * canvas.height, 
+                        vx: (Math.random() - 0.5) * 0.3, 
+                        vy: (Math.random() - 0.5) * 0.3 - 0.05, 
+                        radius: Math.random() * 3 + 1.5, 
+                        pulseSpeed: 0.01 + Math.random() * 0.02, 
+                        pulseTime: Math.random() * Math.PI * 2, 
+                        hue: Math.random() * 360 
+                    });
+                }
+
+                // Draw Constellation Lines Between Close Sprites
+                let sprites = particles.filter(p => p.type === 'sprite');
+                ctx.lineWidth = 0.8;
+                for(let i = 0; i < sprites.length; i++) {
+                    for(let j = i + 1; j < sprites.length; j++) {
+                        let dx = sprites[i].x - sprites[j].x;
+                        let dy = sprites[i].y - sprites[j].y;
+                        let dist = dx*dx + dy*dy;
+                        if(dist < 22000) { // Connect if they drift close to each other
+                            let alpha = 1 - (dist / 22000);
+                            ctx.beginPath();
+                            ctx.moveTo(sprites[i].x, sprites[i].y);
+                            ctx.lineTo(sprites[j].x, sprites[j].y);
+                            // Blend the colors of the two connecting sprites
+                            let grad = ctx.createLinearGradient(sprites[i].x, sprites[i].y, sprites[j].x, sprites[j].y);
+                            grad.addColorStop(0, `hsla(${sprites[i].hue}, 80%, 70%, ${alpha * 0.4})`);
+                            grad.addColorStop(1, `hsla(${sprites[j].hue}, 80%, 70%, ${alpha * 0.4})`);
+                            ctx.strokeStyle = grad;
+                            ctx.stroke();
+                        }
                     }
                 }
 
                 particles.forEach(p => {
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.y -= 0.15;
+                    if (p.type === 'star') {
+                        p.y -= p.speed;
+                        if (p.y < 0) { p.y = canvas.height; p.x = Math.random()*canvas.width; }
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+                    } else if (p.type === 'sprite') {
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.hue += 0.1; 
 
-                    if (p.x < -20) p.x = canvas.width + 20;
-                    if (p.x > canvas.width + 20) p.x = -20;
-                    if (p.y < -20) p.y = canvas.height + 20;
-                    if (p.y > canvas.height + 20) p.y = -20;
+                        // Seamless wrapping
+                        if (p.x < -20) p.x = canvas.width + 20;
+                        if (p.x > canvas.width + 20) p.x = -20;
+                        if (p.y < -20) p.y = canvas.height + 20;
+                        if (p.y > canvas.height + 20) p.y = -20;
 
-                    p.pulseTime += p.pulseSpeed;
-                    let currentRadius = p.radius + Math.sin(p.pulseTime) * (p.radius * 0.4);
+                        p.pulseTime += p.pulseSpeed;
+                        let currentRadius = p.radius + Math.sin(p.pulseTime) * (p.radius * 0.4);
 
-                    ctx.beginPath();
-                    if (p.isLarge) {
-                        ctx.arc(p.x, p.y, currentRadius * 5, 0, Math.PI * 2);
-                        ctx.fillStyle = `hsla(${p.hue}, 80%, 60%, 0.08)`;
-                        ctx.shadowBlur = 30;
-                        ctx.shadowColor = `hsla(${p.hue}, 100%, 70%, 0.5)`;
-                    } else {
+                        // Restored Brighter Core
+                        ctx.beginPath();
                         ctx.arc(p.x, p.y, currentRadius, 0, Math.PI * 2);
-                        ctx.fillStyle = `hsla(${p.hue}, 80%, 70%, 0.6)`;
-                        ctx.shadowBlur = 10;
-                        ctx.shadowColor = `hsla(${p.hue}, 100%, 70%, 0.4)`;
+                        ctx.fillStyle = `hsla(${p.hue}, 90%, 75%, 1)`;
+                        ctx.fill();
+
+                        // Restored Brighter Aura
+                        let glow = ctx.createRadialGradient(p.x, p.y, currentRadius, p.x, p.y, currentRadius * 5);
+                        glow.addColorStop(0, `hsla(${p.hue}, 90%, 60%, 0.5)`);
+                        glow.addColorStop(1, `hsla(${p.hue}, 90%, 60%, 0)`);
+                        
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, currentRadius * 5, 0, Math.PI * 2);
+                        ctx.fillStyle = glow;
+                        ctx.fill();
                     }
-                    ctx.fill();
-                    ctx.shadowBlur = 0;
                 });
             }
             
@@ -311,8 +418,7 @@
             
             if (currentPattern !== type) {
                 currentPattern = type;
-                tendrils = [];
-                particles = [];
+                particles = []; 
                 
                 const canvas = document.getElementById('pattern-canvas');
                 if(canvas) {
@@ -320,17 +426,15 @@
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                 }
 
-                // Stop current audio before switching
                 if (currentAudio) {
                     currentAudio.pause();
                     currentAudio.currentTime = 0;
                 }
 
-                // Start new audio
-                if (patternMusic[type] && patternMusic[type] !== 'YOUR_PS3_MP3_URL_HERE') {
+                if (patternMusic[type]) {
                     currentAudio = new Audio(patternMusic[type]);
                     currentAudio.loop = true;
-                    currentAudio.play().catch(e => console.log("Audio autoplay blocked until user interacts:", e));
+                    currentAudio.play().catch(e => console.log("Audio autoplay blocked:", e));
                 }
             }
 
@@ -396,7 +500,6 @@
                 animationId = null;
             }
 
-            // Stop pattern music when youtube plays
             if (currentAudio) {
                 currentAudio.pause();
                 currentAudio.currentTime = 0;
@@ -420,12 +523,13 @@
             const container = document.getElementById('playlist');
             container.innerHTML = '';
 
+            // Note: The key is still 'ps3' here so it matches your audio URLs perfectly!
             container.innerHTML += `
             <div class="flex flex-col gap-1.5 mb-2">
                 <div onclick="playPattern('ps3')" class="flex items-center justify-between bg-emerald-500/10 hover:bg-emerald-500/30 p-2 rounded-lg border border-emerald-500/20 group transition-all backdrop-blur-sm shadow-sm cursor-pointer">
                     <div class="flex-1 text-left flex items-center text-emerald-400 group-hover:text-emerald-200 transition-colors overflow-hidden pr-2 pointer-events-none">
-                        <i class="fa-solid fa-wave-square text-emerald-500 mr-2 text-[10px] md:text-xs drop-shadow shrink-0"></i>
-                        <span class="text-[10px] md:text-xs font-bold truncate">PS3 Wave</span>
+                        <i class="fa-solid fa-atom text-emerald-500 mr-2 text-[10px] md:text-xs drop-shadow shrink-0"></i>
+                        <span class="text-[10px] md:text-xs font-bold truncate">Ethereal Plasma</span>
                     </div>
                 </div>
                 <div onclick="playPattern('tendrils')" class="flex items-center justify-between bg-cyan-500/10 hover:bg-cyan-500/30 p-2 rounded-lg border border-cyan-500/20 group transition-all backdrop-blur-sm shadow-sm cursor-pointer">
