@@ -274,6 +274,30 @@
             }, 3000);
         };
 
+        // Handle Print Dropdowns
+        window.toggleDropdown = (e, btn) => {
+            e.stopPropagation();
+            const dropdown = btn.nextElementSibling;
+            const isHidden = dropdown.classList.contains('hidden');
+            
+            document.querySelectorAll('.print-dropdown').forEach(d => {
+                d.classList.add('hidden');
+                d.classList.remove('flex');
+            });
+            
+            if (isHidden) {
+                dropdown.classList.remove('hidden');
+                dropdown.classList.add('flex');
+            }
+        };
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.print-dropdown').forEach(d => {
+                d.classList.add('hidden');
+                d.classList.remove('flex');
+            });
+        });
+
         // URL ROUTER LOGIC
         window.addEventListener('hashchange', handleHashRouting);
         
@@ -545,12 +569,12 @@
                             } else if (printLinks.length > 1) {
                                 let multiLinks = printLinks.map((link, i) => `<a href="${link}" target="_blank" onclick="event.stopPropagation()" class="block px-2 py-1.5 hover:bg-pink-100 dark:hover:bg-pink-800 text-pink-700 dark:text-pink-300 text-[10px] font-bold transition-colors whitespace-nowrap border-b border-pink-100 dark:border-pink-500/20 last:border-0 text-center">Print ${i + 1}</a>`).join('');
                                 printBtnHTML = `
-                                <div class="relative group/multi" onclick="event.stopPropagation()">
-                                    <button class="relative flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded bg-pink-100 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-500 hover:text-white border border-pink-300 dark:border-pink-500/30 transition-colors shadow-sm cursor-pointer">
+                                <div class="relative group/btn" onclick="event.stopPropagation()">
+                                    <button onclick="toggleDropdown(event, this)" class="relative flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded bg-pink-100 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-500 hover:text-white border border-pink-300 dark:border-pink-500/30 transition-colors shadow-sm cursor-pointer">
                                         <i class="fa-solid fa-print text-[8px] md:text-[9px]"></i>
-                                        <span class="absolute top-full mt-1.5 right-0 bg-white dark:bg-slate-800 text-pink-600 dark:text-pink-400 text-[9px] font-bold px-1.5 py-1 rounded opacity-0 group-hover/multi:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-pink-200 dark:border-pink-500/30 shadow-lg z-[60]">Print Files</span>
+                                        <span class="absolute top-full mt-1.5 right-0 bg-white dark:bg-slate-800 text-pink-600 dark:text-pink-400 text-[9px] font-bold px-1.5 py-1 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-pink-200 dark:border-pink-500/30 shadow-lg z-[60]">Print Files</span>
                                     </button>
-                                    <div class="absolute top-full mt-1 right-0 hidden group-hover/multi:flex flex-col bg-white dark:bg-slate-800 rounded shadow-xl border border-pink-200 dark:border-pink-500/30 z-[70] overflow-hidden min-w-[60px]">
+                                    <div class="print-dropdown absolute top-full mt-1 right-0 hidden flex-col bg-white dark:bg-slate-800 rounded shadow-xl border border-pink-200 dark:border-pink-500/30 z-[70] overflow-hidden min-w-[60px]">
                                         ${multiLinks}
                                     </div>
                                 </div>`;
@@ -634,12 +658,12 @@
                     } else if (printLinks.length > 1) {
                         let multiLinks = printLinks.map((link, i) => `<a href="${link}" target="_blank" onclick="event.stopPropagation()" class="block px-4 py-2 hover:bg-pink-100 dark:hover:bg-pink-800 text-pink-700 dark:text-pink-300 text-xs md:text-sm font-bold transition-colors whitespace-nowrap border-b border-pink-100 dark:border-pink-500/20 last:border-0 text-center">Print ${i + 1}</a>`).join('');
                         printBtnHTML = `
-                        <div class="relative group/multi" onclick="event.stopPropagation()">
-                            <button class="relative flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-lg bg-pink-100 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-500 hover:text-white border border-pink-300 dark:border-pink-500/30 shadow-sm transition-colors cursor-pointer">
+                        <div class="relative group/btn" onclick="event.stopPropagation()">
+                            <button onclick="toggleDropdown(event, this)" class="relative flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-lg bg-pink-100 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-500 hover:text-white border border-pink-300 dark:border-pink-500/30 shadow-sm transition-colors cursor-pointer">
                                 <i class="fa-solid fa-print text-sm md:text-base"></i>
-                                <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 text-pink-600 dark:text-pink-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover/multi:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-pink-200 dark:border-pink-500/30 shadow-lg z-[60]">Print Files</span>
+                                <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 text-pink-600 dark:text-pink-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-pink-200 dark:border-pink-500/30 shadow-lg z-[60]">Print Files</span>
                             </button>
-                            <div class="absolute top-full mt-2 right-0 hidden group-hover/multi:flex flex-col bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-pink-200 dark:border-pink-500/30 z-[70] overflow-hidden min-w-[80px]">
+                            <div class="print-dropdown absolute top-full mt-2 right-0 hidden flex-col bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-pink-200 dark:border-pink-500/30 z-[70] overflow-hidden min-w-[80px]">
                                 ${multiLinks}
                             </div>
                         </div>`;
