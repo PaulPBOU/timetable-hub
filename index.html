@@ -583,7 +583,8 @@
                             }
 
                             bodyHTML += `
-                            <div class="bg-white dark:bg-slate-900/80 p-2 md:p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 group flex flex-col gap-1 shadow-sm">
+                            <div class="relative bg-white dark:bg-slate-900/80 p-2 md:p-2.5 pb-4 rounded-lg border border-slate-200 dark:border-slate-700 group flex flex-col gap-1 shadow-sm">
+                                <button onclick="event.stopPropagation(); initEdit('${day}', ${idx})" class="absolute bottom-1.5 right-1.5 flex items-center justify-center w-5 h-5 rounded bg-slate-200/60 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 md:opacity-0 md:group-hover:opacity-100 transition-all z-[60] hover:bg-slate-300 dark:hover:bg-slate-600 cursor-pointer" title="Edit Lesson"><i class="fa-solid fa-pen text-[9px]"></i></button>
                                 <div class="flex justify-between items-start w-full">
                                     <div class="text-cyan-600 dark:text-cyan-400 text-[9px] md:text-[11px] font-bold leading-none mt-0.5">${block.time}</div>
                                     <div class="flex items-center gap-1 shrink-0">
@@ -669,11 +670,11 @@
                                 ${multiLinks}
                             </div>
                         </div>`;
-                    }
+                            }
 
                     container.innerHTML += `
                     <div class="flex flex-col bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-700/80 transition-colors border border-slate-200 dark:border-slate-600/30 rounded-xl p-3 md:px-5 md:py-3 group relative mb-3 shadow-sm hover:shadow-md">
-                        <button onclick="event.stopPropagation(); initEdit('${window.appState.day}', ${idx})" class="absolute -top-2 -right-2 flex items-center justify-center w-8 h-8 rounded-full bg-amber-500 text-slate-900 shadow-md md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10 hover:scale-110" title="Edit Lesson"><i class="fa-solid fa-pen text-sm"></i></button>
+                        <button onclick="event.stopPropagation(); initEdit('${window.appState.day}', ${idx})" class="absolute top-0 right-0 flex items-center justify-center w-5 h-5 rounded-none rounded-tr-xl rounded-bl-lg bg-slate-200/60 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 md:opacity-0 md:group-hover:opacity-100 transition-all z-10 hover:bg-slate-300 dark:hover:bg-slate-600 cursor-pointer" title="Edit Lesson"><i class="fa-solid fa-pen text-[9px]"></i></button>
                         
                         <div class="flex flex-col sm:flex-row items-start sm:items-center w-full cursor-pointer" onclick="toggleNote(${idx})">
                             <div class="sm:w-36 text-cyan-600 dark:text-cyan-400 font-bold text-sm md:text-base shrink-0 mb-1 sm:mb-0 flex items-center">
