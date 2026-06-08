@@ -50,7 +50,6 @@
     <div class="absolute filter blur-[100px] md:blur-[120px] z-0 opacity-40 dark:opacity-30 rounded-full w-[250px] md:w-[400px] h-[250px] md:h-[400px] bg-cyan-200 dark:bg-cyan-600 bottom-[-10%] right-[-5%] pointer-events-none transition-colors duration-300"></div>
 
     <!-- GLOBAL CONTROLS -->
-    <!-- Top Right Group (Back, Home & Theme) -->
     <div class="fixed top-2 right-2 md:top-3 md:right-3 flex gap-1.5 md:gap-2 z-50">
         <!-- Back Button -->
         <button id="global-back-btn" class="hidden bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 px-3 h-8 md:h-9 text-xs md:text-sm font-bold rounded-lg flex items-center justify-center transition-colors border border-slate-200 dark:border-slate-600 shadow-md min-w-[70px]" onclick="handleGlobalBack()">
@@ -555,6 +554,49 @@
             return null; 
         };
 
+        // Move single lesson block logic
+        window.moveLessonToNextDay = async (day, idx, btn) => {
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+            const curIdx = days.indexOf(day);
+            
+            if (curIdx === days.length - 1) {
+                showToast("Cannot move Thursday lesson past the end of the current view.");
+                return;
+            }
+            
+            if (btn.dataset.confirmed === "true") {
+                const nextDay = days[curIdx + 1];
+                let updatedWeekData = { ...window.appState.weekData };
+                
+                // Ensure target day is populated or override if cancelled
+                if (!updatedWeekData[nextDay] || updatedWeekData[nextDay].length === 0 || updatedWeekData[nextDay][0].type === 'cancelled') {
+                    updatedWeekData[nextDay] = getSkeleton();
+                }
+                
+                // Swap the block to next day, reset the current block
+                const blockToMove = { ...updatedWeekData[day][idx] };
+                const skeletonBlock = getSkeleton()[idx];
+                
+                updatedWeekData[nextDay][idx] = { ...blockToMove };
+                updatedWeekData[day][idx] = { ...skeletonBlock }; 
+                
+                setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: updatedWeekData }, { merge: true });
+                showToast(`Lesson moved to ${nextDay}`);
+            } else {
+                btn.dataset.confirmed = "true";
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+                btn.classList.add('bg-amber-200', 'dark:bg-amber-700', 'text-amber-700', 'dark:text-amber-200');
+                setTimeout(() => {
+                    if (btn && btn.dataset) {
+                        btn.dataset.confirmed = "false";
+                        btn.innerHTML = originalHTML;
+                        btn.classList.remove('bg-amber-200', 'dark:bg-amber-700', 'text-amber-700', 'dark:text-amber-200');
+                    }
+                }, 3000);
+            }
+        };
+
         window.copyPreviousDayToEmpty = async (day) => {
             const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday'];
             const curIdx = days.indexOf(day);
@@ -675,7 +717,10 @@
 
                             bodyHTML += `
                             <div class="relative bg-white dark:bg-slate-900/80 p-2 md:p-2.5 pb-4 rounded-lg border border-slate-200 dark:border-slate-700 group flex flex-col gap-1 shadow-sm">
-                                <button onclick="event.stopPropagation(); initEdit('${day}', ${idx})" class="absolute bottom-1.5 right-1.5 flex items-center justify-center w-5 h-5 rounded bg-slate-200/60 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 md:opacity-0 md:group-hover:opacity-100 transition-all z-[60] hover:bg-slate-300 dark:hover:bg-slate-600 cursor-pointer" title="Edit Lesson"><i class="fa-solid fa-pen text-[9px]"></i></button>
+                                <div class="absolute bottom-1.5 right-1.5 flex gap-1 z-[60]">
+                                    <button onclick="event.stopPropagation(); moveLessonToNextDay('${day}', ${idx}, this)" class="flex items-center justify-center w-5 h-5 rounded bg-slate-200/60 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-amber-200 dark:hover:bg-amber-700 hover:text-amber-700 dark:hover:text-amber-200 cursor-pointer" title="Move to Next Day"><i class="fa-solid fa-share text-[9px]"></i></button>
+                                    <button onclick="event.stopPropagation(); initEdit('${day}', ${idx})" class="flex items-center justify-center w-5 h-5 rounded bg-slate-200/60 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-slate-300 dark:hover:bg-slate-600 cursor-pointer" title="Edit Lesson"><i class="fa-solid fa-pen text-[9px]"></i></button>
+                                </div>
                                 <div class="flex justify-between items-start w-full">
                                     <div class="text-cyan-600 dark:text-cyan-400 text-[9px] md:text-[11px] font-bold leading-none mt-0.5">${block.time}</div>
                                     <div class="flex items-center gap-1 shrink-0">
@@ -776,7 +821,10 @@
 
                     container.innerHTML += `
                     <div class="flex flex-col bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-700/80 transition-colors border border-slate-200 dark:border-slate-600/30 rounded-xl p-3 md:px-5 md:py-3 group relative mb-3 shadow-sm hover:shadow-md">
-                        <button onclick="event.stopPropagation(); initEdit('${window.appState.day}', ${idx})" class="absolute top-0 right-0 flex items-center justify-center w-5 h-5 rounded-none rounded-tr-xl rounded-bl-lg bg-slate-200/60 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 md:opacity-0 md:group-hover:opacity-100 transition-all z-10 hover:bg-slate-300 dark:hover:bg-slate-600 cursor-pointer" title="Edit Lesson"><i class="fa-solid fa-pen text-[9px]"></i></button>
+                        <div class="absolute top-0 right-0 flex items-center md:opacity-0 md:group-hover:opacity-100 transition-all z-10">
+                            <button onclick="event.stopPropagation(); moveLessonToNextDay('${window.appState.day}', ${idx}, this)" class="flex items-center justify-center w-6 h-6 bg-slate-200/60 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 hover:bg-amber-200 dark:hover:bg-amber-700 hover:text-amber-700 dark:hover:text-amber-200 cursor-pointer rounded-bl-lg border-r border-white/20 dark:border-slate-800/20" title="Move to Next Day"><i class="fa-solid fa-share text-[10px]"></i></button>
+                            <button onclick="event.stopPropagation(); initEdit('${window.appState.day}', ${idx})" class="flex items-center justify-center w-6 h-6 bg-slate-200/60 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-600 cursor-pointer rounded-tr-xl" title="Edit Lesson"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                        </div>
                         
                         <div class="flex flex-col sm:flex-row items-start sm:items-center w-full cursor-pointer" onclick="toggleNote(${idx})">
                             <div class="sm:w-36 text-cyan-600 dark:text-cyan-400 font-bold text-sm md:text-base shrink-0 mb-1 sm:mb-0 flex items-center">
