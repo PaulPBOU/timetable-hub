@@ -62,6 +62,15 @@
             background-color: rgba(168, 85, 247, 0.05);
             background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(168, 85, 247, 0.05) 10px, rgba(168, 85, 247, 0.05) 20px);
         }
+
+        @keyframes gradient-x {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .animate-gradient-x {
+            background-size: 200% 200%;
+            animation: gradient-x 3s ease infinite;
+        }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center p-2 md:p-4 bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
@@ -130,14 +139,20 @@
                     
                     <!-- Theme Button -->
                     <button onclick="toggleTheme()" class="w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center hover:bg-white dark:hover:bg-slate-700/50 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" title="Toggle Theme">
-                        <i id="theme-icon" class="fa-solid fa-moon text-xs md:text-sm transition-transform hover:rotate-12"></i>
+                        <i class="fa-solid fa-moon theme-icon-class text-xs md:text-sm transition-transform hover:rotate-12"></i>
                     </button>
                 </div>
             </div>
         </header>
 
         <!-- LANDING PAGE -->
-        <div id="view-landing" class="flex flex-col items-center justify-center h-full space-y-10 animate-in fade-in zoom-in duration-500">
+        <div id="view-landing" class="flex flex-col items-center justify-center h-full space-y-10 animate-in fade-in zoom-in duration-500 relative w-full">
+            
+            <!-- Quick Theme Toggle for Landing -->
+            <button onclick="toggleTheme()" class="absolute top-0 right-0 mt-2 mr-2 md:mt-4 md:mr-4 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-md shadow-sm border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-700 transition-all hover:scale-105 z-20" title="Toggle Theme">
+                <i class="fa-solid fa-moon theme-icon-class text-sm md:text-base transition-transform hover:rotate-12"></i>
+            </button>
+
             <div class="text-center">
                 <i class="fa-solid fa-graduation-cap text-6xl text-cyan-500 dark:text-cyan-400 mb-6 drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]"></i>
                 <h1 class="text-4xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600 dark:from-cyan-400 dark:to-indigo-400 mb-4">Paul 2026</h1>
@@ -167,23 +182,53 @@
         <!-- START THE DAY PRESENTATION VIEW -->
         <div id="view-start-day" class="hidden flex-col h-full animate-in zoom-in duration-500 min-h-0 bg-slate-50 dark:bg-slate-900 absolute inset-0 z-50 overflow-hidden">
             
-            <!-- Presentation Header (Slim & Integrated) -->
-            <div class="flex justify-between items-center px-4 md:px-8 py-4 shrink-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60 z-10 shadow-sm relative overflow-hidden">
+            <!-- Presentation Header (Slim, Integrated & Fun) -->
+            <div class="flex justify-between items-center px-4 md:px-6 py-2 md:py-3 shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60 z-10 shadow-sm relative overflow-hidden">
+                <!-- Fun Animated Bottom Border -->
+                <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-pink-500 to-cyan-500 animate-gradient-x"></div>
                 <!-- Fun Background Pattern -->
                 <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9IiM2M2IzZWQiIG9wYWNpdHk9IjAuMSIvPjwvc3ZnPg==')] opacity-40"></div>
                 
-                <div class="flex items-center gap-4 relative z-10">
-                    <button onclick="navigate('landing')" class="w-10 h-10 md:w-12 md:h-12 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-full flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 transition-all shadow-sm border border-slate-200 dark:border-slate-700 hover:scale-105 shrink-0"><i class="fa-solid fa-xmark text-lg"></i></button>
-                    <h2 id="start-day-date" class="text-2xl md:text-4xl font-black text-slate-800 dark:text-white tracking-tight drop-shadow-sm truncate">Monday, 8th June</h2>
+                <div class="flex items-center gap-3 md:gap-4 relative z-10 w-full">
+                    <button onclick="navigate('landing')" class="w-8 h-8 md:w-10 md:h-10 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-full flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 transition-all shadow-sm border border-slate-200 dark:border-slate-700 hover:scale-105 shrink-0"><i class="fa-solid fa-arrow-left text-sm md:text-base"></i></button>
+                    
+                    <!-- Fun Icon & Gradient Text -->
+                    <div class="flex items-center gap-2 md:gap-3">
+                        <span class="text-xl md:text-3xl animate-bounce drop-shadow-sm" style="animation-duration: 2s;">☀️</span>
+                        <h2 class="text-xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-purple-500 to-amber-500 animate-gradient-x tracking-tight drop-shadow-sm pb-0.5">Today's Schedule</h2>
+                    </div>
+
+                    <div class="ml-auto flex flex-col items-end gap-0.5">
+                        <h3 id="start-day-date" class="text-sm md:text-xl font-black text-slate-700 dark:text-slate-200 tracking-tight"></h3>
+                        <span id="start-day-subtitle" class="hidden sm:flex px-2 py-0.5 bg-white/80 dark:bg-slate-800/80 rounded border border-slate-200 dark:border-slate-700 text-cyan-600 dark:text-cyan-400 font-bold uppercase tracking-widest text-[9px] md:text-[10px] shadow-sm"></span>
+                    </div>
                 </div>
-                
-                <span id="start-day-subtitle" class="hidden sm:flex px-5 py-2 md:py-2.5 bg-white dark:bg-slate-800 rounded-full text-cyan-600 dark:text-cyan-400 font-black uppercase tracking-widest text-xs md:text-sm shadow-sm border border-cyan-100 dark:border-slate-700 relative z-10 shrink-0">Term 2, Week 8</span>
             </div>
             
-            <!-- Single-Column Auto-scaling Vertical List -->
-            <div class="flex-1 min-h-0 p-2 md:p-4 w-full mx-auto overflow-hidden flex flex-col">
-                <div id="start-day-schedule" class="flex flex-col gap-2 md:gap-2.5 flex-1 h-full min-h-0 w-fit max-w-full mx-auto pb-2 md:pb-4">
+            <!-- Layout Wrapper for Schedule (Center) and Links (Absolute Right) -->
+            <div class="flex-1 min-h-0 p-2 md:p-6 w-full mx-auto overflow-hidden relative">
+                
+                <!-- Single-Column Auto-scaling Vertical List (w-fit mx-auto) -->
+                <div id="start-day-schedule" class="flex flex-col gap-2 md:gap-2.5 h-full min-h-0 w-fit pb-2 md:pb-4 overflow-y-auto custom-scrollbar pr-2 md:pr-4 mx-auto">
                     <!-- Injected via JS -->
+                </div>
+
+                <!-- Right Side Quick Links (Absolutely Positioned to guarantee visibility) -->
+                <div class="absolute top-2 right-4 md:top-6 md:right-8 flex flex-col gap-2.5 shrink-0 w-44 md:w-52 z-20">
+                    <h4 class="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1 mb-0.5 flex items-center"><i class="fa-solid fa-bolt text-amber-400 mr-1.5 text-sm"></i> Teacher Tools</h4>
+                    
+                    <a href="https://online.schoolbytes.education/sbadmin/home" target="_blank" class="w-full px-3.5 py-3 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md hover:bg-amber-50 dark:hover:bg-amber-900/20 text-slate-700 dark:text-slate-200 text-sm font-bold rounded-2xl shadow-sm hover:shadow-md border border-slate-200/80 dark:border-slate-700 transition-all hover:-translate-y-1 flex items-center gap-3 group">
+                        <div class="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center text-amber-500 shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-all shadow-inner"><i class="fa-solid fa-bullhorn text-sm"></i></div>
+                        <span>Daily Update</span>
+                    </a>
+                    <a href="https://outlook.cloud.microsoft/mail/" target="_blank" class="w-full px-3.5 py-3 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md hover:bg-blue-50 dark:hover:bg-blue-900/20 text-slate-700 dark:text-slate-200 text-sm font-bold rounded-2xl shadow-sm hover:shadow-md border border-slate-200/80 dark:border-slate-700 transition-all hover:-translate-y-1 flex items-center gap-3 group">
+                        <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-500 shrink-0 group-hover:scale-110 group-hover:-rotate-6 transition-all shadow-inner"><i class="fa-solid fa-envelope text-sm"></i></div>
+                        <span>Check E-mail</span>
+                    </a>
+                    <a href="https://online.schoolbytes.education/sbadmin/attendance/roll_call/teacher" target="_blank" class="w-full px-3.5 py-3 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-slate-700 dark:text-slate-200 text-sm font-bold rounded-2xl shadow-sm hover:shadow-md border border-slate-200/80 dark:border-slate-700 transition-all hover:-translate-y-1 flex items-center gap-3 group">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-500 shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-all shadow-inner"><i class="fa-solid fa-clipboard-user text-sm"></i></div>
+                        <span>Mark The Roll</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -225,6 +270,15 @@
     </div>
 
     <!-- MODALS -->
+    <!-- Lesson Detail Modal (For Start The Day View) -->
+    <div id="modal-lesson-detail" class="hidden fixed inset-0 z-[110] items-center justify-center p-4 bg-slate-900/95 backdrop-blur-sm" onclick="closeModals()">
+        <div class="w-full max-w-3xl max-h-[90vh] overflow-y-auto custom-scrollbar relative rounded-2xl md:rounded-[1.5rem]" onclick="event.stopPropagation()">
+            <!-- Close button -->
+            <button onclick="closeModals()" class="absolute top-4 right-4 z-50 w-8 h-8 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 transition-colors shadow-sm border border-slate-200 dark:border-slate-700"><i class="fa-solid fa-xmark"></i></button>
+            <div id="lesson-detail-container" class="mt-10 md:mt-0"></div>
+        </div>
+    </div>
+
     <!-- Add Full Day Modal -->
     <div id="modal-add" class="hidden fixed inset-0 z-[100] items-center justify-center p-2 md:p-6 bg-slate-900/95 backdrop-blur-sm">
         <div class="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-2xl shadow-2xl w-full max-w-4xl h-full md:h-[90vh] flex flex-col overflow-hidden">
@@ -352,21 +406,23 @@
         // Handle Theme Toggle
         window.toggleTheme = () => {
             const html = document.documentElement;
-            const icon = document.getElementById('theme-icon');
+            const icons = document.querySelectorAll('.theme-icon-class');
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark');
-                icon.classList.replace('fa-moon', 'fa-sun');
+                icons.forEach(icon => icon.classList.replace('fa-moon', 'fa-sun'));
                 localStorage.theme = 'light';
             } else {
                 html.classList.add('dark');
-                icon.classList.replace('fa-sun', 'fa-moon');
+                icons.forEach(icon => icon.classList.replace('fa-sun', 'fa-moon'));
                 localStorage.theme = 'dark';
             }
         };
         
         if (localStorage.theme === 'light' || (!('theme' in localStorage) && !window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.remove('dark');
-            document.addEventListener("DOMContentLoaded", () => document.getElementById('theme-icon')?.classList.replace('fa-moon', 'fa-sun'));
+            document.addEventListener("DOMContentLoaded", () => {
+                document.querySelectorAll('.theme-icon-class').forEach(icon => icon.classList.replace('fa-moon', 'fa-sun'));
+            });
         }
 
         // Custom Toast Function
@@ -680,7 +736,7 @@
         };
 
         window.closeModals = () => {
-            ['modal-add', 'modal-edit', 'modal-cancel'].forEach(id => {
+            ['modal-add', 'modal-edit', 'modal-cancel', 'modal-lesson-detail'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) { el.classList.add('hidden'); el.classList.remove('flex'); }
             });
@@ -999,17 +1055,20 @@
             const scheduleContainer = document.getElementById('start-day-schedule');
             scheduleContainer.innerHTML = '';
             
-            // Format current date beautifully
+            // Format current date beautifully as DD-MM-YYYY
             const now = new Date();
-            const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const yyyy = now.getFullYear();
             
-            document.getElementById('start-day-date').innerText = now.toLocaleDateString('en-US', dateOptions);
+            // Set date strictly to DD-MM-YYYY format per instruction
+            document.getElementById('start-day-date').innerText = `${dd}-${mm}-${yyyy}`;
             document.getElementById('start-day-subtitle').innerText = `${window.appState.term}, ${window.appState.week}`;
 
             const data = window.appState.weekData[window.appState.day] || [];
             
             if (data.length === 0) {
-                scheduleContainer.className = "flex-1 h-full flex flex-col w-full max-w-3xl mx-auto";
+                scheduleContainer.className = "flex-1 h-full flex flex-col w-full min-w-[300px] mx-auto";
                 scheduleContainer.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-12 text-center rounded-[2.5rem] bg-slate-100 dark:bg-slate-800/50 shadow-sm border border-slate-200 dark:border-slate-800">
                         <i class="fa-solid fa-ghost text-6xl text-slate-300 dark:text-slate-600 mb-4"></i>
@@ -1019,7 +1078,7 @@
             }
 
             if (data.length === 1 && data[0].type === 'cancelled') {
-                scheduleContainer.className = "flex-1 h-full flex flex-col w-full max-w-3xl mx-auto";
+                scheduleContainer.className = "flex-1 h-full flex flex-col w-full min-w-[300px] mx-auto";
                 scheduleContainer.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-12 md:p-16 text-center rounded-[3rem] bg-stripes-red border-2 border-rose-200 dark:border-rose-900/50 shadow-lg">
                         <i class="fa-solid fa-face-smile-wink text-7xl text-rose-400 dark:text-rose-500 mb-6 drop-shadow-sm"></i>
@@ -1029,17 +1088,17 @@
                 return;
             }
             
-            // Re-apply vertical squish list class with fit-content width
-            scheduleContainer.className = "flex flex-col gap-2 md:gap-2.5 flex-1 h-full min-h-0 w-fit max-w-full mx-auto";
+            // Enforce w-fit and mx-auto so it perfectly shrink-wraps and centers exactly
+            scheduleContainer.className = "flex flex-col gap-2 md:gap-2.5 h-full min-h-0 w-fit pb-2 md:pb-4 overflow-y-auto custom-scrollbar pr-2 md:pr-4 mx-auto";
 
-            data.forEach(block => {
+            data.forEach((block, idx) => {
                 if (block.type === 'break') {
                     scheduleContainer.innerHTML += `
                         <div class="shrink-0 flex items-center justify-center rounded-xl md:rounded-[1.25rem] bg-amber-50 dark:bg-amber-900/20 border border-dashed border-amber-300 dark:border-amber-700/60 text-amber-600 dark:text-amber-400 py-1.5 md:py-2 transition-transform hover:scale-[1.01] shadow-sm">
                             <div class="flex items-center gap-3">
                                 <i class="fa-solid fa-${block.icon} text-lg md:text-xl opacity-80"></i>
-                                <h3 class="text-sm md:text-base font-black uppercase tracking-widest leading-none">${block.topic}</h3>
-                                <span class="text-[9px] md:text-[10px] font-bold opacity-70 border border-amber-200 dark:border-amber-800 px-2 py-0.5 rounded-full bg-amber-100/50 dark:bg-amber-900/40 ml-2 md:ml-3">${block.time}</span>
+                                <h3 class="text-sm md:text-base font-black uppercase tracking-widest leading-none whitespace-nowrap">${block.topic}</h3>
+                                <span class="text-[9px] md:text-[10px] font-bold opacity-70 border border-amber-200 dark:border-amber-800 px-2 py-0.5 rounded-full bg-amber-100/50 dark:bg-amber-900/40 ml-2 md:ml-3 whitespace-nowrap">${block.time}</span>
                             </div>
                         </div>`;
                 } else {
@@ -1048,7 +1107,7 @@
                     const startTime = block.time.split(' - ')[0] || block.time;
 
                     scheduleContainer.innerHTML += `
-                        <div class="flex-1 min-h-0 bg-white dark:bg-slate-800 rounded-xl md:rounded-[1.25rem] px-3 md:px-6 flex flex-col justify-center shadow-sm hover:shadow-md border border-slate-200/60 dark:border-slate-700/50 transition-all hover:scale-[1.01] relative overflow-hidden group">
+                        <div onclick="openLessonDetail(${idx})" class="cursor-pointer flex-1 min-h-0 bg-white dark:bg-slate-800 rounded-xl md:rounded-[1.25rem] px-3 md:px-6 flex flex-col justify-center shadow-sm hover:shadow-md border border-slate-200/60 dark:border-slate-700/50 transition-all hover:scale-[1.01] relative overflow-hidden group">
                             
                             <!-- Left Accent Color Stripe -->
                             <div class="absolute left-0 top-0 bottom-0 w-1.5 md:w-2 ${theme.bar}"></div>
@@ -1058,7 +1117,7 @@
                                 <i class="fa-solid ${theme.icon}"></i>
                             </div>
 
-                            <div class="flex items-center gap-3 md:gap-5 w-full relative z-10">
+                            <div class="flex items-center gap-3 md:gap-5 w-full relative z-10 pr-4">
                                 
                                 <!-- Compact Start Time Badge -->
                                 <div class="w-16 md:w-24 shrink-0 flex justify-center">
@@ -1074,8 +1133,8 @@
 
                                 <!-- Lesson Text Data -->
                                 <div class="flex flex-col justify-center flex-1 min-w-0 pr-2">
-                                    <h3 class="text-base md:text-2xl font-black text-slate-800 dark:text-white leading-tight drop-shadow-sm truncate">${block.subject}</h3>
-                                    ${block.topic ? `<p class="text-slate-500 dark:text-slate-400 text-[10px] md:text-sm font-semibold mt-0.5 md:mt-1 truncate">${block.topic}</p>` : ''}
+                                    <h3 class="text-base md:text-2xl font-black text-slate-800 dark:text-white leading-none drop-shadow-sm whitespace-nowrap">${block.subject}</h3>
+                                    ${block.topic ? `<p class="text-slate-500 dark:text-slate-400 text-[10px] md:text-sm font-semibold whitespace-nowrap">${block.topic}</p>` : ''}
                                 </div>
 
                             </div>
@@ -1212,6 +1271,129 @@
                 col.innerHTML = headerHTML + bodyHTML;
                 grid.appendChild(col);
             });
+        };
+
+        window.openLessonDetail = (idx) => {
+            const block = window.appState.weekData[window.appState.day][idx];
+            const container = document.getElementById('lesson-detail-container');
+            const theme = getTheme(block.subject);
+            const hasNote = block.note && block.note.trim() !== "";
+            
+            let printLinks = getPrintLinks(block.printLink);
+            let printBtnHTML = '';
+            if (printLinks.length === 1) {
+                printBtnHTML = `<a href="${printLinks[0]}" target="_blank" onclick="event.stopPropagation()" class="relative group/btn flex items-center justify-center px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-500 hover:text-white transition-all font-bold text-xs md:text-sm border border-pink-200 dark:border-pink-500/30 shadow-sm gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-print"></i> Printing
+                </a>`;
+            } else if (printLinks.length > 1) {
+                let multiLinks = printLinks.map((link, i) => `<a href="${link}" target="_blank" onclick="event.stopPropagation()" class="block px-4 py-2.5 hover:bg-pink-50 dark:hover:bg-pink-800/60 text-pink-700 dark:text-pink-300 text-xs md:text-sm font-bold transition-colors whitespace-nowrap border-b border-pink-100 dark:border-pink-500/20 last:border-0">File ${i + 1}</a>`).join('');
+                
+                printBtnHTML = `
+                <div class="relative group/btn" onclick="event.stopPropagation()">
+                    <button onclick="toggleDropdown(event, this)" class="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-500 hover:text-white transition-all font-bold text-xs md:text-sm border border-pink-200 dark:border-pink-500/30 shadow-sm flex items-center gap-2 whitespace-nowrap cursor-pointer">
+                        <i class="fa-solid fa-print"></i> Printing <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                    </button>
+                    <div class="print-dropdown absolute top-full mt-2 left-0 hidden flex-col bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-pink-200 dark:border-pink-500/30 z-[100] overflow-hidden min-w-[120px]">
+                        ${multiLinks}
+                    </div>
+                </div>`;
+            }
+
+            container.innerHTML = `
+            <div class="relative bg-white dark:bg-slate-800/90 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 rounded-2xl md:rounded-[1.5rem] shadow-2xl transition-all duration-300 group flex flex-col z-10 w-full">
+                <!-- Left Subject Color Stripe -->
+                <div class="absolute left-0 top-0 bottom-0 w-2 md:w-3 ${theme.bar} rounded-l-2xl md:rounded-l-[1.5rem]"></div>
+                
+                <div class="p-4 md:p-6 pl-6 md:pl-8 flex flex-col flex-1">
+                    <!-- Header Info -->
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="px-3 py-1.5 ${theme.badgeBg} ${theme.badgeText} rounded-full text-[10px] md:text-xs font-bold border ${theme.badgeBorder} shadow-sm flex items-center tracking-wide">
+                            <i class="fa-regular fa-clock mr-1.5"></i> ${block.time}
+                        </span>
+                        
+                        <div class="flex items-center z-20 transition-all pr-8 md:pr-0">
+                            <button onclick="event.stopPropagation(); moveLessonToNextDay('${window.appState.day}', ${idx}, this)" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none rounded-l-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="">
+                                <i class="fa-solid fa-share text-xs md:text-sm"></i>
+                            </button>
+                            <button onclick="event.stopPropagation(); initEdit('${window.appState.day}', ${idx}); closeModals(); setTimeout(() => document.getElementById('modal-edit').classList.replace('hidden', 'flex'), 100);" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none rounded-r-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer" title="">
+                                <i class="fa-solid fa-pen text-xs md:text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Main Body -->
+                    <div class="flex items-start gap-4 mb-4 cursor-pointer" onclick="toggleModalNote(${idx})">
+                        <!-- Dynamic Icon -->
+                        <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-slate-50 dark:bg-slate-900/50 flex items-center justify-center shrink-0 border border-slate-100 dark:border-slate-800 shadow-inner ${theme.iconColor} text-2xl md:text-3xl transition-transform group-hover:scale-105">
+                            <i class="fa-solid ${theme.icon}"></i>
+                        </div>
+                        <div class="flex-1 pt-1">
+                            <h2 class="text-xl md:text-2xl font-black text-slate-800 dark:text-white leading-none flex items-center gap-2 drop-shadow-sm whitespace-nowrap">
+                                ${block.subject}
+                                ${hasNote ? '<i class="fa-solid fa-note-sticky text-amber-500 text-sm md:text-base drop-shadow-sm" title="Note added"></i>' : ''}
+                            </h2>
+                            ${block.topic ? `<p class="text-slate-500 dark:text-slate-400 text-sm md:text-base font-semibold mt-2 leading-snug whitespace-nowrap">${block.topic}</p>` : `<p class="text-slate-400 dark:text-slate-500/50 text-sm md:text-base font-medium mt-2 italic">No topic outlined</p>`}
+                        </div>
+                    </div>
+
+                    <!-- Link Action Row -->
+                    <div class="flex flex-wrap items-center gap-2 pt-4 mt-auto border-t border-slate-100 dark:border-slate-700/50 empty:hidden relative z-10">
+                        ${block.unitOutlineLink ? `
+                        <a href="${block.unitOutlineLink}" target="_blank" onclick="event.stopPropagation()" class="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-500 hover:text-white transition-all font-bold text-xs md:text-sm border border-amber-200 dark:border-amber-500/30 shadow-sm flex items-center">
+                            <i class="fa-solid fa-folder-open mr-2"></i> Paul's Overview
+                        </a>` : ''}
+                        
+                        ${block.lessonPlanLink ? `
+                        <a href="${block.lessonPlanLink}" target="_blank" onclick="event.stopPropagation()" class="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500 hover:text-white transition-all font-bold text-xs md:text-sm border border-emerald-200 dark:border-emerald-500/30 shadow-sm flex items-center">
+                            <i class="fa-solid fa-file-lines mr-2"></i> Plan
+                        </a>` : ''}
+
+                        ${block.slidesLink ? `
+                        <a href="${block.slidesLink}" target="_blank" onclick="event.stopPropagation()" class="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500 hover:text-white transition-all font-bold text-xs md:text-sm border border-indigo-200 dark:border-indigo-500/30 shadow-sm flex items-center">
+                            <i class="fa-solid fa-desktop mr-2"></i> Slides
+                        </a>` : ''}
+
+                        ${printBtnHTML}
+                    </div>
+
+                    <!-- Expandable Note Field -->
+                    <div id="note-wrapper-modal-${idx}" class="grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-in-out w-full" onclick="event.stopPropagation()">
+                        <div class="overflow-hidden min-h-0 w-full">
+                            <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700/50">
+                                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider flex items-center"><i class="fa-solid fa-note-sticky mr-1.5"></i> Lesson Notes</label>
+                                <textarea id="note-input-modal-${idx}" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-3 md:p-4 text-sm md:text-base text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 min-h-[100px] transition-shadow custom-scrollbar">${block.note || ''}</textarea>
+                                <div class="flex justify-end mt-3">
+                                    <button onclick="saveModalNote(${idx})" class="bg-cyan-600 hover:bg-cyan-500 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-md shadow-cyan-900/20 transition-colors flex items-center">
+                                        <i class="fa-solid fa-floppy-disk mr-2"></i> Save Note
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+            document.getElementById('modal-lesson-detail').classList.remove('hidden');
+            document.getElementById('modal-lesson-detail').classList.add('flex');
+        };
+
+        window.toggleModalNote = (idx) => {
+            const el = document.getElementById(`note-wrapper-modal-${idx}`);
+            if (el.classList.contains('grid-rows-[0fr]')) {
+                el.classList.remove('grid-rows-[0fr]', 'opacity-0');
+                el.classList.add('grid-rows-[1fr]', 'opacity-100');
+            } else {
+                el.classList.add('grid-rows-[0fr]', 'opacity-0');
+                el.classList.remove('grid-rows-[1fr]', 'opacity-100');
+            }
+        };
+
+        window.saveModalNote = (idx) => {
+            const noteVal = document.getElementById(`note-input-modal-${idx}`).value;
+            const updated = [...window.appState.weekData[window.appState.day]];
+            updated[idx].note = noteVal;
+            setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [window.appState.day]: updated } }, { merge: true });
+            toggleModalNote(idx); 
         };
 
         window.toggleNote = (idx) => {
