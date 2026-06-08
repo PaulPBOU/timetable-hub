@@ -42,6 +42,16 @@
             background-color: rgba(159, 18, 57, 0.15);
             background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(244, 63, 94, 0.05) 10px, rgba(244, 63, 94, 0.05) 20px);
         }
+        
+        /* New RFF Stripe Class */
+        .bg-stripes-rff {
+            background-color: #475569; /* slate-600 */
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.1) 10px, rgba(255, 255, 255, 0.1) 20px);
+        }
+        .dark .bg-stripes-rff {
+            background-color: #334155; /* slate-700 */
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.05) 10px, rgba(255, 255, 255, 0.05) 20px);
+        }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center p-2 md:p-4 bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
@@ -50,6 +60,7 @@
     <div class="absolute filter blur-[100px] md:blur-[120px] z-0 opacity-40 dark:opacity-30 rounded-full w-[250px] md:w-[400px] h-[250px] md:h-[400px] bg-cyan-200 dark:bg-cyan-600 bottom-[-10%] right-[-5%] pointer-events-none transition-colors duration-300"></div>
 
     <!-- GLOBAL CONTROLS -->
+    <!-- Top Right Group (Back, Home & Theme) -->
     <div class="fixed top-2 right-2 md:top-3 md:right-3 flex gap-1.5 md:gap-2 z-50">
         <!-- Back Button -->
         <button id="global-back-btn" class="hidden bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 px-3 h-8 md:h-9 text-xs md:text-sm font-bold rounded-lg flex items-center justify-center transition-colors border border-slate-200 dark:border-slate-600 shadow-md min-w-[70px]" onclick="handleGlobalBack()">
@@ -129,7 +140,7 @@
                     <p id="week-subtitle" class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-semibold ml-1 md:ml-2">Term, Week</p>
                 </div>
             </div>
-            <div id="week-grid" class="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 flex-1 overflow-hidden pb-2 min-w-full min-h-0">
+            <div id="week-grid" class="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar pb-4 min-w-full">
                 <!-- Columns injected dynamically -->
             </div>
         </div>
@@ -144,7 +155,7 @@
                     <p id="day-subtitle" class="text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-semibold ml-1 md:ml-2">Term, Week</p>
                 </div>
             </div>
-            <div id="day-blocks" class="flex-1 overflow-y-auto custom-scrollbar pr-2 md:pr-4 space-y-3 pb-4">
+            <div id="day-blocks" class="flex-1 overflow-y-auto custom-scrollbar pr-2 md:pr-4 space-y-3 pb-4 relative">
                 <!-- Blocks injected dynamically -->
             </div>
         </div>
@@ -300,7 +311,7 @@
         window.showToast = (msg) => {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            toast.className = 'bg-slate-800 dark:bg-slate-700 text-white px-5 py-3 rounded-xl shadow-xl text-sm font-semibold animate-in slide-in-from-bottom-5 fade-in duration-300 flex items-center border border-slate-600';
+            toast.className = 'bg-slate-800 dark:bg-slate-700 text-white px-5 py-3 rounded-xl shadow-xl text-sm font-semibold animate-in slide-in-from-bottom-5 fade-in duration-300 flex items-center border border-slate-600 z-[9999]';
             toast.innerHTML = `<i class="fa-solid fa-circle-info text-cyan-400 mr-2"></i> ${msg}`;
             container.appendChild(toast);
             setTimeout(() => {
@@ -523,12 +534,23 @@
             { id: 'b7', type: 'lesson', time: '2:30pm - 3:00pm', subject: 'End of Day', topic: 'Wrap Up', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
         ];
 
+        // Global Icon logic based on the unified theme logic
         const getIcon = (sub) => {
-            if(sub === 'English') return 'fa-book-open text-indigo-500 dark:text-indigo-400';
-            if(sub === 'Maths') return 'fa-pen text-rose-500 dark:text-rose-400';
-            if(sub === 'History') return 'fa-calendar text-emerald-500 dark:text-emerald-400';
-            if(sub === 'Whole School') return 'fa-medal text-yellow-500 dark:text-yellow-400';
-            return 'fa-backpack text-cyan-500 dark:text-cyan-400';
+            if (!sub) return 'fa-folder-open text-slate-500';
+            const lowerSub = sub.toLowerCase().trim();
+            if (lowerSub.includes('shared reading')) return 'fa-book-open-reader text-cyan-500 dark:text-cyan-400';
+            if (lowerSub.includes('daily write')) return 'fa-pen-nib text-blue-500 dark:text-blue-400';
+            if (lowerSub.includes('writing')) return 'fa-pen-to-square text-indigo-500 dark:text-indigo-400';
+            if (lowerSub.startsWith('english')) return 'fa-book text-sky-500 dark:text-sky-400';
+            if (lowerSub.startsWith('math')) return 'fa-calculator text-red-500 dark:text-red-400';
+            if (lowerSub.startsWith('history')) return 'fa-landmark text-purple-500 dark:text-purple-400';
+            if (lowerSub.startsWith('art') || lowerSub.includes('visual art')) return 'fa-palette text-pink-500 dark:text-pink-400';
+            if (lowerSub.startsWith('sport') || lowerSub === 'pe' || lowerSub === 'p.e') return 'fa-basketball text-amber-500 dark:text-amber-400';
+            if (lowerSub === 'science rff') return 'fa-flask text-slate-600 dark:text-slate-400';
+            if (lowerSub === 'pdh rff') return 'fa-heart-pulse text-slate-600 dark:text-slate-400';
+            if (lowerSub.includes('rff')) return 'fa-person-chalkboard text-slate-600 dark:text-slate-400';
+            if (lowerSub === 'whole school') return 'fa-medal text-yellow-500 dark:text-yellow-400';
+            return 'fa-chalkboard text-slate-500 dark:text-slate-400';
         };
 
         const renderWeekSelector = () => {
@@ -568,12 +590,10 @@
                 const nextDay = days[curIdx + 1];
                 let updatedWeekData = { ...window.appState.weekData };
                 
-                // Ensure target day is populated or override if cancelled
                 if (!updatedWeekData[nextDay] || updatedWeekData[nextDay].length === 0 || updatedWeekData[nextDay][0].type === 'cancelled') {
                     updatedWeekData[nextDay] = getSkeleton();
                 }
                 
-                // Swap the block to next day, reset the current block
                 const blockToMove = { ...updatedWeekData[day][idx] };
                 const skeletonBlock = getSkeleton()[idx];
                 
@@ -668,106 +688,81 @@
                 const isCurrentDay = (window.appState.term === curTime.term && window.appState.week === curTime.week && day === curTime.day);
                 
                 const col = document.createElement('div');
-                col.className = `flex flex-col bg-slate-100/50 dark:bg-slate-800/30 rounded-2xl border ${isCurrentDay ? 'border-cyan-400 dark:border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.15)] ring-1 ring-cyan-400' : 'border-slate-200 dark:border-slate-700/50'} overflow-hidden transition-all h-full min-h-0`;
+                col.className = `flex flex-col bg-white dark:bg-slate-900 rounded-2xl overflow-hidden transition-all h-full ${isCurrentDay ? 'ring-2 ring-inset ring-cyan-400 shadow-[inset_0_0_15px_rgba(34,211,238,0.2)]' : 'border border-slate-200 dark:border-slate-700 shadow-sm'}`;
                 
-                let headerHTML = `<div onclick="navigate('${window.appState.term}/${window.appState.week}/${day}')" class="shrink-0 p-3 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 flex justify-between items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors z-10 group">
-                    <h2 class="text-sm md:text-base font-extrabold ${isCurrentDay ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-700 dark:text-slate-200'}">${day}</h2>
-                    <i class="fa-solid fa-arrow-right text-slate-300 dark:text-slate-600 text-xs group-hover:text-cyan-500 transition-colors"></i>
+                let headerHTML = `<div onclick="navigate('${window.appState.term}/${window.appState.week}/${day}')" class="flex justify-between items-center px-4 py-3 border-b border-slate-100 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group ${isCurrentDay ? 'bg-cyan-50 dark:bg-cyan-900/20' : ''}">
+                    <h2 class="text-sm md:text-base font-bold text-slate-700 dark:text-slate-200 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">${day}</h2>
+                    <i class="fa-solid fa-arrow-right text-slate-300 dark:text-slate-600 group-hover:text-cyan-500 group-hover:translate-x-1 transition-all text-xs"></i>
                 </div>`;
                 
-                let bodyHTML = '<div class="flex-1 overflow-y-auto custom-scrollbar p-2.5 space-y-3 flex flex-col min-h-0">';
+                let bodyHTML = '<div class="p-2 md:p-3 flex flex-col overflow-y-auto custom-scrollbar flex-1 bg-slate-50/50 dark:bg-slate-900/50">';
                 
                 if (data.length === 0) {
-                    bodyHTML += `
-                    <div class="flex-1 flex flex-col justify-center items-center p-2 gap-3 min-h-[200px]">
-                        <button onclick="initAddDay('${day}')" class="w-full bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-800 hover:bg-cyan-100 dark:hover:bg-cyan-800 rounded-xl py-4 flex flex-col items-center justify-center transition-all shadow-sm hover:shadow group">
-                            <i class="fa-solid fa-wand-magic-sparkles text-xl mb-2 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-xs font-bold">Populate Template</span>
-                        </button>
-                        <button onclick="copyPreviousDayToEmpty('${day}')" class="w-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl py-2.5 flex items-center justify-center transition-colors shadow-sm gap-2">
-                            <i class="fa-solid fa-copy text-sm"></i>
-                            <span class="text-[11px] font-bold">Copy Previous Day</span>
-                        </button>
-                        <div class="w-full h-px bg-slate-200 dark:bg-slate-700/50 my-1"></div>
-                        <button onclick="initCancelDay('${day}')" class="w-full text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl py-2 flex items-center justify-center transition-colors gap-2">
-                            <i class="fa-solid fa-ban text-sm"></i>
-                            <span class="text-[11px] font-bold">Cancel Day</span>
-                        </button>
+                    bodyHTML += `<div class="flex flex-col items-center justify-center h-full min-h-[120px] gap-2 p-2">
+                        <button onclick="initAddDay('${day}')" class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 p-3 border border-dashed border-slate-400 dark:border-slate-600 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 w-full transition-colors"><i class="fa-solid fa-circle-plus text-xl mb-1"></i><span class="text-[10px] md:text-xs font-bold">Populate Day</span></button>
+                        <button onclick="copyPreviousDayToEmpty('${day}')" class="flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 p-2 border border-dashed border-slate-400 dark:border-slate-600 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 w-full transition-colors"><i class="fa-solid fa-copy mr-2 text-sm"></i><span class="text-[10px] md:text-xs font-bold">Copy Previous Day</span></button>
+                        <button onclick="initCancelDay('${day}')" class="flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 p-2 border border-dashed border-slate-400 dark:border-slate-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 w-full transition-colors"><i class="fa-solid fa-xmark mr-2 text-sm"></i><span class="text-[10px] md:text-xs font-bold">Cancel Day</span></button>
                     </div>`;
                 } else if (data.length === 1 && data[0].type === 'cancelled') {
-                    bodyHTML += `
-                    <div class="flex-1 flex flex-col items-center justify-center p-4 text-center rounded-xl bg-stripes-red border border-rose-200 dark:border-rose-900/30 m-1 min-h-[200px]">
+                    bodyHTML += `<div class="flex flex-col items-center justify-center h-full p-4 text-center rounded-2xl bg-stripes-red flex-1 border border-rose-100 dark:border-rose-900/30 m-1 min-h-[200px]">
                         <i class="fa-solid fa-mug-hot text-3xl md:text-4xl text-rose-400/60 dark:text-rose-500/50 mb-3 drop-shadow-sm"></i>
-                        <h3 class="text-rose-700 dark:text-rose-300 font-bold text-sm uppercase tracking-wider mb-1">Day Cancelled</h3>
-                        <p class="text-rose-600 dark:text-rose-400 text-xs italic font-medium">${data[0].note || 'No learning planned'}</p>
-                        <button onclick="clearDay('${day}', this)" class="mt-6 flex items-center justify-center bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-800 py-1.5 px-3 rounded-lg text-[11px] font-bold transition-all shadow-sm"><i class="fa-solid fa-rotate-left mr-1.5"></i> Restore Day</button>
+                        <h3 class="text-rose-700 dark:text-rose-300 font-bold text-xs md:text-sm uppercase tracking-wider mb-1">Day Cancelled</h3>
+                        <p class="text-rose-600 dark:text-rose-400 text-[10px] md:text-xs italic font-medium">${data[0].note || 'No Learning'}</p>
+                        <button onclick="clearDay('${day}', this)" class="mt-auto pt-3 flex items-center justify-center text-rose-500 hover:text-rose-700 dark:hover:text-rose-300 py-1.5 text-[9px] md:text-[10px] font-bold transition-colors w-full"><i class="fa-solid fa-rotate-left mr-1.5"></i> Restore Day</button>
                     </div>`;
                 } else {
+                    bodyHTML += `<div class="space-y-2.5">`;
                     data.forEach((block, idx) => {
                         if(block.type === 'break') {
-                            bodyHTML += `<div class="py-1.5 flex items-center justify-center gap-2 text-amber-600 dark:text-amber-400 font-bold tracking-widest uppercase text-[9px] md:text-[10px] bg-amber-50/50 dark:bg-amber-900/10 rounded-lg border border-dashed border-amber-200 dark:border-amber-800/50"><i class="fa-solid fa-${block.icon}"></i> ${block.topic}</div>`;
+                            bodyHTML += `<div class="py-1.5 text-center text-amber-600 dark:text-amber-400 font-bold tracking-wider uppercase text-[9px] bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-dashed border-amber-200 dark:border-amber-700/50 mx-1"><i class="fa-solid fa-${block.icon} mr-1.5 text-[10px]"></i> ${block.topic}</div>`;
                         } else {
                             // Compile Print HTML
                             let printLinks = getPrintLinks(block.printLink);
                             let printBtnHTML = '';
                             if (printLinks.length === 1) {
-                                printBtnHTML = `<a href="${printLinks[0]}" target="_blank" onclick="event.stopPropagation()" class="relative group/btn flex items-center justify-center w-6 h-6 rounded bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-500 hover:text-white border border-pink-200 dark:border-pink-500/30 transition-colors shadow-sm">
-                                    <i class="fa-solid fa-print text-[10px]"></i>
-                                    <span class="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">Print</span>
-                                </a>`;
+                                printBtnHTML = `<a href="${printLinks[0]}" target="_blank" onclick="event.stopPropagation()" class="w-6 h-6 md:w-7 md:h-7 rounded flex items-center justify-center bg-pink-50 dark:bg-pink-500/10 text-pink-500 hover:bg-pink-100 dark:hover:bg-pink-500/20 transition-colors shadow-sm border border-pink-100 dark:border-pink-500/20" title="Print"><i class="fa-solid fa-print text-[9px] md:text-[10px]"></i></a>`;
                             } else if (printLinks.length > 1) {
-                                let multiLinks = printLinks.map((link, i) => `<a href="${link}" target="_blank" onclick="event.stopPropagation()" class="block px-3 py-2 hover:bg-pink-50 dark:hover:bg-pink-900/40 text-pink-700 dark:text-pink-300 text-[11px] font-bold transition-colors whitespace-nowrap border-b border-slate-100 dark:border-slate-700 last:border-0">Print File ${i + 1}</a>`).join('');
+                                let multiLinks = printLinks.map((link, i) => `<a href="${link}" target="_blank" onclick="event.stopPropagation()" class="block px-3 py-1.5 hover:bg-pink-50 dark:hover:bg-pink-800 text-pink-600 dark:text-pink-300 text-[9px] font-bold transition-colors whitespace-nowrap border-b border-pink-100 dark:border-pink-500/20 last:border-0 text-center">Print ${i + 1}</a>`).join('');
                                 printBtnHTML = `
                                 <div class="relative group/btn" onclick="event.stopPropagation()">
-                                    <button onclick="toggleDropdown(event, this)" class="relative flex items-center justify-center w-6 h-6 rounded bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-500 hover:text-white border border-pink-200 dark:border-pink-500/30 transition-colors shadow-sm cursor-pointer">
-                                        <i class="fa-solid fa-print text-[10px]"></i>
+                                    <button onclick="toggleDropdown(event, this)" class="w-6 h-6 md:w-7 md:h-7 rounded flex items-center justify-center bg-pink-50 dark:bg-pink-500/10 text-pink-500 hover:bg-pink-100 dark:hover:bg-pink-500/20 transition-colors shadow-sm border border-pink-100 dark:border-pink-500/20 cursor-pointer" title="Print Files">
+                                        <i class="fa-solid fa-print text-[9px] md:text-[10px]"></i>
                                     </button>
-                                    <div class="print-dropdown absolute bottom-full mb-1 right-0 hidden flex-col bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 z-[70] overflow-hidden min-w-[100px]">
+                                    <div class="print-dropdown absolute bottom-full mb-1 right-0 hidden flex-col bg-white dark:bg-slate-800 rounded shadow-lg border border-pink-200 dark:border-pink-500/30 z-[70] overflow-hidden min-w-[60px]">
                                         ${multiLinks}
                                     </div>
                                 </div>`;
                             }
 
-                            const hasLinks = block.unitOutlineLink || block.lessonPlanLink || block.slidesLink || printLinks.length > 0;
-
                             bodyHTML += `
-                            <div class="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-xl p-2.5 shadow-sm hover:shadow-md hover:border-cyan-300 dark:hover:border-cyan-700 transition-all group flex flex-col gap-1.5">
-                                <div class="flex justify-between items-start">
-                                    <span class="text-[10px] font-extrabold text-cyan-700 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/30 px-1.5 py-0.5 rounded shadow-sm border border-cyan-100 dark:border-cyan-800/50">
-                                        ${block.time}
-                                    </span>
-                                    <div class="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-[60]">
-                                        <button onclick="event.stopPropagation(); moveLessonToNextDay('${day}', ${idx}, this)" class="flex items-center justify-center w-6 h-6 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400 transition-colors border border-transparent hover:border-amber-200 dark:hover:border-amber-800/50" title="Move to Next Day"><i class="fa-solid fa-share text-[10px]"></i></button>
-                                        <button onclick="event.stopPropagation(); initEdit('${day}', ${idx})" class="flex items-center justify-center w-6 h-6 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-200 transition-colors border border-transparent hover:border-slate-300 dark:hover:border-slate-600" title="Edit Lesson"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-[0_5px_15px_rgba(0,0,0,0.05)] transition-all group relative flex flex-col gap-2">
+                                
+                                <div class="flex justify-between items-center">
+                                    <span class="text-cyan-700 dark:text-cyan-300 bg-cyan-50 dark:bg-cyan-900/30 px-2 py-0.5 rounded text-[9px] md:text-[10px] font-bold tracking-wide">${block.time}</span>
+                                    
+                                    <div class="opacity-0 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex gap-1 relative z-10">
+                                        <button onclick="event.stopPropagation(); moveLessonToNextDay('${day}', ${idx}, this)" class="bg-slate-50 dark:bg-slate-700 hover:bg-amber-50 dark:hover:bg-amber-900/30 text-slate-400 hover:text-amber-500 p-1.5 rounded text-[9px] transition-colors border border-slate-100 dark:border-slate-600" title="Move to Next Day"><i class="fa-solid fa-share"></i></button>
+                                        <button onclick="event.stopPropagation(); initEdit('${day}', ${idx})" class="bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded text-[9px] transition-colors border border-slate-100 dark:border-slate-600" title="Edit Lesson"><i class="fa-solid fa-pen"></i></button>
                                     </div>
                                 </div>
-                                
-                                <div class="flex flex-col mt-0.5">
-                                    <h3 class="text-[13px] md:text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">${block.subject}</h3>
-                                    ${block.topic ? `<p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug line-clamp-2">${block.topic}</p>` : ''}
+
+                                <div class="flex flex-col pl-0.5">
+                                    <div class="text-slate-800 dark:text-slate-100 font-bold text-xs md:text-sm leading-tight mb-0.5">${block.subject}</div>
+                                    <div class="text-slate-500 dark:text-slate-400 text-[10px] leading-snug">${block.topic || '<span class="italic opacity-50">No topic</span>'}</div>
                                 </div>
 
-                                ${hasLinks ? `
-                                <div class="flex flex-wrap items-center gap-1.5 pt-2 mt-0.5 border-t border-slate-100 dark:border-slate-800/50 w-full">
-                                    ${block.unitOutlineLink ? `<a href="${block.unitOutlineLink}" target="_blank" class="relative group/btn flex items-center justify-center w-6 h-6 rounded bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-500 hover:text-white border border-amber-200 dark:border-amber-500/30 transition-colors shadow-sm">
-                                        <i class="fa-solid fa-folder-open text-[10px]"></i>
-                                        <span class="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">Paul's Unit Outline</span>
-                                    </a>` : ''}
-                                    ${block.lessonPlanLink ? `<a href="${block.lessonPlanLink}" target="_blank" class="relative group/btn flex items-center justify-center w-6 h-6 rounded bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500 hover:text-white border border-emerald-200 dark:border-emerald-500/30 transition-colors shadow-sm">
-                                        <i class="fa-solid fa-file-lines text-[10px]"></i>
-                                        <span class="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">Lesson Plan</span>
-                                    </a>` : ''}
-                                    ${block.slidesLink ? `<a href="${block.slidesLink}" target="_blank" class="relative group/btn flex items-center justify-center w-6 h-6 rounded bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-600 hover:text-white border border-indigo-200 dark:border-indigo-500/30 transition-colors shadow-sm">
-                                        <i class="fa-solid fa-desktop text-[10px]"></i>
-                                        <span class="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">Slides</span>
-                                    </a>` : ''}
+                                <div class="flex flex-wrap gap-1.5 mt-1 pt-2 border-t border-slate-50 dark:border-slate-700/50 empty:hidden">
+                                    ${block.unitOutlineLink ? `<a href="${block.unitOutlineLink}" target="_blank" onclick="event.stopPropagation()" class="w-6 h-6 md:w-7 md:h-7 rounded flex items-center justify-center bg-amber-50 dark:bg-amber-500/10 text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors shadow-sm border border-amber-100 dark:border-amber-500/20" title="Unit Outline"><i class="fa-solid fa-folder-open text-[9px] md:text-[10px]"></i></a>` : ''}
+                                    ${block.lessonPlanLink ? `<a href="${block.lessonPlanLink}" target="_blank" onclick="event.stopPropagation()" class="w-6 h-6 md:w-7 md:h-7 rounded flex items-center justify-center bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors shadow-sm border border-emerald-100 dark:border-emerald-500/20" title="Lesson Plan"><i class="fa-solid fa-file-lines text-[9px] md:text-[10px]"></i></a>` : ''}
+                                    ${block.slidesLink ? `<a href="${block.slidesLink}" target="_blank" onclick="event.stopPropagation()" class="w-6 h-6 md:w-7 md:h-7 rounded flex items-center justify-center bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors shadow-sm border border-indigo-100 dark:border-indigo-500/20" title="Slides"><i class="fa-solid fa-desktop text-[9px] md:text-[10px]"></i></a>` : ''}
                                     ${printBtnHTML}
-                                </div>` : ''}
+                                </div>
                             </div>`;
                         }
                     });
+                    bodyHTML += `</div>`;
                     
-                    bodyHTML += `<div class="mt-2 mb-1 flex justify-center"><button onclick="clearDay('${day}', this)" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 hover:border-rose-200 dark:hover:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:text-rose-500 dark:hover:text-rose-400 py-1.5 px-4 rounded-lg transition-all text-[10px] md:text-xs font-bold flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-eraser"></i> Clear Day</button></div>`;
+                    bodyHTML += `<div class="mt-auto pt-3"><button onclick="clearDay('${day}', this)" class="w-full flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 py-1.5 border border-transparent hover:border-rose-200 dark:hover:border-rose-900/50 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all text-[10px] md:text-xs font-semibold"><i class="fa-solid fa-eraser mr-1.5"></i> Clear Day</button></div>`;
                 }
                 bodyHTML += '</div>';
                 col.innerHTML = headerHTML + bodyHTML;
@@ -799,97 +794,188 @@
             container.innerHTML = '';
             const data = window.appState.weekData[window.appState.day] || [];
             
+            let html = '<div class="w-full max-w-3xl mx-auto flex flex-col pb-8 pt-2 md:pt-4">';
+
             if (data.length === 1 && data[0].type === 'cancelled') {
-                container.innerHTML = `
-                    <div class="flex flex-col items-center justify-center h-full p-6 text-center rounded-2xl bg-stripes-red border border-rose-200 dark:border-rose-900/30 mt-4 min-h-[300px]">
-                        <i class="fa-solid fa-mug-hot text-5xl md:text-6xl text-rose-400/60 dark:text-rose-500/50 mb-4 drop-shadow-sm"></i>
-                        <h3 class="text-rose-700 dark:text-rose-300 font-black text-xl md:text-2xl uppercase tracking-widest mb-2">Day Cancelled</h3>
-                        <p class="text-rose-600 dark:text-rose-400 text-sm md:text-lg italic font-medium">${data[0].note || 'No learning planned'}</p>
+                html += `
+                    <div class="flex flex-col items-center justify-center p-8 md:p-12 text-center rounded-3xl bg-stripes-red border-2 border-rose-200 dark:border-rose-900/50 mt-6 md:mt-10 shadow-lg">
+                        <div class="w-24 h-24 bg-rose-100 dark:bg-rose-900/50 rounded-full flex items-center justify-center mb-6 shadow-inner border border-rose-200 dark:border-rose-800/50">
+                            <i class="fa-solid fa-mug-hot text-4xl md:text-5xl text-rose-500 dark:text-rose-400 drop-shadow-sm"></i>
+                        </div>
+                        <h3 class="text-rose-700 dark:text-rose-300 font-black text-2xl md:text-4xl uppercase tracking-widest mb-3">No Learning</h3>
+                        <p class="text-rose-600 dark:text-rose-400 text-base md:text-xl font-semibold bg-white/50 dark:bg-slate-900/50 px-6 py-2 rounded-full border border-rose-200 dark:border-rose-800/50 shadow-sm">${data[0].note || 'Day Cancelled'}</p>
                     </div>
                 `;
+                html += '</div>';
+                container.innerHTML = html;
                 return;
             }
 
+            // Theme generation specifically requested for Day Block stripes and icons based on lesson names
+            const getTheme = (sub) => {
+                if(!sub) sub = '';
+                const lowerSub = sub.toLowerCase().trim();
+
+                // RFF rules (grey with diagonal stripes)
+                if (lowerSub === 'rff' || lowerSub === 'science rff' || lowerSub === 'pdh rff') {
+                    return {
+                        bar: 'bg-stripes-rff',
+                        iconColor: 'text-slate-600 dark:text-slate-400',
+                        badgeBg: 'bg-slate-100 dark:bg-slate-800',
+                        badgeText: 'text-slate-700 dark:text-slate-300',
+                        badgeBorder: 'border-slate-300 dark:border-slate-600',
+                        icon: lowerSub === 'science rff' ? 'fa-flask' : (lowerSub === 'pdh rff' ? 'fa-heart-pulse' : 'fa-person-chalkboard')
+                    };
+                }
+                // English specific subsets
+                if (lowerSub.includes('shared reading')) {
+                    return { bar: 'bg-cyan-500', iconColor: 'text-cyan-500', badgeBg: 'bg-cyan-50 dark:bg-cyan-900/30', badgeText: 'text-cyan-700 dark:text-cyan-300', badgeBorder: 'border-cyan-200 dark:border-cyan-800', icon: 'fa-book-open-reader' };
+                }
+                if (lowerSub.includes('daily write')) {
+                    return { bar: 'bg-blue-500', iconColor: 'text-blue-500', badgeBg: 'bg-blue-50 dark:bg-blue-900/30', badgeText: 'text-blue-700 dark:text-blue-300', badgeBorder: 'border-blue-200 dark:border-blue-800', icon: 'fa-pen-nib' };
+                }
+                if (lowerSub.includes('writing')) {
+                    return { bar: 'bg-indigo-500', iconColor: 'text-indigo-500', badgeBg: 'bg-indigo-50 dark:bg-indigo-900/30', badgeText: 'text-indigo-700 dark:text-indigo-300', badgeBorder: 'border-indigo-200 dark:border-indigo-800', icon: 'fa-pen-to-square' };
+                }
+                if (lowerSub.startsWith('english')) {
+                     return { bar: 'bg-sky-500', iconColor: 'text-sky-500', badgeBg: 'bg-sky-50 dark:bg-sky-900/30', badgeText: 'text-sky-700 dark:text-sky-300', badgeBorder: 'border-sky-200 dark:border-sky-800', icon: 'fa-book' };
+                }
+                // Standard subjects
+                if (lowerSub.startsWith('maths') || lowerSub.startsWith('math')) {
+                    return { bar: 'bg-red-500', iconColor: 'text-red-500', badgeBg: 'bg-red-50 dark:bg-red-900/30', badgeText: 'text-red-700 dark:text-red-300', badgeBorder: 'border-red-200 dark:border-red-800', icon: 'fa-calculator' };
+                }
+                if (lowerSub.startsWith('history')) {
+                    return { bar: 'bg-purple-500', iconColor: 'text-purple-500', badgeBg: 'bg-purple-50 dark:bg-purple-900/30', badgeText: 'text-purple-700 dark:text-purple-300', badgeBorder: 'border-purple-200 dark:border-purple-800', icon: 'fa-landmark' };
+                }
+                if (lowerSub.startsWith('art') || lowerSub.includes('visual art')) {
+                    return { bar: 'bg-pink-500', iconColor: 'text-pink-500', badgeBg: 'bg-pink-50 dark:bg-pink-900/30', badgeText: 'text-pink-700 dark:text-pink-300', badgeBorder: 'border-pink-200 dark:border-pink-800', icon: 'fa-palette' };
+                }
+                if (lowerSub.startsWith('sport') || lowerSub === 'pe' || lowerSub === 'p.e') {
+                    return { bar: 'bg-amber-400', iconColor: 'text-amber-500', badgeBg: 'bg-amber-50 dark:bg-amber-900/30', badgeText: 'text-amber-700 dark:text-amber-300', badgeBorder: 'border-amber-200 dark:border-amber-800', icon: 'fa-basketball' };
+                }
+                
+                // Fallback default
+                return { bar: 'bg-slate-600', iconColor: 'text-slate-500', badgeBg: 'bg-slate-100 dark:bg-slate-800', badgeText: 'text-slate-700 dark:text-slate-300', badgeBorder: 'border-slate-300 dark:border-slate-600', icon: 'fa-chalkboard' };
+            };
+
             data.forEach((block, idx) => {
                 if(block.type === 'break') {
-                    container.innerHTML += `<div class="py-2 text-center text-amber-600 dark:text-amber-400 font-bold tracking-widest uppercase text-xs bg-amber-100 dark:bg-amber-900/30 rounded-lg border border-dashed border-amber-300 dark:border-amber-700/50 my-3"><i class="fa-solid fa-${block.icon} mr-1"></i> ${block.topic} (${block.time})</div>`;
+                    html += `
+                    <div class="flex items-center justify-center gap-4 my-6 opacity-80">
+                        <div class="h-px bg-amber-200 dark:bg-amber-800/50 flex-1"></div>
+                        <div class="px-5 py-2 rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 text-[10px] md:text-xs font-black tracking-widest uppercase border border-amber-200 dark:border-amber-800/50 shadow-sm flex items-center">
+                            <i class="fa-solid fa-${block.icon} mr-2 text-sm"></i> ${block.topic} (${block.time})
+                        </div>
+                        <div class="h-px bg-amber-200 dark:bg-amber-800/50 flex-1"></div>
+                    </div>`;
                 } else {
+                    const theme = getTheme(block.subject);
                     const hasNote = block.note && block.note.trim() !== "";
                     
-                    // Compile Print HTML for Day View
                     let printLinks = getPrintLinks(block.printLink);
                     let printBtnHTML = '';
                     if (printLinks.length === 1) {
-                        printBtnHTML = `<a href="${printLinks[0]}" target="_blank" onclick="event.stopPropagation()" class="relative group/btn flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-lg bg-pink-100 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-500 hover:text-white border border-pink-300 dark:border-pink-500/30 shadow-sm transition-colors">
-                            <i class="fa-solid fa-print text-sm md:text-base"></i>
-                            <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 text-pink-600 dark:text-pink-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-pink-200 dark:border-pink-500/30 shadow-lg z-[60]">Print</span>
+                        printBtnHTML = `<a href="${printLinks[0]}" target="_blank" onclick="event.stopPropagation()" class="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-500 hover:text-white transition-all font-bold text-xs md:text-sm border border-pink-200 dark:border-pink-500/30 shadow-sm flex items-center">
+                            <i class="fa-solid fa-print mr-2"></i> Print
                         </a>`;
                     } else if (printLinks.length > 1) {
-                        let multiLinks = printLinks.map((link, i) => `<a href="${link}" target="_blank" onclick="event.stopPropagation()" class="block px-4 py-2 hover:bg-pink-100 dark:hover:bg-pink-800 text-pink-700 dark:text-pink-300 text-xs md:text-sm font-bold transition-colors whitespace-nowrap border-b border-pink-100 dark:border-pink-500/20 last:border-0 text-center">Print ${i + 1}</a>`).join('');
+                        let multiLinks = printLinks.map((link, i) => `<a href="${link}" target="_blank" onclick="event.stopPropagation()" class="block px-4 py-2.5 hover:bg-pink-50 dark:hover:bg-pink-800/60 text-pink-700 dark:text-pink-300 text-xs md:text-sm font-bold transition-colors whitespace-nowrap border-b border-pink-100 dark:border-pink-500/20 last:border-0">File ${i + 1}</a>`).join('');
+                        
+                        // We set dropdown to z-[100] and isolated logic to ensure it flies above the following card
                         printBtnHTML = `
                         <div class="relative group/btn" onclick="event.stopPropagation()">
-                            <button onclick="toggleDropdown(event, this)" class="relative flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-lg bg-pink-100 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-500 hover:text-white border border-pink-300 dark:border-pink-500/30 shadow-sm transition-colors cursor-pointer">
-                                <i class="fa-solid fa-print text-sm md:text-base"></i>
-                                <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 text-pink-600 dark:text-pink-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-pink-200 dark:border-pink-500/30 shadow-lg z-[60]">Print Files</span>
+                            <button onclick="toggleDropdown(event, this)" class="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-500 hover:text-white transition-all font-bold text-xs md:text-sm border border-pink-200 dark:border-pink-500/30 shadow-sm flex items-center cursor-pointer">
+                                <i class="fa-solid fa-print mr-2"></i> Files <i class="fa-solid fa-chevron-down ml-1.5 text-[10px]"></i>
                             </button>
-                            <div class="print-dropdown absolute top-full mt-2 right-0 hidden flex-col bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-pink-200 dark:border-pink-500/30 z-[70] overflow-hidden min-w-[80px]">
+                            <div class="print-dropdown absolute top-full mt-2 left-0 hidden flex-col bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-pink-200 dark:border-pink-500/30 z-[100] overflow-hidden min-w-[120px]">
                                 ${multiLinks}
                             </div>
                         </div>`;
-                            }
+                    }
 
-                    container.innerHTML += `
-                    <div class="flex flex-col bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-700/80 transition-colors border border-slate-200 dark:border-slate-600/30 rounded-xl p-3 md:px-5 md:py-3 group relative mb-3 shadow-sm hover:shadow-md">
-                        <div class="absolute top-0 right-0 flex items-center md:opacity-0 md:group-hover:opacity-100 transition-all z-10">
-                            <button onclick="event.stopPropagation(); moveLessonToNextDay('${window.appState.day}', ${idx}, this)" class="flex items-center justify-center w-6 h-6 bg-slate-200/60 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 hover:bg-amber-200 dark:hover:bg-amber-700 hover:text-amber-700 dark:hover:text-amber-200 cursor-pointer rounded-bl-lg border-r border-white/20 dark:border-slate-800/20" title="Move to Next Day"><i class="fa-solid fa-share text-[10px]"></i></button>
-                            <button onclick="event.stopPropagation(); initEdit('${window.appState.day}', ${idx})" class="flex items-center justify-center w-6 h-6 bg-slate-200/60 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-600 cursor-pointer rounded-tr-xl" title="Edit Lesson"><i class="fa-solid fa-pen text-[10px]"></i></button>
-                        </div>
+                    // By removing overflow-hidden from the outer card, dropdowns will not clip on bottom. 
+                    // To prevent the color stripe from leaking corners, we apply rounded-l-2xl to it natively.
+                    html += `
+                    <div class="relative bg-white dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 rounded-2xl md:rounded-[1.5rem] shadow-sm hover:shadow-xl transition-all duration-300 group mb-5 flex flex-col z-10 hover:z-20">
                         
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center w-full cursor-pointer" onclick="toggleNote(${idx})">
-                            <div class="sm:w-36 text-cyan-600 dark:text-cyan-400 font-bold text-sm md:text-base shrink-0 mb-1 sm:mb-0 flex items-center">
-                                ${block.time}
-                                ${hasNote ? '<i class="fa-solid fa-note-sticky text-amber-500 ml-2" title="Note added"></i>' : ''}
-                            </div>
-                            <div class="flex-1 flex items-center w-full">
-                                <div class="mr-3 hidden md:block"><i class="fa-solid ${getIcon(block.subject)} text-xl"></i></div>
-                                <div class="flex-1 pr-4">
-                                    <div class="text-slate-800 dark:text-slate-100 font-bold text-base md:text-lg leading-tight flex flex-wrap items-center gap-y-1">
-                                        <span>${block.subject}</span>
-                                        <span class="text-slate-500 dark:text-slate-400 font-normal ml-1 mr-2">- ${block.topic}</span>
-                                        ${block.unitOutlineLink ? `<a href="${block.unitOutlineLink}" target="_blank" onclick="event.stopPropagation()" class="relative group/btn inline-flex items-center justify-center w-6 h-6 rounded bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-500 hover:text-white border border-amber-300 dark:border-amber-500/30 transition-colors shadow-sm">
-                                            <i class="fa-solid fa-folder-open text-xs"></i>
-                                            <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-amber-200 dark:border-amber-500/30 shadow-lg z-[60]">Paul's Unit Outline</span>
-                                        </a>` : ''}
-                                    </div>
+                        <!-- Left Subject Color Stripe -->
+                        <div class="absolute left-0 top-0 bottom-0 w-2 md:w-3 ${theme.bar} rounded-l-2xl md:rounded-l-[1.5rem]"></div>
+                        
+                        <div class="p-4 md:p-6 pl-6 md:pl-8 flex flex-col flex-1">
+                            
+                            <!-- Header Info -->
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="px-3 py-1.5 ${theme.badgeBg} ${theme.badgeText} rounded-full text-[10px] md:text-xs font-bold font-mono border ${theme.badgeBorder} shadow-sm flex items-center tracking-wide">
+                                    <i class="fa-regular fa-clock mr-1.5"></i> ${block.time}
+                                </span>
+                                
+                                <div class="flex items-center gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                    <button onclick="event.stopPropagation(); moveLessonToNextDay('${window.appState.day}', ${idx}, this)" class="flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400 transition-colors shadow-sm border border-transparent hover:border-amber-200 dark:hover:border-amber-800/50" title="Move to Next Day">
+                                        <i class="fa-solid fa-share text-xs md:text-sm"></i>
+                                    </button>
+                                    <button onclick="event.stopPropagation(); initEdit('${window.appState.day}', ${idx})" class="flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-slate-800 dark:hover:text-slate-200 transition-colors shadow-sm border border-transparent hover:border-slate-300 dark:hover:border-slate-500" title="Edit Lesson">
+                                        <i class="fa-solid fa-pen text-xs md:text-sm"></i>
+                                    </button>
                                 </div>
                             </div>
-                            <div class="flex gap-2 mt-2 sm:mt-0 ml-auto w-full sm:w-auto justify-end pr-1">
-                                ${block.lessonPlanLink ? `<a href="${block.lessonPlanLink}" target="_blank" onclick="event.stopPropagation()" class="relative group/btn flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-lg bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-500 hover:text-white border border-emerald-300 dark:border-emerald-500/30 shadow-sm transition-colors">
-                                    <i class="fa-solid fa-file-lines text-sm md:text-base"></i>
-                                    <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-emerald-200 dark:border-emerald-500/30 shadow-lg z-[60]">Lesson Plan</span>
+
+                            <!-- Main Body -->
+                            <div class="flex items-start gap-4 mb-4 cursor-pointer" onclick="toggleNote(${idx})">
+                                <!-- Dynamic Icon -->
+                                <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-slate-50 dark:bg-slate-900/50 flex items-center justify-center shrink-0 border border-slate-100 dark:border-slate-800 shadow-inner ${theme.iconColor} text-2xl md:text-3xl transition-transform group-hover:scale-105">
+                                    <i class="fa-solid ${theme.icon}"></i>
+                                </div>
+                                <div class="flex-1 pt-1">
+                                    <h2 class="text-xl md:text-2xl font-black text-slate-800 dark:text-white leading-tight flex items-center gap-2">
+                                        ${block.subject}
+                                        ${hasNote ? '<i class="fa-solid fa-note-sticky text-amber-500 text-sm md:text-base drop-shadow-sm" title="Note added"></i>' : ''}
+                                    </h2>
+                                    ${block.topic ? `<p class="text-slate-500 dark:text-slate-400 text-sm md:text-base font-medium mt-1 leading-snug">${block.topic}</p>` : `<p class="text-slate-400 dark:text-slate-500/50 text-sm md:text-base font-medium mt-1 italic">No topic outlined</p>`}
+                                </div>
+                            </div>
+
+                            <!-- Link Action Row -->
+                            <div class="flex flex-wrap items-center gap-2 pt-4 mt-auto border-t border-slate-100 dark:border-slate-700/50">
+                                ${block.unitOutlineLink ? `
+                                <a href="${block.unitOutlineLink}" target="_blank" onclick="event.stopPropagation()" class="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-500 hover:text-white transition-all font-bold text-xs md:text-sm border border-amber-200 dark:border-amber-500/30 shadow-sm flex items-center">
+                                    <i class="fa-solid fa-folder-open mr-2"></i> Outline
                                 </a>` : ''}
-                                ${block.slidesLink ? `<a href="${block.slidesLink}" target="_blank" onclick="event.stopPropagation()" class="relative group/btn flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-lg bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200 dark:hover:bg-indigo-600 hover:text-indigo-800 dark:hover:text-white border border-indigo-300 dark:border-indigo-500/30 shadow-sm transition-colors">
-                                    <i class="fa-solid fa-desktop text-sm md:text-base"></i>
-                                    <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-indigo-200 dark:border-indigo-500/30 shadow-lg z-[60]">Slides</span>
+                                
+                                ${block.lessonPlanLink ? `
+                                <a href="${block.lessonPlanLink}" target="_blank" onclick="event.stopPropagation()" class="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500 hover:text-white transition-all font-bold text-xs md:text-sm border border-emerald-200 dark:border-emerald-500/30 shadow-sm flex items-center">
+                                    <i class="fa-solid fa-file-lines mr-2"></i> Plan
                                 </a>` : ''}
+
+                                ${block.slidesLink ? `
+                                <a href="${block.slidesLink}" target="_blank" onclick="event.stopPropagation()" class="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500 hover:text-white transition-all font-bold text-xs md:text-sm border border-indigo-200 dark:border-indigo-500/30 shadow-sm flex items-center">
+                                    <i class="fa-solid fa-desktop mr-2"></i> Slides
+                                </a>` : ''}
+
                                 ${printBtnHTML}
                             </div>
-                        </div>
 
-                        <div id="note-wrapper-${idx}" class="grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-in-out w-full" onclick="event.stopPropagation()">
-                            <div class="overflow-hidden min-h-0 w-full">
-                                <div class="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider"><i class="fa-solid fa-note-sticky mr-1"></i> Lesson Notes</label>
-                                    <textarea id="note-input-${idx}" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-cyan-500 min-h-[80px]">${block.note || ''}</textarea>
-                                    <div class="flex justify-end mt-2">
-                                        <button onclick="saveNote(${idx})" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-1.5 rounded text-sm font-bold shadow">Save Note</button>
+                            <!-- Expandable Note Field -->
+                            <div id="note-wrapper-${idx}" class="grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-in-out w-full" onclick="event.stopPropagation()">
+                                <div class="overflow-hidden min-h-0 w-full">
+                                    <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700/50">
+                                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider flex items-center"><i class="fa-solid fa-note-sticky mr-1.5"></i> Lesson Notes</label>
+                                        <textarea id="note-input-${idx}" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-3 md:p-4 text-sm md:text-base text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 min-h-[100px] transition-shadow custom-scrollbar">${block.note || ''}</textarea>
+                                        <div class="flex justify-end mt-3">
+                                            <button onclick="saveNote(${idx})" class="bg-cyan-600 hover:bg-cyan-500 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-md shadow-cyan-900/20 transition-colors flex items-center">
+                                                <i class="fa-solid fa-floppy-disk mr-2"></i> Save Note
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>`;
                 }
             });
+
+            html += '</div>';
+            container.innerHTML = html;
         };
 
         window.initEdit = (day, idx) => {
