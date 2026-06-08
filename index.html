@@ -1155,9 +1155,9 @@
                 const isCurrentDay = (window.appState.term === curTime.term && window.appState.week === curTime.week && day === curTime.day);
                 
                 const col = document.createElement('div');
-                col.className = `flex flex-col bg-slate-50/50 dark:bg-slate-800/40 rounded-[2rem] transition-all h-full border ${isCurrentDay ? 'border-cyan-400/60 shadow-[0_8px_30px_rgba(6,182,212,0.15)] ring-1 ring-cyan-400/20' : 'border-slate-200/60 dark:border-slate-700/50 shadow-sm'}`;
+                col.className = `flex flex-col bg-slate-50/80 dark:bg-slate-800/40 rounded-[2rem] transition-all h-full border ${isCurrentDay ? 'border-cyan-400/60 shadow-[0_8px_30px_rgba(6,182,212,0.15)] ring-1 ring-cyan-400/20' : 'border-slate-200 dark:border-slate-700/50 shadow-sm'}`;
                 
-                let headerHTML = `<div onclick="navigate('${window.appState.term}/${window.appState.week}/${day}')" class="flex justify-between items-center px-5 py-3.5 border-b border-slate-200/60 dark:border-slate-700/50 cursor-pointer transition-colors group rounded-t-[2rem] ${isCovered ? 'bg-purple-100/50 dark:bg-purple-900/30' : (isCurrentDay ? 'bg-cyan-50/80 dark:bg-cyan-900/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800')}">
+                let headerHTML = `<div onclick="navigate('${window.appState.term}/${window.appState.week}/${day}')" class="flex justify-between items-center px-5 py-3.5 border-b border-slate-200 dark:border-slate-700/50 cursor-pointer transition-colors group rounded-t-[2rem] ${isCovered ? 'bg-purple-100/50 dark:bg-purple-900/30' : (isCurrentDay ? 'bg-cyan-50/80 dark:bg-cyan-900/20' : 'hover:bg-slate-100/70 dark:hover:bg-slate-800')}">
                     <div class="flex items-center gap-2">
                         <h2 class="text-sm md:text-base font-bold ${isCovered ? 'text-purple-700 dark:text-purple-300' : 'text-slate-700 dark:text-slate-200 group-hover:text-cyan-600 dark:group-hover:text-cyan-400'} transition-colors">${day}</h2>
                         ${isCovered ? '<i class="fa-solid fa-chalkboard-user text-purple-500 dark:text-purple-400 text-xs" title="Cover Teacher"></i>' : ''}
@@ -1291,9 +1291,9 @@
                 printBtnHTML = `
                 <div class="relative group/btn" onclick="event.stopPropagation()">
                     <button onclick="toggleDropdown(event, this)" class="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-500 hover:text-white transition-all font-bold text-xs md:text-sm border border-pink-200 dark:border-pink-500/30 shadow-sm flex items-center gap-2 whitespace-nowrap cursor-pointer">
-                        <i class="fa-solid fa-print"></i> Printing <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                        <i class="fa-solid fa-print"></i> Printing <i class="fa-solid fa-chevron-up text-[10px]"></i>
                     </button>
-                    <div class="print-dropdown absolute top-full mt-2 left-0 hidden flex-col bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-pink-200 dark:border-pink-500/30 z-[100] overflow-hidden min-w-[120px]">
+                    <div class="print-dropdown absolute bottom-full mb-2 left-0 hidden flex-col bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-pink-200 dark:border-pink-500/30 z-[100] overflow-hidden min-w-[120px]">
                         ${multiLinks}
                     </div>
                 </div>`;
@@ -1522,11 +1522,11 @@
                                     <i class="fa-solid ${theme.icon}"></i>
                                 </div>
                                 <div class="flex-1 pt-1">
-                                    <h2 class="text-xl md:text-2xl font-black text-slate-800 dark:text-white leading-tight flex items-center gap-2">
+                                    <h2 class="text-xl md:text-2xl font-black text-slate-800 dark:text-white leading-none flex items-center gap-2 drop-shadow-sm whitespace-nowrap">
                                         ${block.subject}
                                         ${hasNote ? '<i class="fa-solid fa-note-sticky text-amber-500 text-sm md:text-base drop-shadow-sm" title="Note added"></i>' : ''}
                                     </h2>
-                                    ${block.topic ? `<p class="text-slate-500 dark:text-slate-400 text-sm md:text-base font-medium mt-1 leading-snug">${block.topic}</p>` : `<p class="text-slate-400 dark:text-slate-500/50 text-sm md:text-base font-medium mt-1 italic">No topic outlined</p>`}
+                                    ${block.topic ? `<p class="text-slate-500 dark:text-slate-400 text-sm md:text-base font-semibold mt-2 leading-snug whitespace-nowrap">${block.topic}</p>` : `<p class="text-slate-400 dark:text-slate-500/50 text-sm md:text-base font-medium mt-2 italic">No topic outlined</p>`}
                                 </div>
                             </div>
 
