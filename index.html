@@ -198,10 +198,10 @@
             </button>
 
             <!-- Layout Wrapper for Schedule (Center) and Links (Absolute Right) -->
-            <div class="flex-1 min-h-0 p-2 md:p-6 w-full mx-auto overflow-hidden relative">
+            <div class="flex-1 min-h-0 px-2 pb-2 pt-[3px] md:px-6 md:pb-6 md:pt-[3px] w-full mx-auto overflow-hidden relative">
                 
                 <!-- Single-Column Auto-scaling Vertical List (w-fit mx-auto) -->
-                <div id="start-day-schedule" class="flex flex-col gap-1.5 md:gap-2 h-full min-h-0 w-fit pb-2 md:pb-4 overflow-y-auto custom-scrollbar pr-2 md:pr-4 mx-auto pt-28 md:pt-4">
+                <div id="start-day-schedule" class="flex flex-col gap-1.5 md:gap-2 h-full min-h-0 w-fit pb-2 md:pb-4 overflow-y-auto custom-scrollbar pr-2 md:pr-4 mx-auto pt-[3px]">
                     <!-- Injected via JS -->
                 </div>
 
@@ -1062,7 +1062,7 @@
             const data = window.appState.weekData[window.appState.day] || [];
             
             if (data.length === 0) {
-                scheduleContainer.className = "flex-1 h-full flex flex-col w-full min-w-[300px] mx-auto pt-14 md:pt-4";
+                scheduleContainer.className = "flex-1 h-full flex flex-col w-full min-w-[300px] mx-auto pt-[3px]";
                 scheduleContainer.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-12 text-center rounded-[2.5rem] bg-slate-100 dark:bg-slate-800/50 shadow-sm border border-slate-200 dark:border-slate-800">
                         <i class="fa-solid fa-ghost text-6xl text-slate-300 dark:text-slate-600 mb-4"></i>
@@ -1072,7 +1072,7 @@
             }
 
             if (data.length === 1 && data[0].type === 'cancelled') {
-                scheduleContainer.className = "flex-1 h-full flex flex-col w-full min-w-[300px] mx-auto pt-14 md:pt-4";
+                scheduleContainer.className = "flex-1 h-full flex flex-col w-full min-w-[300px] mx-auto pt-[3px]";
                 scheduleContainer.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-12 md:p-16 text-center rounded-[3rem] bg-stripes-red border-2 border-rose-200 dark:border-rose-900/50 shadow-lg">
                         <i class="fa-solid fa-face-smile-wink text-7xl text-rose-400 dark:text-rose-500 mb-6 drop-shadow-sm"></i>
@@ -1083,13 +1083,13 @@
             }
             
             // Enforce w-fit and mx-auto so it perfectly shrink-wraps and centers exactly. Tighter gap for squish.
-            scheduleContainer.className = "flex flex-col gap-1.5 h-full min-h-0 w-fit pb-2 md:pb-4 overflow-y-auto custom-scrollbar pr-2 md:pr-4 mx-auto pt-14 md:pt-4";
+            scheduleContainer.className = "flex flex-col gap-1.5 h-full min-h-0 w-fit pb-2 md:pb-4 overflow-y-auto custom-scrollbar pr-2 md:pr-4 mx-auto pt-[3px]";
 
             data.forEach((block, idx) => {
                 if (block.type === 'break') {
-                    // Full width dashed line with centered text
+                    // Full width dashed line with centered text. Negative margin counteracts the flex gap to tightly squeeze it.
                     scheduleContainer.innerHTML += `
-                        <div class="relative flex items-center justify-center w-full py-1 my-0">
+                        <div class="relative flex items-center justify-center w-full py-0 -my-1">
                             <div class="absolute inset-0 flex items-center">
                                 <div class="w-full border-t border-dashed border-amber-400/60 dark:border-amber-600/50"></div>
                             </div>
