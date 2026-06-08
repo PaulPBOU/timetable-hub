@@ -201,13 +201,12 @@
 
             patternTime += 0.015;
 
-            // --- ETHEREAL PLASMA (Aurora Borealis / Smoke Ribbons) ---
+            // --- ETHEREAL PLASMA (Blue Ribbons with Distinct Edges) ---
             if (currentPattern === 'ps3') {
-                ctx.fillStyle = '#02050a'; 
+                ctx.fillStyle = '#010409'; // Deep dark blue background
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
                 if (particles.length === 0) {
-                    // Increased floating background sparks for more density
                     for (let i = 0; i < 300; i++) {
                         particles.push({ 
                             type: 'spark', 
@@ -221,29 +220,36 @@
                     }
                 }
 
-                // Aurora / Smoke Ribbons - Slower and higher contrast
                 ctx.globalCompositeOperation = 'screen';
                 for (let i = 0; i < 8; i++) {
                     ctx.beginPath();
                     for (let x = -50; x <= canvas.width + 50; x += 40) {
-                        // Slowed down the wave movement multipliers
-                        let y = (canvas.height * 0.4) 
-                              + Math.sin(x * 0.002 + patternTime * 0.3 + i) * (120 + i * 20) 
-                              + Math.sin(x * 0.001 - patternTime * 0.15 + i * 1.5) * 160;
+                        // Offset each wave slightly in Y to help definition
+                        let y = (canvas.height * 0.4) + (i * 15)
+                              + Math.sin(x * 0.002 + patternTime * 0.3 + i * 1.2) * (100 + i * 15) 
+                              + Math.sin(x * 0.001 - patternTime * 0.15 + i * 1.5) * 130;
                         
                         if (x === -50) ctx.moveTo(x, y);
                         else ctx.lineTo(x, y);
                     }
+                    
+                    // Water tones: ranging from aquamarine (170) to deep cerulean/blue (240)
+                    let hue = 180 + (i * 8) + Math.sin(patternTime * 0.3 + i) * 20; 
+                    
+                    // Dialed back the brightness of the contour line
+                    ctx.strokeStyle = `hsla(${hue}, 90%, 65%, 0.5)`; 
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+
+                    // Now close the path down to the bottom to fill the rest
                     ctx.lineTo(canvas.width + 50, canvas.height + 50);
                     ctx.lineTo(-50, canvas.height + 50);
                     ctx.closePath();
                     
-                    let hue = (160 + patternTime * 5 + i * 25) % 360; 
-                    
-                    // Higher contrast gradient
+                    // Varied fill lightness and richer opacity for depth
                     let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-                    grad.addColorStop(0, `hsla(${hue}, 100%, 65%, 0.25)`);
-                    grad.addColorStop(1, `hsla(${(hue + 40) % 360}, 100%, 15%, 0)`);
+                    grad.addColorStop(0, `hsla(${hue}, 85%, ${45 - i * 2}%, 0.4)`); 
+                    grad.addColorStop(1, `hsla(${hue + 20}, 90%, 5%, 0.1)`);
                     
                     ctx.fillStyle = grad;
                     ctx.fill();
@@ -251,10 +257,9 @@
                 
                 // Reset composite to draw sparks normally on top
                 ctx.globalCompositeOperation = 'source-over';
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.fillStyle = 'rgba(180, 240, 255, 0.3)'; // Soft cyan sparks
                 particles.forEach(p => {
                     p.y -= p.speed;
-                    // Smooth drift using a base x to prevent flickering
                     let currentX = p.basex + Math.sin(patternTime + p.driftPhase) * 20;
                     if (p.y < -10) { p.y = canvas.height + 10; p.basex = Math.random() * canvas.width; }
                     ctx.beginPath(); ctx.arc(currentX, p.y, p.size, 0, Math.PI*2); ctx.fill();
