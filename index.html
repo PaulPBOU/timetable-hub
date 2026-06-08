@@ -688,14 +688,14 @@
                 const isCurrentDay = (window.appState.term === curTime.term && window.appState.week === curTime.week && day === curTime.day);
                 
                 const col = document.createElement('div');
-                col.className = `flex flex-col bg-white dark:bg-slate-900 rounded-2xl overflow-hidden transition-all h-full ${isCurrentDay ? 'ring-2 ring-inset ring-cyan-400 shadow-[inset_0_0_15px_rgba(34,211,238,0.2)]' : 'border border-slate-200 dark:border-slate-700 shadow-sm'}`;
+                col.className = `flex flex-col bg-white dark:bg-slate-900 rounded-2xl transition-all h-full ${isCurrentDay ? 'ring-2 ring-inset ring-cyan-400 shadow-[inset_0_0_15px_rgba(34,211,238,0.2)]' : 'border border-slate-200 dark:border-slate-700 shadow-sm'}`;
                 
-                let headerHTML = `<div onclick="navigate('${window.appState.term}/${window.appState.week}/${day}')" class="flex justify-between items-center px-4 py-3 border-b border-slate-100 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group ${isCurrentDay ? 'bg-cyan-50 dark:bg-cyan-900/20' : ''}">
+                let headerHTML = `<div onclick="navigate('${window.appState.term}/${window.appState.week}/${day}')" class="flex justify-between items-center px-4 py-3 border-b border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group rounded-t-2xl ${isCurrentDay ? 'bg-cyan-50 dark:bg-cyan-900/20' : ''}">
                     <h2 class="text-sm md:text-base font-bold text-slate-700 dark:text-slate-200 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">${day}</h2>
                     <i class="fa-solid fa-arrow-right text-slate-300 dark:text-slate-600 group-hover:text-cyan-500 group-hover:translate-x-1 transition-all text-xs"></i>
                 </div>`;
                 
-                let bodyHTML = '<div class="p-2 md:p-3 flex flex-col overflow-y-auto custom-scrollbar flex-1 bg-slate-50/50 dark:bg-slate-900/50">';
+                let bodyHTML = '<div class="p-2 md:p-3 flex flex-col overflow-y-auto custom-scrollbar flex-1 bg-slate-100/70 dark:bg-slate-900/50 rounded-b-2xl relative">';
                 
                 if (data.length === 0) {
                     bodyHTML += `<div class="flex flex-col items-center justify-center h-full min-h-[120px] gap-2 p-2">
@@ -704,7 +704,7 @@
                         <button onclick="initCancelDay('${day}')" class="flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 p-2 border border-dashed border-slate-400 dark:border-slate-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 w-full transition-colors"><i class="fa-solid fa-xmark mr-2 text-sm"></i><span class="text-[10px] md:text-xs font-bold">Cancel Day</span></button>
                     </div>`;
                 } else if (data.length === 1 && data[0].type === 'cancelled') {
-                    bodyHTML += `<div class="flex flex-col items-center justify-center h-full p-4 text-center rounded-2xl bg-stripes-red flex-1 border border-rose-100 dark:border-rose-900/30 m-1 min-h-[200px]">
+                    bodyHTML += `<div class="flex flex-col items-center justify-center h-full p-4 text-center rounded-2xl bg-stripes-red flex-1 border border-rose-200 dark:border-rose-900/30 m-1 min-h-[200px]">
                         <i class="fa-solid fa-mug-hot text-3xl md:text-4xl text-rose-400/60 dark:text-rose-500/50 mb-3 drop-shadow-sm"></i>
                         <h3 class="text-rose-700 dark:text-rose-300 font-bold text-xs md:text-sm uppercase tracking-wider mb-1">Day Cancelled</h3>
                         <p class="text-rose-600 dark:text-rose-400 text-[10px] md:text-xs italic font-medium">${data[0].note || 'No Learning'}</p>
@@ -714,35 +714,45 @@
                     bodyHTML += `<div class="space-y-2.5">`;
                     data.forEach((block, idx) => {
                         if(block.type === 'break') {
-                            bodyHTML += `<div class="py-1.5 text-center text-amber-600 dark:text-amber-400 font-bold tracking-wider uppercase text-[9px] bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-dashed border-amber-200 dark:border-amber-700/50 mx-1"><i class="fa-solid fa-${block.icon} mr-1.5 text-[10px]"></i> ${block.topic}</div>`;
+                            bodyHTML += `<div class="py-1.5 text-center text-amber-600 dark:text-amber-400 font-bold tracking-wider uppercase text-[9px] bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-dashed border-amber-300 dark:border-amber-700/50 mx-1"><i class="fa-solid fa-${block.icon} mr-1.5 text-[10px]"></i> ${block.topic}</div>`;
                         } else {
                             // Compile Print HTML
                             let printLinks = getPrintLinks(block.printLink);
                             let printBtnHTML = '';
                             if (printLinks.length === 1) {
-                                printBtnHTML = `<a href="${printLinks[0]}" target="_blank" onclick="event.stopPropagation()" class="w-6 h-6 md:w-7 md:h-7 rounded flex items-center justify-center bg-pink-50 dark:bg-pink-500/10 text-pink-500 hover:bg-pink-100 dark:hover:bg-pink-500/20 transition-colors shadow-sm border border-pink-100 dark:border-pink-500/20" title="Print"><i class="fa-solid fa-print text-[9px] md:text-[10px]"></i></a>`;
+                                printBtnHTML = `<a href="${printLinks[0]}" target="_blank" onclick="event.stopPropagation()" class="relative group/btn w-6 h-6 md:w-7 md:h-7 rounded flex items-center justify-center bg-pink-50 dark:bg-pink-500/10 text-pink-500 hover:bg-pink-100 dark:hover:bg-pink-500/20 transition-colors shadow-sm border border-pink-100 dark:border-pink-500/20">
+                                    <i class="fa-solid fa-print text-[9px] md:text-[10px]"></i>
+                                    <span class="absolute bottom-full mb-1.5 left-0 bg-white dark:bg-slate-800 text-pink-600 dark:text-pink-400 text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-pink-200 dark:border-pink-500/30 shadow-lg z-[80]">Printing</span>
+                                </a>`;
                             } else if (printLinks.length > 1) {
                                 let multiLinks = printLinks.map((link, i) => `<a href="${link}" target="_blank" onclick="event.stopPropagation()" class="block px-3 py-1.5 hover:bg-pink-50 dark:hover:bg-pink-800 text-pink-600 dark:text-pink-300 text-[9px] font-bold transition-colors whitespace-nowrap border-b border-pink-100 dark:border-pink-500/20 last:border-0 text-center">Print ${i + 1}</a>`).join('');
                                 printBtnHTML = `
-                                <div class="relative group/btn" onclick="event.stopPropagation()">
-                                    <button onclick="toggleDropdown(event, this)" class="w-6 h-6 md:w-7 md:h-7 rounded flex items-center justify-center bg-pink-50 dark:bg-pink-500/10 text-pink-500 hover:bg-pink-100 dark:hover:bg-pink-500/20 transition-colors shadow-sm border border-pink-100 dark:border-pink-500/20 cursor-pointer" title="Print Files">
+                                <div class="relative" onclick="event.stopPropagation()">
+                                    <button onclick="toggleDropdown(event, this)" class="relative group/printbtn w-6 h-6 md:w-7 md:h-7 rounded flex items-center justify-center bg-pink-50 dark:bg-pink-500/10 text-pink-500 hover:bg-pink-100 dark:hover:bg-pink-500/20 transition-colors shadow-sm border border-pink-100 dark:border-pink-500/20 cursor-pointer">
                                         <i class="fa-solid fa-print text-[9px] md:text-[10px]"></i>
+                                        <span class="absolute bottom-full mb-1.5 left-0 bg-white dark:bg-slate-800 text-pink-600 dark:text-pink-400 text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover/printbtn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-pink-200 dark:border-pink-500/30 shadow-lg z-[80]">Printing</span>
                                     </button>
-                                    <div class="print-dropdown absolute bottom-full mb-1 right-0 hidden flex-col bg-white dark:bg-slate-800 rounded shadow-lg border border-pink-200 dark:border-pink-500/30 z-[70] overflow-hidden min-w-[60px]">
+                                    <div class="print-dropdown absolute top-full mt-1.5 left-0 hidden flex-col bg-white dark:bg-slate-800 rounded shadow-lg border border-pink-200 dark:border-pink-500/30 z-[90] overflow-hidden min-w-[60px]">
                                         ${multiLinks}
                                     </div>
                                 </div>`;
                             }
 
                             bodyHTML += `
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-[0_5px_15px_rgba(0,0,0,0.05)] transition-all group relative flex flex-col gap-2">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group relative flex flex-col gap-2">
                                 
                                 <div class="flex justify-between items-center">
                                     <span class="text-cyan-700 dark:text-cyan-300 bg-cyan-50 dark:bg-cyan-900/30 px-2 py-0.5 rounded text-[9px] md:text-[10px] font-bold tracking-wide">${block.time}</span>
                                     
-                                    <div class="opacity-0 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex gap-1 relative z-10">
-                                        <button onclick="event.stopPropagation(); moveLessonToNextDay('${day}', ${idx}, this)" class="bg-slate-50 dark:bg-slate-700 hover:bg-amber-50 dark:hover:bg-amber-900/30 text-slate-400 hover:text-amber-500 p-1.5 rounded text-[9px] transition-colors border border-slate-100 dark:border-slate-600" title="Move to Next Day"><i class="fa-solid fa-share"></i></button>
-                                        <button onclick="event.stopPropagation(); initEdit('${day}', ${idx})" class="bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded text-[9px] transition-colors border border-slate-100 dark:border-slate-600" title="Edit Lesson"><i class="fa-solid fa-pen"></i></button>
+                                    <div class="opacity-0 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex gap-1 relative z-20">
+                                        <button onclick="event.stopPropagation(); moveLessonToNextDay('${day}', ${idx}, this)" class="relative group/action bg-slate-50 dark:bg-slate-700 hover:bg-amber-50 dark:hover:bg-amber-900/30 text-slate-400 hover:text-amber-500 p-1.5 rounded text-[9px] transition-colors border border-slate-200 dark:border-slate-600">
+                                            <i class="fa-solid fa-share"></i>
+                                            <span class="absolute bottom-full mb-1.5 right-0 bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover/action:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-amber-200 dark:border-amber-800/50 shadow-lg z-[80]">Move to Next Day</span>
+                                        </button>
+                                        <button onclick="event.stopPropagation(); initEdit('${day}', ${idx})" class="relative group/action bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded text-[9px] transition-colors border border-slate-200 dark:border-slate-600">
+                                            <i class="fa-solid fa-pen"></i>
+                                            <span class="absolute bottom-full mb-1.5 right-0 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover/action:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-slate-200 dark:border-slate-700 shadow-lg z-[80]">Edit Lesson</span>
+                                        </button>
                                     </div>
                                 </div>
 
@@ -751,10 +761,19 @@
                                     <div class="text-slate-500 dark:text-slate-400 text-[10px] leading-snug">${block.topic || '<span class="italic opacity-50">No topic</span>'}</div>
                                 </div>
 
-                                <div class="flex flex-wrap gap-1.5 mt-1 pt-2 border-t border-slate-50 dark:border-slate-700/50 empty:hidden">
-                                    ${block.unitOutlineLink ? `<a href="${block.unitOutlineLink}" target="_blank" onclick="event.stopPropagation()" class="w-6 h-6 md:w-7 md:h-7 rounded flex items-center justify-center bg-amber-50 dark:bg-amber-500/10 text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors shadow-sm border border-amber-100 dark:border-amber-500/20" title="Unit Outline"><i class="fa-solid fa-folder-open text-[9px] md:text-[10px]"></i></a>` : ''}
-                                    ${block.lessonPlanLink ? `<a href="${block.lessonPlanLink}" target="_blank" onclick="event.stopPropagation()" class="w-6 h-6 md:w-7 md:h-7 rounded flex items-center justify-center bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors shadow-sm border border-emerald-100 dark:border-emerald-500/20" title="Lesson Plan"><i class="fa-solid fa-file-lines text-[9px] md:text-[10px]"></i></a>` : ''}
-                                    ${block.slidesLink ? `<a href="${block.slidesLink}" target="_blank" onclick="event.stopPropagation()" class="w-6 h-6 md:w-7 md:h-7 rounded flex items-center justify-center bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors shadow-sm border border-indigo-100 dark:border-indigo-500/20" title="Slides"><i class="fa-solid fa-desktop text-[9px] md:text-[10px]"></i></a>` : ''}
+                                <div class="flex flex-wrap gap-1.5 mt-1 pt-2 border-t border-slate-100 dark:border-slate-700/50 empty:hidden relative z-10">
+                                    ${block.unitOutlineLink ? `<a href="${block.unitOutlineLink}" target="_blank" onclick="event.stopPropagation()" class="relative group/btn w-6 h-6 md:w-7 md:h-7 rounded flex items-center justify-center bg-amber-50 dark:bg-amber-500/10 text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors shadow-sm border border-amber-100 dark:border-amber-500/20">
+                                        <i class="fa-solid fa-folder-open text-[9px] md:text-[10px]"></i>
+                                        <span class="absolute bottom-full mb-1.5 left-0 bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-amber-200 dark:border-amber-500/30 shadow-lg z-[80]">Unit Outline</span>
+                                    </a>` : ''}
+                                    ${block.lessonPlanLink ? `<a href="${block.lessonPlanLink}" target="_blank" onclick="event.stopPropagation()" class="relative group/btn w-6 h-6 md:w-7 md:h-7 rounded flex items-center justify-center bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors shadow-sm border border-emerald-100 dark:border-emerald-500/20">
+                                        <i class="fa-solid fa-file-lines text-[9px] md:text-[10px]"></i>
+                                        <span class="absolute bottom-full mb-1.5 left-0 bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-emerald-200 dark:border-emerald-500/30 shadow-lg z-[80]">Lesson Plan</span>
+                                    </a>` : ''}
+                                    ${block.slidesLink ? `<a href="${block.slidesLink}" target="_blank" onclick="event.stopPropagation()" class="relative group/btn w-6 h-6 md:w-7 md:h-7 rounded flex items-center justify-center bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors shadow-sm border border-indigo-100 dark:border-indigo-500/20">
+                                        <i class="fa-solid fa-desktop text-[9px] md:text-[10px]"></i>
+                                        <span class="absolute bottom-full mb-1.5 left-0 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-indigo-200 dark:border-indigo-500/30 shadow-lg z-[80]">Slides</span>
+                                    </a>` : ''}
                                     ${printBtnHTML}
                                 </div>
                             </div>`;
@@ -875,17 +894,16 @@
                     let printLinks = getPrintLinks(block.printLink);
                     let printBtnHTML = '';
                     if (printLinks.length === 1) {
-                        printBtnHTML = `<a href="${printLinks[0]}" target="_blank" onclick="event.stopPropagation()" class="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-500 hover:text-white transition-all font-bold text-xs md:text-sm border border-pink-200 dark:border-pink-500/30 shadow-sm flex items-center">
-                            <i class="fa-solid fa-print mr-2"></i> Print
+                        printBtnHTML = `<a href="${printLinks[0]}" target="_blank" onclick="event.stopPropagation()" class="relative flex items-center justify-center px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-500 hover:text-white transition-all font-bold text-xs md:text-sm border border-pink-200 dark:border-pink-500/30 shadow-sm gap-2 whitespace-nowrap">
+                            <i class="fa-solid fa-print"></i> Printing
                         </a>`;
                     } else if (printLinks.length > 1) {
                         let multiLinks = printLinks.map((link, i) => `<a href="${link}" target="_blank" onclick="event.stopPropagation()" class="block px-4 py-2.5 hover:bg-pink-50 dark:hover:bg-pink-800/60 text-pink-700 dark:text-pink-300 text-xs md:text-sm font-bold transition-colors whitespace-nowrap border-b border-pink-100 dark:border-pink-500/20 last:border-0">File ${i + 1}</a>`).join('');
                         
-                        // We set dropdown to z-[100] and isolated logic to ensure it flies above the following card
                         printBtnHTML = `
                         <div class="relative group/btn" onclick="event.stopPropagation()">
-                            <button onclick="toggleDropdown(event, this)" class="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-500 hover:text-white transition-all font-bold text-xs md:text-sm border border-pink-200 dark:border-pink-500/30 shadow-sm flex items-center cursor-pointer">
-                                <i class="fa-solid fa-print mr-2"></i> Files <i class="fa-solid fa-chevron-down ml-1.5 text-[10px]"></i>
+                            <button onclick="toggleDropdown(event, this)" class="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-500 hover:text-white transition-all font-bold text-xs md:text-sm border border-pink-200 dark:border-pink-500/30 shadow-sm flex items-center gap-2 whitespace-nowrap cursor-pointer">
+                                <i class="fa-solid fa-print"></i> Printing <i class="fa-solid fa-chevron-down text-[10px]"></i>
                             </button>
                             <div class="print-dropdown absolute top-full mt-2 left-0 hidden flex-col bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-pink-200 dark:border-pink-500/30 z-[100] overflow-hidden min-w-[120px]">
                                 ${multiLinks}
@@ -909,12 +927,14 @@
                                     <i class="fa-regular fa-clock mr-1.5"></i> ${block.time}
                                 </span>
                                 
-                                <div class="flex items-center gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                                    <button onclick="event.stopPropagation(); moveLessonToNextDay('${window.appState.day}', ${idx}, this)" class="flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400 transition-colors shadow-sm border border-transparent hover:border-amber-200 dark:hover:border-amber-800/50" title="Move to Next Day">
+                                <div class="flex items-center z-20 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all">
+                                    <button onclick="event.stopPropagation(); moveLessonToNextDay('${window.appState.day}', ${idx}, this)" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none rounded-l-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer">
                                         <i class="fa-solid fa-share text-xs md:text-sm"></i>
+                                        <span class="absolute bottom-full mb-1 right-0 bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 text-[10px] font-bold px-2 py-1 rounded-lg opacity-0 group-hover/action:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-amber-200 dark:border-amber-800/50 shadow-lg z-[60]">Move to Next Day</span>
                                     </button>
-                                    <button onclick="event.stopPropagation(); initEdit('${window.appState.day}', ${idx})" class="flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-slate-800 dark:hover:text-slate-200 transition-colors shadow-sm border border-transparent hover:border-slate-300 dark:hover:border-slate-500" title="Edit Lesson">
+                                    <button onclick="event.stopPropagation(); initEdit('${window.appState.day}', ${idx})" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none rounded-r-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer">
                                         <i class="fa-solid fa-pen text-xs md:text-sm"></i>
+                                        <span class="absolute bottom-full mb-1 right-0 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-bold px-2 py-1 rounded-lg opacity-0 group-hover/action:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-slate-200 dark:border-slate-700 shadow-lg z-[60]">Edit Lesson</span>
                                     </button>
                                 </div>
                             </div>
@@ -935,7 +955,7 @@
                             </div>
 
                             <!-- Link Action Row -->
-                            <div class="flex flex-wrap items-center gap-2 pt-4 mt-auto border-t border-slate-100 dark:border-slate-700/50">
+                            <div class="flex flex-wrap items-center gap-2 pt-4 mt-auto border-t border-slate-100 dark:border-slate-700/50 relative z-10">
                                 ${block.unitOutlineLink ? `
                                 <a href="${block.unitOutlineLink}" target="_blank" onclick="event.stopPropagation()" class="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-500 hover:text-white transition-all font-bold text-xs md:text-sm border border-amber-200 dark:border-amber-500/30 shadow-sm flex items-center">
                                     <i class="fa-solid fa-folder-open mr-2"></i> Outline
