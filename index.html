@@ -116,6 +116,12 @@
             <!-- Right: The Glass Pill (Controls) -->
             <div class="flex items-center justify-center sm:justify-end w-full sm:w-1/3 order-1 sm:order-3 shrink-0 gap-2 md:gap-3">
                 
+                <!-- Daily Tasks Button (Only visible on Day View) -->
+                <button id="header-todo-btn" onclick="openTodoModal()" class="hidden items-center justify-center h-8 md:h-9 px-3 rounded-full bg-cyan-50 dark:bg-cyan-900/30 border border-cyan-200 dark:border-cyan-700/50 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 transition-all shadow-sm gap-2" title="Manage Daily Tasks">
+                    <i class="fa-solid fa-list-check text-xs"></i>
+                    <span id="header-todo-count" class="text-[10px] md:text-xs font-bold">Tasks</span>
+                </button>
+
                 <!-- Cover Class Toggle Button (Only visible on Day View) -->
                 <button id="header-toggle-cover-btn" onclick="toggleCoverDay(window.appState.day)" class="hidden items-center justify-center h-8 w-8 md:h-9 md:w-9 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all shadow-sm" title="Toggle Class Cover">
                     <i class="fa-solid fa-chalkboard-user text-xs md:text-sm"></i>
@@ -183,13 +189,23 @@
         <!-- START THE DAY PRESENTATION VIEW -->
         <div id="view-start-day" class="hidden flex-col h-full animate-in zoom-in duration-500 min-h-0 bg-slate-50 dark:bg-slate-900 absolute inset-0 z-50 overflow-hidden rounded-2xl md:rounded-[2rem]">
             
-            <!-- Left Side Info (No Background, Massive Fonts) -->
-            <div class="absolute top-6 left-6 md:top-10 md:left-10 flex flex-col z-20 pointer-events-none">
-                <h3 class="text-sm md:text-lg font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1 md:mb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-sun text-amber-500"></i> Today's Schedule
-                </h3>
-                <h2 id="left-day-name" class="text-5xl md:text-7xl font-black tracking-tighter text-slate-800 dark:text-white drop-shadow-sm leading-none mb-1 md:mb-2">Day</h2>
-                <p id="left-date-text" class="text-lg md:text-2xl font-bold text-cyan-600 dark:text-cyan-400 tracking-wide">D/M/YYYY</p>
+            <!-- Left Side Info (Anchored Top & Bottom to allow internal scrolling of Todos) -->
+            <div class="absolute top-6 left-6 md:top-10 md:left-10 bottom-6 flex flex-col z-30 pointer-events-none">
+                <div class="shrink-0 mb-4">
+                    <h3 class="text-sm md:text-lg font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1 md:mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-sun text-amber-500"></i> Today's Schedule
+                    </h3>
+                    <h2 id="left-day-name" class="text-5xl md:text-7xl font-black tracking-tighter text-slate-800 dark:text-white drop-shadow-sm leading-none mb-1 md:mb-2">Day</h2>
+                    <p id="left-date-text" class="text-lg md:text-2xl font-bold text-cyan-600 dark:text-cyan-400 tracking-wide">D/M/YYYY</p>
+                </div>
+                
+                <!-- START DAY TODOS -->
+                <div id="start-day-todos-wrapper" class="hidden flex-col gap-2 pointer-events-auto overflow-y-auto custom-scrollbar pr-2 w-48 md:w-64 min-h-0 relative mt-2">
+                    <h4 class="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1 shrink-0 flex items-center"><i class="fa-solid fa-list-check text-cyan-500 mr-1.5"></i> Daily Tasks</h4>
+                    <div id="start-day-todos" class="flex flex-col gap-2 shrink-0 pb-4">
+                        <!-- Todos injected -->
+                    </div>
+                </div>
             </div>
 
             <!-- Prominent X Button (Moved to Right Side) -->
@@ -262,6 +278,26 @@
     </div>
 
     <!-- MODALS -->
+
+    <!-- Daily Tasks / Todo Modal -->
+    <div id="modal-todos" class="hidden fixed inset-0 z-[100] items-center justify-center p-4 bg-slate-900/95 backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden">
+            <div class="flex justify-between items-center p-4 md:p-5 border-b border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                <h3 class="text-lg md:text-xl font-bold text-slate-800 dark:text-white flex items-center"><i class="fa-solid fa-list-check text-cyan-500 mr-2"></i> Daily Tasks</h3>
+                <button onclick="closeModals()" class="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            </div>
+            <div class="p-4 md:p-6 flex flex-col gap-4 max-h-[60vh]">
+                <div class="flex gap-2">
+                    <input type="text" id="modal-new-todo-input" placeholder="e.g. Print worksheets..." class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 shadow-inner" onkeypress="if(event.key === 'Enter') addTodo()">
+                    <button onclick="addTodo()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md shadow-cyan-900/20 transition-all active:scale-95"><i class="fa-solid fa-plus"></i></button>
+                </div>
+                <div id="modal-todo-list" class="flex flex-col gap-2 overflow-y-auto custom-scrollbar pr-1 flex-1">
+                    <!-- Todos injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Lesson Detail Modal (For Start The Day View) -->
     <div id="modal-lesson-detail" class="hidden fixed inset-0 z-[110] items-center justify-center p-4 bg-slate-900/95 backdrop-blur-sm" onclick="closeModals()">
         <div class="w-full max-w-3xl max-h-[90vh] overflow-y-auto custom-scrollbar relative rounded-2xl md:rounded-[1.5rem]" onclick="event.stopPropagation()">
@@ -393,7 +429,14 @@
         const db = getFirestore(app);
         let unsubscribeDB = null;
 
-        window.appState = { view: 'landing', term: '', week: '', day: '', weekData: { Monday: [], Tuesday: [], Wednesday: [], Thursday: [] }, coverData: {}, soundPlayed: false };
+        window.appState = { 
+            view: 'landing', 
+            term: '', week: '', day: '', 
+            weekData: { Monday: [], Tuesday: [], Wednesday: [], Thursday: [] }, 
+            coverData: {}, 
+            todosData: { Monday: [], Tuesday: [], Wednesday: [], Thursday: [] },
+            soundPlayed: false 
+        };
 
         // Handle Theme Toggle
         window.toggleTheme = () => {
@@ -619,19 +662,123 @@
         window.loadWeekData = (term, week) => {
             window.appState.weekData = { Monday: [], Tuesday: [], Wednesday: [], Thursday: [] };
             window.appState.coverData = {};
+            window.appState.todosData = { Monday: [], Tuesday: [], Wednesday: [], Thursday: [] };
+            
             if (unsubscribeDB) unsubscribeDB(); 
             const docRef = doc(db, "timetables", `2026_${term.replace(' ', '')}_${week.replace(' ', '')}`);
             unsubscribeDB = onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
                     window.appState.weekData = docSnap.data().days || window.appState.weekData;
                     window.appState.coverData = docSnap.data().cover || {};
+                    window.appState.todosData = docSnap.data().todos || { Monday: [], Tuesday: [], Wednesday: [], Thursday: [] };
                 } else {
-                    setDoc(docRef, { days: window.appState.weekData, cover: {} }, { merge: true });
+                    setDoc(docRef, { days: window.appState.weekData, cover: {}, todos: window.appState.todosData }, { merge: true });
                 }
+                
                 if (window.appState.view === 'week') renderWeekGrid();
                 if (window.appState.view === 'day') renderDayBlocks();
-                if (window.appState.view === 'start-day') renderStartDay();
+                window.updateTodoUI(); 
             });
+        };
+
+        // --- TODO LOGIC ---
+        window.openTodoModal = () => {
+            document.getElementById('modal-todos').classList.replace('hidden', 'flex');
+            window.updateTodoUI();
+            setTimeout(() => {
+                const input = document.getElementById('modal-new-todo-input');
+                if (input) input.focus();
+            }, 100);
+        };
+
+        window.addTodo = () => {
+            const input = document.getElementById('modal-new-todo-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const day = window.appState.day;
+            const currentTodos = window.appState.todosData[day] || [];
+            const newTodos = [...currentTodos, { text: text, done: false }];
+            
+            window.appState.todosData[day] = newTodos;
+            window.updateTodoUI();
+            
+            setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { 
+                todos: { ...window.appState.todosData, [day]: newTodos } 
+            }, { merge: true });
+            
+            input.value = '';
+            input.focus();
+        };
+
+        window.toggleTodo = (idx, isDone) => {
+            const day = window.appState.day;
+            const currentTodos = [...(window.appState.todosData[day] || [])];
+            if(currentTodos[idx]) {
+                currentTodos[idx].done = isDone;
+                window.appState.todosData[day] = currentTodos;
+                
+                window.updateTodoUI();
+
+                setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { 
+                    todos: { ...window.appState.todosData, [day]: currentTodos } 
+                }, { merge: true });
+            }
+        };
+
+        window.deleteTodo = (idx) => {
+            const day = window.appState.day;
+            const currentTodos = [...(window.appState.todosData[day] || [])];
+            currentTodos.splice(idx, 1);
+            window.appState.todosData[day] = currentTodos;
+            
+            window.updateTodoUI();
+
+            setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { 
+                todos: { ...window.appState.todosData, [day]: currentTodos } 
+            }, { merge: true });
+        };
+
+        window.updateTodoUI = () => {
+            const day = window.appState.day;
+            const todos = window.appState.todosData[day] || [];
+            
+            // 1. Update Header Badge Count
+            const countEl = document.getElementById('header-todo-count');
+            if (countEl) {
+                const pending = todos.filter(t => !t.done).length;
+                countEl.innerText = pending > 0 ? `${pending} Pending` : (todos.length > 0 ? 'All Done!' : 'Tasks');
+                if (pending > 0) {
+                    countEl.parentElement.classList.remove('text-cyan-600', 'dark:text-cyan-400');
+                    countEl.parentElement.classList.add('text-rose-500', 'dark:text-rose-400');
+                } else {
+                    countEl.parentElement.classList.add('text-cyan-600', 'dark:text-cyan-400');
+                    countEl.parentElement.classList.remove('text-rose-500', 'dark:text-rose-400');
+                }
+            }
+
+            // 2. Update Start Day View
+            if (window.appState.view === 'start-day') {
+                renderStartDay();
+            }
+
+            // 3. Update Modal if open
+            const modalList = document.getElementById('modal-todo-list');
+            if (modalList) {
+                if (todos.length === 0) {
+                    modalList.innerHTML = '<p class="text-xs text-slate-400 dark:text-slate-500 italic text-center py-4">No tasks added yet.</p>';
+                } else {
+                    modalList.innerHTML = todos.map((todo, idx) => `
+                        <div class="flex items-center justify-between group bg-slate-50 dark:bg-slate-900/50 px-3 py-2.5 rounded-xl border border-slate-100 dark:border-slate-800 transition-colors">
+                            <label class="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
+                                <input type="checkbox" ${todo.done ? 'checked' : ''} onchange="toggleTodo(${idx}, this.checked)" class="w-4 h-4 rounded text-cyan-600 focus:ring-cyan-500 bg-white border-slate-300 dark:bg-slate-700 dark:border-slate-600 accent-cyan-500 cursor-pointer">
+                                <span class="text-xs md:text-sm font-semibold truncate ${todo.done ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-200'}">${todo.text}</span>
+                            </label>
+                            <button onclick="deleteTodo(${idx})" class="text-slate-300 hover:text-red-500 opacity-0 md:opacity-0 md:group-hover:opacity-100 transition-opacity p-1.5 ml-2 rounded hover:bg-red-50 dark:hover:bg-red-900/20"><i class="fa-solid fa-trash text-xs"></i></button>
+                        </div>
+                    `).join('');
+                }
+            }
         };
 
         window.handleGlobalBack = () => {
@@ -662,11 +809,13 @@
             const backText = document.getElementById('global-back-text');
             const divider = document.getElementById('global-divider');
             const coverBtn = document.getElementById('header-toggle-cover-btn');
+            const todoBtn = document.getElementById('header-todo-btn');
             
             if (view === 'landing' || view === 'start-day') {
                 header.classList.add('hidden');
                 header.classList.remove('flex');
                 if(coverBtn) { coverBtn.classList.add('hidden'); coverBtn.classList.remove('flex'); }
+                if(todoBtn) { todoBtn.classList.add('hidden'); todoBtn.classList.remove('flex'); }
                 
                 if (view === 'start-day') {
                     renderStartDay();
@@ -691,6 +840,7 @@
                     navEl.classList.add('hidden');
                     liveDot.classList.add('hidden');
                     if(coverBtn) { coverBtn.classList.add('hidden'); coverBtn.classList.remove('flex'); }
+                    if(todoBtn) { todoBtn.classList.add('hidden'); todoBtn.classList.remove('flex'); }
                 }
                 if (view === 'week-select') {
                     backText.innerText = 'Terms';
@@ -700,6 +850,7 @@
                     navEl.classList.add('hidden');
                     liveDot.classList.add('hidden');
                     if(coverBtn) { coverBtn.classList.add('hidden'); coverBtn.classList.remove('flex'); }
+                    if(todoBtn) { todoBtn.classList.add('hidden'); todoBtn.classList.remove('flex'); }
                     renderWeekSelector();
                 }
                 if (view === 'week') {
@@ -711,6 +862,7 @@
                     liveDot.classList.remove('hidden');
                     liveDot.innerHTML = `<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>`;
                     if(coverBtn) { coverBtn.classList.add('hidden'); coverBtn.classList.remove('flex'); }
+                    if(todoBtn) { todoBtn.classList.add('hidden'); todoBtn.classList.remove('flex'); }
                     renderWeekGrid();
                 }
                 if (view === 'day') {
@@ -722,13 +874,15 @@
                     liveDot.classList.remove('hidden');
                     liveDot.innerHTML = `<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>`;
                     if(coverBtn) { coverBtn.classList.remove('hidden'); coverBtn.classList.add('flex'); }
+                    if(todoBtn) { todoBtn.classList.remove('hidden'); todoBtn.classList.add('flex'); }
+                    window.updateTodoUI(); 
                     renderDayBlocks();
                 }
             }
         };
 
         window.closeModals = () => {
-            ['modal-add', 'modal-edit', 'modal-cancel', 'modal-lesson-detail'].forEach(id => {
+            ['modal-add', 'modal-edit', 'modal-cancel', 'modal-lesson-detail', 'modal-todos'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) { el.classList.add('hidden'); el.classList.remove('flex'); }
             });
@@ -1058,6 +1212,27 @@
             const leftDateText = document.getElementById('left-date-text');
             if (leftDayName) leftDayName.innerText = window.appState.day;
             if (leftDateText) leftDateText.innerText = `${dd}/${mm}/${yyyy}`;
+
+            // Populate Start Day Todos
+            const todoWrapper = document.getElementById('start-day-todos-wrapper');
+            const todoContainer = document.getElementById('start-day-todos');
+            const todos = window.appState.todosData[window.appState.day] || [];
+            
+            if (todoWrapper && todoContainer) {
+                if (todos.length > 0) {
+                    todoContainer.innerHTML = todos.map((todo, idx) => `
+                        <label class="flex items-start gap-2.5 cursor-pointer group bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 backdrop-blur-xl p-3 rounded-xl border border-slate-200/60 dark:border-slate-700/60 shadow-md transition-all w-full relative">
+                            <input type="checkbox" ${todo.done ? 'checked' : ''} onchange="toggleTodo(${idx}, this.checked)" class="w-4 h-4 mt-0.5 rounded text-cyan-600 focus:ring-cyan-500 bg-slate-100 border-slate-300 dark:bg-slate-700 dark:border-slate-600 accent-cyan-500 shrink-0 cursor-pointer transition-transform group-active:scale-90">
+                            <span class="text-xs md:text-sm font-bold leading-snug flex-1 ${todo.done ? 'line-through text-slate-400 dark:text-slate-500 opacity-60' : 'text-slate-700 dark:text-slate-200'} transition-all duration-300">${todo.text}</span>
+                        </label>
+                    `).join('');
+                    todoWrapper.classList.remove('hidden');
+                    todoWrapper.classList.add('flex');
+                } else {
+                    todoWrapper.classList.add('hidden');
+                    todoWrapper.classList.remove('flex');
+                }
+            }
 
             const data = window.appState.weekData[window.appState.day] || [];
             
@@ -1439,7 +1614,7 @@
 
             if (data.length === 1 && data[0].type === 'cancelled') {
                 html += `
-                    <div class="flex flex-col items-center justify-center p-8 md:p-12 text-center rounded-3xl bg-stripes-red border-2 border-rose-200 dark:border-rose-900/50 mt-6 md:mt-10 shadow-lg">
+                    <div class="flex flex-col items-center justify-center p-8 md:p-12 text-center rounded-3xl bg-stripes-red border-2 border-rose-200 dark:border-rose-900/50 mt-2 shadow-lg z-10 relative">
                         <div class="w-24 h-24 bg-rose-100 dark:bg-rose-900/50 rounded-full flex items-center justify-center mb-6 shadow-inner border border-rose-200 dark:border-rose-800/50">
                             <i class="fa-solid fa-mug-hot text-4xl md:text-5xl text-rose-500 dark:text-rose-400 drop-shadow-sm"></i>
                         </div>
@@ -1455,7 +1630,7 @@
             data.forEach((block, idx) => {
                 if(block.type === 'break') {
                     html += `
-                    <div class="flex items-center justify-center gap-4 my-2 opacity-80">
+                    <div class="flex items-center justify-center gap-4 my-2 opacity-80 relative z-10">
                         <div class="h-px bg-amber-200 dark:bg-amber-800/50 flex-1"></div>
                         <div class="px-5 py-2 rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 text-[10px] md:text-xs font-black tracking-widest uppercase border border-amber-200 dark:border-amber-800/50 shadow-sm flex items-center">
                             <i class="fa-solid fa-${block.icon} mr-2 text-sm"></i> ${block.topic} (${block.time})
