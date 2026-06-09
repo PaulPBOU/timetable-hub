@@ -200,10 +200,17 @@
                 </div>
                 
                 <!-- START DAY TODOS -->
-                <div id="start-day-todos-wrapper" class="hidden flex-col gap-2 pointer-events-auto overflow-y-auto custom-scrollbar pr-2 w-48 md:w-64 min-h-0 relative mt-2">
-                    <h4 class="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1 shrink-0 flex items-center"><i class="fa-solid fa-list-check text-cyan-500 mr-1.5"></i> Daily Tasks</h4>
-                    <div id="start-day-todos" class="flex flex-col gap-2 shrink-0 pb-4">
-                        <!-- Todos injected -->
+                <div id="start-day-todos-wrapper" class="hidden flex-col gap-1 pointer-events-auto overflow-y-auto custom-scrollbar pr-2 w-48 md:w-64 min-h-0 relative mt-2">
+                    <h4 onclick="toggleStartDayTodos()" class="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 shrink-0 flex items-center cursor-pointer hover:text-slate-600 dark:hover:text-slate-300 transition-colors select-none p-1 -ml-1 rounded group">
+                        <i class="fa-solid fa-list-check text-cyan-500 mr-1.5"></i> DAILY TODO:
+                        <i id="todo-chevron" class="fa-solid fa-chevron-down ml-auto text-[10px] transition-transform duration-300 -rotate-90 opacity-70 group-hover:opacity-100"></i>
+                    </h4>
+                    <div id="start-day-todos-anim" class="grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-in-out w-full">
+                        <div class="overflow-hidden min-h-0 w-full">
+                            <div id="start-day-todos" class="flex flex-col gap-2 shrink-0 pb-4 pt-1">
+                                <!-- Todos injected -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -682,6 +689,20 @@
         };
 
         // --- TODO LOGIC ---
+        window.toggleStartDayTodos = () => {
+            const animWrapper = document.getElementById('start-day-todos-anim');
+            const chevron = document.getElementById('todo-chevron');
+            if (animWrapper.classList.contains('grid-rows-[0fr]')) {
+                animWrapper.classList.remove('grid-rows-[0fr]', 'opacity-0');
+                animWrapper.classList.add('grid-rows-[1fr]', 'opacity-100');
+                chevron.classList.remove('-rotate-90');
+            } else {
+                animWrapper.classList.add('grid-rows-[0fr]', 'opacity-0');
+                animWrapper.classList.remove('grid-rows-[1fr]', 'opacity-100');
+                chevron.classList.add('-rotate-90');
+            }
+        };
+
         window.openTodoModal = () => {
             document.getElementById('modal-todos').classList.replace('hidden', 'flex');
             window.updateTodoUI();
@@ -1221,9 +1242,9 @@
             if (todoWrapper && todoContainer) {
                 if (todos.length > 0) {
                     todoContainer.innerHTML = todos.map((todo, idx) => `
-                        <label class="flex items-start gap-2.5 cursor-pointer group bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 backdrop-blur-xl p-3 rounded-xl border border-slate-200/60 dark:border-slate-700/60 shadow-md transition-all w-full relative">
-                            <input type="checkbox" ${todo.done ? 'checked' : ''} onchange="toggleTodo(${idx}, this.checked)" class="w-4 h-4 mt-0.5 rounded text-cyan-600 focus:ring-cyan-500 bg-slate-100 border-slate-300 dark:bg-slate-700 dark:border-slate-600 accent-cyan-500 shrink-0 cursor-pointer transition-transform group-active:scale-90">
-                            <span class="text-xs md:text-sm font-bold leading-snug flex-1 ${todo.done ? 'line-through text-slate-400 dark:text-slate-500 opacity-60' : 'text-slate-700 dark:text-slate-200'} transition-all duration-300">${todo.text}</span>
+                        <label class="flex items-start gap-2.5 cursor-pointer group bg-slate-100/60 dark:bg-slate-800/40 hover:bg-slate-200/60 dark:hover:bg-slate-800/70 p-2 md:p-2.5 rounded-xl border border-slate-200/50 dark:border-slate-700/40 shadow-sm transition-all w-full">
+                            <input type="checkbox" ${todo.done ? 'checked' : ''} onchange="toggleTodo(${idx}, this.checked)" class="w-3.5 h-3.5 mt-[3px] rounded text-cyan-600 focus:ring-cyan-500 bg-white border-slate-300 dark:bg-slate-700 dark:border-slate-600 accent-cyan-500 shrink-0 cursor-pointer transition-transform group-active:scale-90 opacity-80 group-hover:opacity-100">
+                            <span class="text-[11px] md:text-xs font-semibold leading-snug flex-1 ${todo.done ? 'line-through text-slate-400 dark:text-slate-500 opacity-60' : 'text-slate-700 dark:text-slate-200'} transition-all duration-300">${todo.text}</span>
                         </label>
                     `).join('');
                     todoWrapper.classList.remove('hidden');
