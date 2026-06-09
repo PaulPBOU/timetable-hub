@@ -58,6 +58,12 @@
             </div>
             
             <div class="flex items-center gap-2 md:gap-3">
+                
+                <!-- Music Play/Pause Toggle -->
+                <button onclick="toggleMusic()" id="music-toggle-btn" class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white/70 w-11 h-11 md:w-12 md:h-12 rounded-xl flex justify-center items-center transition-all shadow-lg border border-white/10" title="Toggle Background Music">
+                    <i id="music-toggle-icon" class="fa-solid fa-play text-lg md:text-xl"></i>
+                </button>
+
                 <button onclick="promptTimer()" class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white/70 w-11 h-11 md:w-12 md:h-12 rounded-xl flex justify-center items-center transition-all shadow-lg border border-white/10">
                     <i class="fa-solid fa-hourglass-start text-lg md:text-xl"></i>
                 </button>
@@ -143,6 +149,30 @@
         
         let playlistData = [];
         let zoneStarted = false; 
+        
+        // --- MUSIC TOGGLE STATE ---
+        let isMusicPlaying = false; 
+
+        window.toggleMusic = () => {
+            const icon = document.getElementById('music-toggle-icon');
+            const btn = document.getElementById('music-toggle-btn');
+            
+            if (isMusicPlaying) {
+                if (currentAudio) currentAudio.pause();
+                isMusicPlaying = false;
+                icon.classList.replace('fa-pause', 'fa-play');
+                btn.classList.remove('text-emerald-300', 'bg-emerald-500/30', 'border-emerald-500/40');
+                btn.classList.add('text-white/70', 'bg-white/10', 'border-white/10');
+            } else {
+                if (currentAudio) {
+                    currentAudio.play().catch(e => console.log("Playback blocked:", e));
+                }
+                isMusicPlaying = true;
+                icon.classList.replace('fa-play', 'fa-pause');
+                btn.classList.remove('text-white/70', 'bg-white/10', 'border-white/10');
+                btn.classList.add('text-emerald-300', 'bg-emerald-500/30', 'border-emerald-500/40');
+            }
+        };
 
         window.goBack = () => {
             if (window.history.length > 1 && document.referrer.includes('index.html')) {
@@ -175,7 +205,8 @@
         const patternMusic = {
             'ps3': 'https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/Enchanted%20Fern%20Hollow.mp3?alt=media&token=3f23becf-85e0-450a-a9bf-ae6fc1970262', 
             'tendrils': 'https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/Magical%20Mossy%20Glade.mp3?alt=media&token=2521aae3-74c0-4d21-a43c-2f9782211bf1',
-            'nebula': 'https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/Steady%20Glade%20Meditation.mp3?alt=media&token=088385a4-363f-4bc4-8088-d6216db9a046'
+            'nebula': 'https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/Steady%20Glade%20Meditation.mp3?alt=media&token=088385a4-363f-4bc4-8088-d6216db9a046',
+            'plasma2': 'https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/Steady%20Glade%20Meditation.mp3?alt=media&token=088385a4-363f-4bc4-8088-d6216db9a046'
         };
 
         let currentPattern = null; 
@@ -224,7 +255,6 @@
                 for (let i = 0; i < 8; i++) {
                     ctx.beginPath();
                     for (let x = -50; x <= canvas.width + 50; x += 40) {
-                        // Offset each wave slightly in Y to help definition
                         let y = (canvas.height * 0.4) + (i * 15)
                               + Math.sin(x * 0.002 + patternTime * 0.3 + i * 1.2) * (100 + i * 15) 
                               + Math.sin(x * 0.001 - patternTime * 0.15 + i * 1.5) * 130;
@@ -233,20 +263,15 @@
                         else ctx.lineTo(x, y);
                     }
                     
-                    // Water tones: ranging from aquamarine (170) to deep cerulean/blue (240)
                     let hue = 180 + (i * 8) + Math.sin(patternTime * 0.3 + i) * 20; 
-                    
-                    // Dialed back the brightness of the contour line
                     ctx.strokeStyle = `hsla(${hue}, 90%, 65%, 0.5)`; 
                     ctx.lineWidth = 1.5;
                     ctx.stroke();
 
-                    // Now close the path down to the bottom to fill the rest
                     ctx.lineTo(canvas.width + 50, canvas.height + 50);
                     ctx.lineTo(-50, canvas.height + 50);
                     ctx.closePath();
                     
-                    // Varied fill lightness and richer opacity for depth
                     let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
                     grad.addColorStop(0, `hsla(${hue}, 85%, ${45 - i * 2}%, 0.4)`); 
                     grad.addColorStop(1, `hsla(${hue + 20}, 90%, 5%, 0.1)`);
@@ -255,9 +280,8 @@
                     ctx.fill();
                 }
                 
-                // Reset composite to draw sparks normally on top
                 ctx.globalCompositeOperation = 'source-over';
-                ctx.fillStyle = 'rgba(180, 240, 255, 0.3)'; // Soft cyan sparks
+                ctx.fillStyle = 'rgba(180, 240, 255, 0.3)';
                 particles.forEach(p => {
                     p.y -= p.speed;
                     let currentX = p.basex + Math.sin(patternTime + p.driftPhase) * 20;
@@ -274,14 +298,14 @@
                     for(let i=0; i<80; i++) {
                         particles.push({
                             type: 'tendril',
-                            basex: Math.random() * canvas.width, // Fixed base to prevent flicker
+                            basex: Math.random() * canvas.width,
                             y: Math.random() * canvas.height,
                             vx: (Math.random() - 0.5) * 0.5, 
                             speed: 0.3 + Math.random() * 1.0, 
                             length: 150 + Math.random() * 250, 
                             hue: Math.random() * 360,
                             width: Math.random() * 2 + 1.5,
-                            swing: 15 + Math.random() * 30, // Sway amplitude
+                            swing: 15 + Math.random() * 30,
                             offset: Math.random() * Math.PI * 2
                         });
                     }
@@ -309,7 +333,6 @@
                             p.basex = Math.random() * canvas.width;
                         }
 
-                        // Smooth physics relying on time rather than Y position
                         let headX = p.basex + Math.sin(patternTime * 1.5 + p.offset) * p.swing;
                         let midX = p.basex - (p.vx * p.length * 0.5) + Math.sin(patternTime * 1.5 - 0.5 + p.offset) * (p.swing * 1.2);
                         let tailX = p.basex - (p.vx * p.length) + Math.sin(patternTime * 1.5 - 1.0 + p.offset) * p.swing;
@@ -378,7 +401,6 @@
                     });
                 }
 
-                // Draw Constellation Lines Between Close Sprites
                 let sprites = particles.filter(p => p.type === 'sprite');
                 ctx.lineWidth = 0.8;
                 for(let i = 0; i < sprites.length; i++) {
@@ -386,12 +408,11 @@
                         let dx = sprites[i].x - sprites[j].x;
                         let dy = sprites[i].y - sprites[j].y;
                         let dist = dx*dx + dy*dy;
-                        if(dist < 22000) { // Connect if they drift close to each other
+                        if(dist < 22000) { 
                             let alpha = 1 - (dist / 22000);
                             ctx.beginPath();
                             ctx.moveTo(sprites[i].x, sprites[i].y);
                             ctx.lineTo(sprites[j].x, sprites[j].y);
-                            // Blend the colors of the two connecting sprites
                             let grad = ctx.createLinearGradient(sprites[i].x, sprites[i].y, sprites[j].x, sprites[j].y);
                             grad.addColorStop(0, `hsla(${sprites[i].hue}, 80%, 70%, ${alpha * 0.4})`);
                             grad.addColorStop(1, `hsla(${sprites[j].hue}, 80%, 70%, ${alpha * 0.4})`);
@@ -412,7 +433,6 @@
                         p.y += p.vy;
                         p.hue += 0.1; 
 
-                        // Seamless wrapping
                         if (p.x < -20) p.x = canvas.width + 20;
                         if (p.x > canvas.width + 20) p.x = -20;
                         if (p.y < -20) p.y = canvas.height + 20;
@@ -421,13 +441,11 @@
                         p.pulseTime += p.pulseSpeed;
                         let currentRadius = p.radius + Math.sin(p.pulseTime) * (p.radius * 0.4);
 
-                        // Restored Brighter Core
                         ctx.beginPath();
                         ctx.arc(p.x, p.y, currentRadius, 0, Math.PI * 2);
                         ctx.fillStyle = `hsla(${p.hue}, 90%, 75%, 1)`;
                         ctx.fill();
 
-                        // Restored Brighter Aura
                         let glow = ctx.createRadialGradient(p.x, p.y, currentRadius, p.x, p.y, currentRadius * 5);
                         glow.addColorStop(0, `hsla(${p.hue}, 90%, 60%, 0.5)`);
                         glow.addColorStop(1, `hsla(${p.hue}, 90%, 60%, 0)`);
@@ -438,6 +456,46 @@
                         ctx.fill();
                     }
                 });
+
+            // --- HYPNOTIC PLASMA (Soft Fiery Glow) ---
+            } else if (currentPattern === 'plasma2') {
+                // Dim the background gradually to create smooth trails
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.fillStyle = "rgba(10, 0, 0, 0.3)"; 
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                let t = patternTime * 0.5; 
+
+                // Extended beyond canvas edges with slightly wider spacing
+                for(let gridX = -50; gridX < canvas.width + 50; gridX += 60) {
+                    for(let gridY = -50; gridY < canvas.height + 50; gridY += 60) {
+                        // Organic wobble to break the rigid geometric grid
+                        let x = gridX + Math.sin(gridY * 0.03 + t) * 25;
+                        let y = gridY + Math.cos(gridX * 0.03 + t) * 25;
+
+                        let v = Math.sin(x/100 + t) + Math.cos(y/100 + t) + Math.sin((x+y)/100 + t);
+                        
+                        // Fiery colors
+                        let r = Math.floor(v * 40 + 215); 
+                        let g = Math.floor(v * 60 + 90); 
+                        let b = 10; 
+                        
+                        // Distinct but varying circles
+                        let radius = Math.abs(v) * 22 + 5; 
+                        
+                        // Add underglow/shadow to make them look soft and glowing
+                        ctx.shadowBlur = 20;
+                        ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.9)`;
+                        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.65)`;
+                        
+                        ctx.beginPath();
+                        ctx.arc(x, y, radius, 0, Math.PI*2);
+                        ctx.fill();
+                    }
+                }
+                
+                // Reset shadow blur to prevent leaking to other frames
+                ctx.shadowBlur = 0;
             }
             
             animationId = requestAnimationFrame(window.animatePattern);
@@ -466,7 +524,10 @@
                 if (patternMusic[type]) {
                     currentAudio = new Audio(patternMusic[type]);
                     currentAudio.loop = true;
-                    currentAudio.play().catch(e => console.log("Audio autoplay blocked:", e));
+                    // Play audio ONLY if the toggle state is true
+                    if (isMusicPlaying) {
+                        currentAudio.play().catch(e => console.log("Audio autoplay blocked:", e));
+                    }
                 }
             }
 
@@ -535,6 +596,18 @@
             if (currentAudio) {
                 currentAudio.pause();
                 currentAudio.currentTime = 0;
+                
+                // Reset toggle button state if canvas music was manually playing
+                if (isMusicPlaying) {
+                    isMusicPlaying = false;
+                    const icon = document.getElementById('music-toggle-icon');
+                    const btn = document.getElementById('music-toggle-btn');
+                    if (icon) icon.classList.replace('fa-pause', 'fa-play');
+                    if (btn) {
+                        btn.classList.remove('text-emerald-300', 'bg-emerald-500/30', 'border-emerald-500/40');
+                        btn.classList.add('text-white/70', 'bg-white/10', 'border-white/10');
+                    }
+                }
             }
 
             document.getElementById('pattern-canvas').classList.add('hidden');
@@ -555,7 +628,6 @@
             const container = document.getElementById('playlist');
             container.innerHTML = '';
 
-            // Note: The key is still 'ps3' here so it matches your audio URLs perfectly!
             container.innerHTML += `
             <div class="flex flex-col gap-1.5 mb-2">
                 <div onclick="playPattern('ps3')" class="flex items-center justify-between bg-emerald-500/10 hover:bg-emerald-500/30 p-2 rounded-lg border border-emerald-500/20 group transition-all backdrop-blur-sm shadow-sm cursor-pointer">
@@ -574,6 +646,12 @@
                     <div class="flex-1 text-left flex items-center text-purple-400 group-hover:text-purple-200 transition-colors overflow-hidden pr-2 pointer-events-none">
                         <i class="fa-solid fa-certificate text-purple-500 mr-2 text-[10px] md:text-xs drop-shadow shrink-0"></i>
                         <span class="text-[10px] md:text-xs font-bold truncate">Cosmic Drift</span>
+                    </div>
+                </div>
+                <div onclick="playPattern('plasma2')" class="flex items-center justify-between bg-rose-500/10 hover:bg-rose-500/30 p-2 rounded-lg border border-rose-500/20 group transition-all backdrop-blur-sm shadow-sm cursor-pointer">
+                    <div class="flex-1 text-left flex items-center text-rose-400 group-hover:text-rose-200 transition-colors overflow-hidden pr-2 pointer-events-none">
+                        <i class="fa-solid fa-hurricane text-rose-500 mr-2 text-[10px] md:text-xs drop-shadow shrink-0"></i>
+                        <span class="text-[10px] md:text-xs font-bold truncate">Hypnotic Plasma</span>
                     </div>
                 </div>
             </div>`;
