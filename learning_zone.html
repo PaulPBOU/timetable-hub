@@ -4,136 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learning Zone</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap');
-        body { font-family: 'Outfit', sans-serif; background-color: #000; color: #f8fafc; overflow: hidden; margin: 0; }
-        .meter-fill { transition: height 0.1s ease-out, background-color 0.3s; }
-        .hidden { display: none !important; }
-        
-        /* YouTube iframe hack to act as a full-bleed background */
-        #video-bg {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 0; pointer-events: none; overflow: hidden;
-            background: transparent;
-        }
-        #yt-iframe {
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 100vw; height: 56.25vw; /* 16:9 aspect ratio */
-            min-height: 100vh; min-w-[177.77vh];
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
     </style>
 </head>
-<body class="w-screen h-screen flex flex-col relative bg-transparent">
+<body class="bg-black overflow-hidden m-0 p-0 font-sans" style="font-family: 'Outfit', sans-serif;">
     
-    <div id="start-overlay" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center pointer-events-auto transition-opacity duration-500">
-        <button id="enter-zone-btn" onclick="startZone()" disabled class="bg-slate-500/20 text-slate-400 font-extrabold text-2xl md:text-4xl py-6 px-12 rounded-3xl transition-all border border-slate-400/30 flex items-center backdrop-blur-md cursor-not-allowed">
-            <i class="fa-solid fa-spinner fa-spin mr-4"></i> Loading...
-        </button>
-    </div>
+    <div id="root"></div>
 
-    <canvas id="pattern-canvas" class="hidden fixed top-0 left-0 w-screen h-screen z-0 pointer-events-none"></canvas>
-
-    <div id="video-bg">
-        <iframe id="yt-iframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    </div>
-
-    <div class="absolute inset-0 z-10 flex flex-col p-4 md:p-6 pointer-events-none">
-        
-        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-            <div class="absolute w-[30vw] h-[30vw] bg-emerald-500/10 blur-[100px] rounded-full top-1/4 left-1/4 animate-[pulse_8s_ease-in-out_infinite]"></div>
-            <div class="absolute w-[40vw] h-[40vw] bg-cyan-500/10 blur-[120px] rounded-full bottom-1/4 right-1/4 animate-[pulse_12s_ease-in-out_infinite_alternate]"></div>
-        </div>
-
-        <div class="relative z-10 flex justify-between items-center mb-6 shrink-0 pointer-events-auto">
-            <div>
-                <h1 class="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 flex items-center drop-shadow-[0_0_10px_rgba(0,0,0,0.8)]">
-                    <i class="fa-solid fa-headphones mr-4 text-emerald-400"></i> Learning Zone
-                </h1>
-            </div>
-            
-            <div class="flex items-center gap-2 md:gap-3">
-                
-                <!-- Music Play/Pause Toggle -->
-                <button onclick="toggleMusic()" id="music-toggle-btn" class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white/70 w-11 h-11 md:w-12 md:h-12 rounded-xl flex justify-center items-center transition-all shadow-lg border border-white/10" title="Toggle Background Music">
-                    <i id="music-toggle-icon" class="fa-solid fa-play text-lg md:text-xl"></i>
-                </button>
-
-                <button onclick="promptTimer()" class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white/70 w-11 h-11 md:w-12 md:h-12 rounded-xl flex justify-center items-center transition-all shadow-lg border border-white/10">
-                    <i class="fa-solid fa-hourglass-start text-lg md:text-xl"></i>
-                </button>
-                
-                <button onclick="toggleStopwatch()" id="stopwatch-btn" class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white/70 w-11 h-11 md:w-12 md:h-12 rounded-xl flex justify-center items-center transition-all shadow-lg border border-white/10">
-                    <i class="fa-solid fa-stopwatch text-lg md:text-xl"></i>
-                </button>
-
-                <button onclick="goBack()" class="bg-rose-500/20 hover:bg-rose-500/40 backdrop-blur-md text-rose-200 hover:text-white w-11 h-11 md:w-12 md:h-12 rounded-xl flex justify-center items-center transition-all border border-rose-500/30 shadow-lg ml-2">
-                    <i class="fa-solid fa-xmark text-xl md:text-2xl"></i>
-                </button>
-            </div>
-        </div>
-
-        <div class="relative z-10 flex-1 flex justify-between overflow-hidden">
-            
-            <div class="w-[180px] md:w-[220px] bg-slate-900/10 border border-white/10 rounded-2xl p-3 shadow-2xl flex flex-col pointer-events-auto backdrop-blur-md h-full">
-                <h2 class="text-sm md:text-base font-bold text-white/60 mb-3 drop-shadow-md flex items-center"><i class="fa-brands fa-youtube mr-2 text-white/50"></i> Focus Playlist</h2>
-                
-                <div class="flex gap-1.5 mb-3 shrink-0 w-full">
-                    <input type="text" id="new-yt-url" placeholder="Paste URL..." class="flex-1 w-0 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] md:text-xs text-white/70 focus:outline-none focus:border-white/30 placeholder-white/30 transition-colors">
-                    <button onclick="addVideo()" class="bg-white/10 hover:bg-white/20 px-2.5 py-1.5 rounded-lg text-white/60 font-bold shadow-md transition-colors shrink-0"><i class="fa-solid fa-plus text-[10px] md:text-xs"></i></button>
-                </div>
-
-                <div id="playlist" class="flex-1 overflow-y-auto custom-scrollbar space-y-1.5 pr-1">
-                    <p class="text-white/30 text-center text-xs mt-4">Loading...</p>
-                </div>
-            </div>
-
-            <div class="w-[120px] md:w-[140px] bg-slate-900/10 border border-white/10 rounded-2xl p-4 shadow-2xl flex flex-col items-center pointer-events-auto backdrop-blur-md h-full">
-                <h2 class="text-base md:text-lg font-bold text-white/70 mb-4 text-center leading-tight drop-shadow-md"><i class="fa-solid fa-volume-high text-cyan-400/80 block text-xl md:text-2xl mb-1"></i> Noise</h2>
-                
-                <button id="start-mic-btn" onclick="startMic()" class="w-full bg-cyan-600/40 hover:bg-cyan-500/60 text-white/80 font-bold py-3 rounded-xl shadow-lg mb-4 text-[10px] md:text-xs flex flex-col items-center border border-cyan-400/30 transition-colors">
-                    <i class="fa-solid fa-microphone text-lg md:text-xl mb-1"></i> Enable Mic
-                </button>
-
-                <div id="meter-container" class="flex-1 w-full bg-black/20 rounded-full border border-white/10 overflow-hidden relative hidden flex flex-col-reverse shadow-inner backdrop-blur-sm">
-                    <div id="meter-bar" class="w-full h-[0%] bg-emerald-500/70 meter-fill rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
-                    
-                    <div class="absolute bottom-[60%] left-0 right-0 border-b-2 md:border-b-4 border-yellow-500/50 z-10 w-full drop-shadow-md"></div>
-                    <div class="absolute bottom-[85%] left-0 right-0 border-b-2 md:border-b-4 border-red-500/50 z-10 w-full drop-shadow-md"></div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <div id="time-display-container" class="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none hidden bg-transparent">
-        <div class="bg-black/20 backdrop-blur-md rounded-[3rem] p-8 md:p-12 flex flex-col items-center border border-white/10 pointer-events-auto shadow-2xl">
-            <h1 id="huge-time-text" class="text-[12vw] md:text-[14vw] font-black text-white/90 drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)] tracking-tighter leading-none">00:00</h1>
-            <button id="dismiss-timer-btn" onclick="dismissTime()" class="mt-6 md:mt-8 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white/80 px-8 py-3 rounded-full text-lg md:text-xl font-bold transition-all shadow-xl">
-                Dismiss Timer
-            </button>
-        </div>
-    </div>
-
-    <div id="alarm-overlay" class="hidden fixed inset-0 z-[999] bg-red-600/95 backdrop-blur-xl flex flex-col items-center justify-center animate-pulse">
-        <i class="fa-solid fa-triangle-exclamation text-white text-9xl mb-8 drop-shadow-2xl"></i>
-        <h1 class="text-6xl md:text-8xl font-black text-white text-center tracking-tight mb-8 drop-shadow-2xl">TOO LOUD</h1>
-        <p class="text-3xl text-white font-bold mb-12 drop-shadow-lg">We need to be silent now.</p>
-        <button onclick="dismissAlarm()" class="bg-white text-red-600 hover:bg-slate-200 font-extrabold text-2xl px-12 py-6 rounded-full shadow-2xl border-4 border-red-800 transition-transform hover:scale-105 pointer-events-auto">
-            Dismiss Alarm
-        </button>
-    </div>
-
-    <script type="module">
+    <script type="text/babel" data-type="module">
+        // 1. Firebase Imports (Using browser URLs)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+        // 2. Extract React Hooks
+        const { useState, useEffect, useRef } = React;
+
+        // 3. Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyCEGrh2SIC20vJj_nLm4x34ok01srxip7I",
             authDomain: "paul-s-2026.firebaseapp.com",
@@ -146,699 +49,473 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        
-        let playlistData = [];
-        let zoneStarted = false; 
-        
-        // --- MUSIC TOGGLE STATE ---
-        let isMusicPlaying = false; 
 
-        window.toggleMusic = () => {
-            const icon = document.getElementById('music-toggle-icon');
-            const btn = document.getElementById('music-toggle-btn');
-            
-            if (isMusicPlaying) {
-                if (currentAudio) currentAudio.pause();
-                isMusicPlaying = false;
-                icon.classList.replace('fa-pause', 'fa-play');
-                btn.classList.remove('text-emerald-300', 'bg-emerald-500/30', 'border-emerald-500/40');
-                btn.classList.add('text-white/70', 'bg-white/10', 'border-white/10');
-            } else {
-                if (currentAudio) {
-                    currentAudio.play().catch(e => console.log("Playback blocked:", e));
-                }
-                isMusicPlaying = true;
-                icon.classList.replace('fa-play', 'fa-pause');
-                btn.classList.remove('text-white/70', 'bg-white/10', 'border-white/10');
-                btn.classList.add('text-emerald-300', 'bg-emerald-500/30', 'border-emerald-500/40');
-            }
-        };
-
-        window.goBack = () => {
-            if (window.history.length > 1 && document.referrer.includes('index.html')) {
-                window.history.back();
-            } else {
-                const now = new Date(); 
-                const terms = [
-                    { name: 'Term 1', start: new Date('2026-01-28') }, { name: 'Term 2', start: new Date('2026-04-20') },
-                    { name: 'Term 3', start: new Date('2026-07-20') }, { name: 'Term 4', start: new Date('2026-10-12') }
-                ];
-                let curTerm = 'Term 2', weekNum = 1;
-                for(let i = terms.length - 1; i >= 0; i--) {
-                    if(now >= terms[i].start) {
-                        curTerm = terms[i].name;
-                        weekNum = Math.floor((now - terms[i].start) / (7 * 24 * 60 * 60 * 1000)) + 1;
-                        break;
-                    }
-                }
-                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                let curDay = days[now.getDay()];
-                if (curDay === 'Saturday' || curDay === 'Sunday' || curDay === 'Friday') {
-                    weekNum += 1;
-                }
-                weekNum = Math.min(Math.max(weekNum, 1), 12);
-                window.location.href = `index.html#${curTerm}/Week ${weekNum}`;
-            }
-        };
-
-        let currentAudio = null;
+        // 4. Music Assets
         const patternMusic = {
-            'ps3': 'https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/Enchanted%20Fern%20Hollow.mp3?alt=media&token=3f23becf-85e0-450a-a9bf-ae6fc1970262', 
+            'ps3': 'https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/Enchanted%20Fern%20Hollow.mp3?alt=media&token=3f23becf-85e0-450a-a9bf-ae6fc1970262',
             'tendrils': 'https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/Magical%20Mossy%20Glade.mp3?alt=media&token=2521aae3-74c0-4d21-a43c-2f9782211bf1',
             'nebula': 'https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/Steady%20Glade%20Meditation.mp3?alt=media&token=088385a4-363f-4bc4-8088-d6216db9a046',
             'plasma2': 'https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/Steady%20Glade%20Meditation.mp3?alt=media&token=088385a4-363f-4bc4-8088-d6216db9a046'
         };
 
-        let currentPattern = null; 
-        let animationId = null;
-        let patternTime = 0;
-        let particles = []; 
+        // 5. Main Component
+        function LearningZone() {
+            // State
+            const [user, setUser] = useState(null);
+            const [playlistData, setPlaylistData] = useState([]);
+            const [zoneStarted, setZoneStarted] = useState(false);
+            const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+            const [currentPattern, setCurrentPattern] = useState(null);
+            const [currentVideoId, setCurrentVideoId] = useState(null);
+            const [newYtUrl, setNewYtUrl] = useState('');
+            const [errorMsg, setErrorMsg] = useState('');
 
-        window.animatePattern = () => {
-            if (!currentPattern) {
-                cancelAnimationFrame(animationId);
-                animationId = null;
-                return;
-            }
-            
-            const canvas = document.getElementById('pattern-canvas');
-            const ctx = canvas.getContext('2d');
-            
-            if(canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-                particles = []; 
-            }
+            // Timers
+            const [timeMode, setTimeMode] = useState(null);
+            const [timeValue, setTimeValue] = useState(0);
+            const [showTimerPrompt, setShowTimerPrompt] = useState(false);
+            const [timerInput, setTimerInput] = useState('5');
+            const [timesUp, setTimesUp] = useState(false);
 
-            patternTime += 0.015;
+            // Mic
+            const [micEnabled, setMicEnabled] = useState(false);
+            const [volumePercent, setVolumePercent] = useState(0);
+            const [isAlarmActive, setIsAlarmActive] = useState(false);
 
-            // --- ETHEREAL PLASMA (Blue Ribbons with Distinct Edges) ---
-            if (currentPattern === 'ps3') {
-                ctx.fillStyle = '#010409'; // Deep dark blue background
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                if (particles.length === 0) {
-                    for (let i = 0; i < 300; i++) {
-                        particles.push({ 
-                            type: 'spark', 
-                            basex: Math.random() * canvas.width, 
-                            y: Math.random() * canvas.height, 
-                            speed: 0.1 + Math.random() * 0.4, 
-                            size: Math.random() * 1.8,
-                            driftPhase: Math.random() * Math.PI * 2,
-                            driftSpeed: 0.005 + Math.random() * 0.01
-                        });
+            // Refs
+            const audioRef = useRef(null);
+            const canvasRef = useRef(null);
+            const particlesRef = useRef([]);
+            const patternTimeRef = useRef(0);
+            const animationFrameRef = useRef(null);
+            const timerIntervalRef = useRef(null);
+            const audioCtxRef = useRef(null);
+            const redStartTimeRef = useRef(null);
+            const alarmOscillatorRef = useRef(null);
+
+            // Auth Setup
+            useEffect(() => {
+                const initAuth = async () => { await signInAnonymously(auth); };
+                initAuth();
+                return onAuthStateChanged(auth, (currentUser) => { setUser(currentUser); });
+            }, []);
+
+            // Database Setup
+            useEffect(() => {
+                if (!user) return;
+                const docRef = doc(db, "settings", "learning_zone");
+                const unsubscribeDB = onSnapshot(docRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        setPlaylistData(docSnap.data().videos || []);
+                    } else {
+                        const initialPlaylist = [{ url: "https://www.youtube.com/watch?v=lTRiuFIWV54", title: "Lofi Focus Music" }];
+                        setDoc(docRef, { videos: initialPlaylist }, { merge: true });
                     }
-                }
-
-                ctx.globalCompositeOperation = 'screen';
-                for (let i = 0; i < 8; i++) {
-                    ctx.beginPath();
-                    for (let x = -50; x <= canvas.width + 50; x += 40) {
-                        let y = (canvas.height * 0.4) + (i * 15)
-                              + Math.sin(x * 0.002 + patternTime * 0.3 + i * 1.2) * (100 + i * 15) 
-                              + Math.sin(x * 0.001 - patternTime * 0.15 + i * 1.5) * 130;
-                        
-                        if (x === -50) ctx.moveTo(x, y);
-                        else ctx.lineTo(x, y);
-                    }
-                    
-                    let hue = 180 + (i * 8) + Math.sin(patternTime * 0.3 + i) * 20; 
-                    ctx.strokeStyle = `hsla(${hue}, 90%, 65%, 0.5)`; 
-                    ctx.lineWidth = 1.5;
-                    ctx.stroke();
-
-                    ctx.lineTo(canvas.width + 50, canvas.height + 50);
-                    ctx.lineTo(-50, canvas.height + 50);
-                    ctx.closePath();
-                    
-                    let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-                    grad.addColorStop(0, `hsla(${hue}, 85%, ${45 - i * 2}%, 0.4)`); 
-                    grad.addColorStop(1, `hsla(${hue + 20}, 90%, 5%, 0.1)`);
-                    
-                    ctx.fillStyle = grad;
-                    ctx.fill();
-                }
-                
-                ctx.globalCompositeOperation = 'source-over';
-                ctx.fillStyle = 'rgba(180, 240, 255, 0.3)';
-                particles.forEach(p => {
-                    p.y -= p.speed;
-                    let currentX = p.basex + Math.sin(patternTime + p.driftPhase) * 20;
-                    if (p.y < -10) { p.y = canvas.height + 10; p.basex = Math.random() * canvas.width; }
-                    ctx.beginPath(); ctx.arc(currentX, p.y, p.size, 0, Math.PI*2); ctx.fill();
+                    if (zoneStarted && !currentVideoId && !currentPattern) playPattern('ps3');
                 });
+                return () => unsubscribeDB();
+            }, [user, zoneStarted, currentVideoId, currentPattern]);
 
-            // --- RAINING TENDRILS (Curving Bioluminescent Vines + Gold Dust) ---
-            } else if (currentPattern === 'tendrils') {
-                ctx.fillStyle = '#020608';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                if(particles.length === 0) {
-                    for(let i=0; i<80; i++) {
-                        particles.push({
-                            type: 'tendril',
-                            basex: Math.random() * canvas.width,
-                            y: Math.random() * canvas.height,
-                            vx: (Math.random() - 0.5) * 0.5, 
-                            speed: 0.3 + Math.random() * 1.0, 
-                            length: 150 + Math.random() * 250, 
-                            hue: Math.random() * 360,
-                            width: Math.random() * 2 + 1.5,
-                            swing: 15 + Math.random() * 30,
-                            offset: Math.random() * Math.PI * 2
-                        });
-                    }
-                    for(let i=0; i<60; i++) {
-                        particles.push({
-                            type: 'gold',
-                            basex: Math.random() * canvas.width,
-                            y: Math.random() * canvas.height,
-                            vy: -0.2 - Math.random() * 0.5,
-                            size: Math.random() * 2 + 0.5,
-                            pulse: Math.random() * Math.PI * 2,
-                            offset: Math.random() * Math.PI * 2
-                        });
-                    }
+            // Audio Playback
+            useEffect(() => {
+                if (audioRef.current) {
+                    if (isMusicPlaying) audioRef.current.play().catch(e => console.log("Playback blocked:", e));
+                    else audioRef.current.pause();
                 }
-                
-                particles.forEach(p => {
-                    if (p.type === 'tendril') {
-                        p.basex += p.vx;
-                        p.y += p.speed;
-                        p.hue += 0.1; 
+            }, [isMusicPlaying, currentPattern]);
 
-                        if (p.y - p.length > canvas.height) {
-                            p.y = -Math.random() * 100;
-                            p.basex = Math.random() * canvas.width;
-                        }
+            const toggleMusic = () => setIsMusicPlaying(!isMusicPlaying);
 
-                        let headX = p.basex + Math.sin(patternTime * 1.5 + p.offset) * p.swing;
-                        let midX = p.basex - (p.vx * p.length * 0.5) + Math.sin(patternTime * 1.5 - 0.5 + p.offset) * (p.swing * 1.2);
-                        let tailX = p.basex - (p.vx * p.length) + Math.sin(patternTime * 1.5 - 1.0 + p.offset) * p.swing;
-
-                        let glow = ctx.createLinearGradient(headX, p.y, tailX, p.y - p.length);
-                        glow.addColorStop(0, `hsla(${p.hue}, 100%, 70%, 0.9)`);
-                        glow.addColorStop(1, `hsla(${p.hue}, 100%, 70%, 0)`);
-                        
-                        ctx.shadowBlur = 15;
-                        ctx.shadowColor = `hsla(${p.hue}, 100%, 50%, 0.6)`;
-                        
-                        ctx.beginPath();
-                        ctx.moveTo(headX, p.y);
-                        ctx.quadraticCurveTo(midX, p.y - p.length/2, tailX, p.y - p.length);
-                        ctx.strokeStyle = glow;
-                        ctx.lineWidth = p.width;
-                        ctx.stroke();
-
-                        ctx.beginPath();
-                        ctx.arc(headX, p.y, p.width * 1.5, 0, Math.PI*2);
-                        ctx.fillStyle = `hsla(${p.hue}, 100%, 90%, 1)`;
-                        ctx.fill();
-                        
-                        ctx.shadowBlur = 0; 
-                        
-                    } else if (p.type === 'gold') {
-                        let currentX = p.basex + Math.sin(patternTime + p.offset) * 10;
-                        p.y += p.vy;
-                        p.pulse += 0.05;
-                        
-                        if (p.y < -10) {
-                            p.y = canvas.height + 10;
-                            p.basex = Math.random() * canvas.width;
-                        }
-                        
-                        let currentSize = p.size + Math.sin(p.pulse) * 0.5;
-                        if (currentSize < 0) currentSize = 0;
-                        
-                        ctx.shadowBlur = 10;
-                        ctx.shadowColor = 'rgba(255, 215, 0, 0.8)';
-                        ctx.beginPath();
-                        ctx.arc(currentX, p.y, currentSize, 0, Math.PI*2);
-                        ctx.fillStyle = `hsla(45, 100%, 70%, ${0.6 + Math.sin(p.pulse)*0.4})`;
-                        ctx.fill();
-                        ctx.shadowBlur = 0; 
-                    }
-                });
-
-            // --- COSMIC DRIFT (Constellation Network) ---
-            } else if (currentPattern === 'nebula') {
-                ctx.fillStyle = '#080514';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                if(particles.length === 0) {
-                    for(let i=0; i<300; i++) particles.push({ type: 'star', x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*1.2, speed: Math.random()*0.1 });
-                    for(let i=0; i<60; i++) particles.push({ 
-                        type: 'sprite', 
-                        x: Math.random() * canvas.width, 
-                        y: Math.random() * canvas.height, 
-                        vx: (Math.random() - 0.5) * 0.3, 
-                        vy: (Math.random() - 0.5) * 0.3 - 0.05, 
-                        radius: Math.random() * 3 + 1.5, 
-                        pulseSpeed: 0.01 + Math.random() * 0.02, 
-                        pulseTime: Math.random() * Math.PI * 2, 
-                        hue: Math.random() * 360 
-                    });
+            // Canvas Animation (Same math as your HTML file)
+            useEffect(() => {
+                if (!currentPattern) {
+                    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+                    return;
                 }
 
-                let sprites = particles.filter(p => p.type === 'sprite');
-                ctx.lineWidth = 0.8;
-                for(let i = 0; i < sprites.length; i++) {
-                    for(let j = i + 1; j < sprites.length; j++) {
-                        let dx = sprites[i].x - sprites[j].x;
-                        let dy = sprites[i].y - sprites[j].y;
-                        let dist = dx*dx + dy*dy;
-                        if(dist < 22000) { 
-                            let alpha = 1 - (dist / 22000);
+                const canvas = canvasRef.current;
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+
+                const renderFrame = () => {
+                    if(canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+                        canvas.width = window.innerWidth;
+                        canvas.height = window.innerHeight;
+                        particlesRef.current = []; 
+                    }
+
+                    patternTimeRef.current += 0.015;
+                    const patternTime = patternTimeRef.current;
+                    let particles = particlesRef.current;
+
+                    if (currentPattern === 'ps3') {
+                        ctx.fillStyle = '#010409';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        if (particles.length === 0) {
+                            for (let i = 0; i < 300; i++) {
+                                particles.push({ type: 'spark', basex: Math.random() * canvas.width, y: Math.random() * canvas.height, speed: 0.1 + Math.random() * 0.4, size: Math.random() * 1.8, driftPhase: Math.random() * Math.PI * 2 });
+                            }
+                        }
+                        ctx.globalCompositeOperation = 'screen';
+                        for (let i = 0; i < 8; i++) {
                             ctx.beginPath();
-                            ctx.moveTo(sprites[i].x, sprites[i].y);
-                            ctx.lineTo(sprites[j].x, sprites[j].y);
-                            let grad = ctx.createLinearGradient(sprites[i].x, sprites[i].y, sprites[j].x, sprites[j].y);
-                            grad.addColorStop(0, `hsla(${sprites[i].hue}, 80%, 70%, ${alpha * 0.4})`);
-                            grad.addColorStop(1, `hsla(${sprites[j].hue}, 80%, 70%, ${alpha * 0.4})`);
-                            ctx.strokeStyle = grad;
-                            ctx.stroke();
+                            for (let x = -50; x <= canvas.width + 50; x += 40) {
+                                let y = (canvas.height * 0.4) + (i * 15) + Math.sin(x * 0.002 + patternTime * 0.3 + i * 1.2) * (100 + i * 15) + Math.sin(x * 0.001 - patternTime * 0.15 + i * 1.5) * 130;
+                                if (x === -50) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                            }
+                            let hue = 180 + (i * 8) + Math.sin(patternTime * 0.3 + i) * 20; 
+                            ctx.strokeStyle = `hsla(${hue}, 90%, 65%, 0.5)`; 
+                            ctx.lineWidth = 1.5; ctx.stroke();
+                            ctx.lineTo(canvas.width + 50, canvas.height + 50); ctx.lineTo(-50, canvas.height + 50); ctx.closePath();
+                            let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                            grad.addColorStop(0, `hsla(${hue}, 85%, ${45 - i * 2}%, 0.4)`); grad.addColorStop(1, `hsla(${hue + 20}, 90%, 5%, 0.1)`);
+                            ctx.fillStyle = grad; ctx.fill();
                         }
+                        ctx.globalCompositeOperation = 'source-over';
+                        ctx.fillStyle = 'rgba(180, 240, 255, 0.3)';
+                        particles.forEach(p => {
+                            p.y -= p.speed; let currentX = p.basex + Math.sin(patternTime + p.driftPhase) * 20;
+                            if (p.y < -10) { p.y = canvas.height + 10; p.basex = Math.random() * canvas.width; }
+                            ctx.beginPath(); ctx.arc(currentX, p.y, p.size, 0, Math.PI*2); ctx.fill();
+                        });
+                    } else if (currentPattern === 'tendrils') {
+                        ctx.fillStyle = '#020608'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        if(particles.length === 0) {
+                            for(let i=0; i<80; i++) particles.push({type: 'tendril', basex: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 0.5, speed: 0.3 + Math.random() * 1.0, length: 150 + Math.random() * 250, hue: Math.random() * 360, width: Math.random() * 2 + 1.5, swing: 15 + Math.random() * 30, offset: Math.random() * Math.PI * 2});
+                            for(let i=0; i<60; i++) particles.push({type: 'gold', basex: Math.random() * canvas.width, y: Math.random() * canvas.height, vy: -0.2 - Math.random() * 0.5, size: Math.random() * 2 + 0.5, pulse: Math.random() * Math.PI * 2, offset: Math.random() * Math.PI * 2});
+                        }
+                        particles.forEach(p => {
+                            if (p.type === 'tendril') {
+                                p.basex += p.vx; p.y += p.speed; p.hue += 0.1; 
+                                if (p.y - p.length > canvas.height) { p.y = -Math.random() * 100; p.basex = Math.random() * canvas.width; }
+                                let headX = p.basex + Math.sin(patternTime * 1.5 + p.offset) * p.swing;
+                                let midX = p.basex - (p.vx * p.length * 0.5) + Math.sin(patternTime * 1.5 - 0.5 + p.offset) * (p.swing * 1.2);
+                                let tailX = p.basex - (p.vx * p.length) + Math.sin(patternTime * 1.5 - 1.0 + p.offset) * p.swing;
+                                let glow = ctx.createLinearGradient(headX, p.y, tailX, p.y - p.length);
+                                glow.addColorStop(0, `hsla(${p.hue}, 100%, 70%, 0.9)`); glow.addColorStop(1, `hsla(${p.hue}, 100%, 70%, 0)`);
+                                ctx.shadowBlur = 15; ctx.shadowColor = `hsla(${p.hue}, 100%, 50%, 0.6)`;
+                                ctx.beginPath(); ctx.moveTo(headX, p.y); ctx.quadraticCurveTo(midX, p.y - p.length/2, tailX, p.y - p.length);
+                                ctx.strokeStyle = glow; ctx.lineWidth = p.width; ctx.stroke();
+                                ctx.beginPath(); ctx.arc(headX, p.y, p.width * 1.5, 0, Math.PI*2); ctx.fillStyle = `hsla(${p.hue}, 100%, 90%, 1)`; ctx.fill();
+                                ctx.shadowBlur = 0; 
+                            } else if (p.type === 'gold') {
+                                let currentX = p.basex + Math.sin(patternTime + p.offset) * 10; p.y += p.vy; p.pulse += 0.05;
+                                if (p.y < -10) { p.y = canvas.height + 10; p.basex = Math.random() * canvas.width; }
+                                let currentSize = p.size + Math.sin(p.pulse) * 0.5; if (currentSize < 0) currentSize = 0;
+                                ctx.shadowBlur = 10; ctx.shadowColor = 'rgba(255, 215, 0, 0.8)';
+                                ctx.beginPath(); ctx.arc(currentX, p.y, currentSize, 0, Math.PI*2); ctx.fillStyle = `hsla(45, 100%, 70%, ${0.6 + Math.sin(p.pulse)*0.4})`; ctx.fill();
+                                ctx.shadowBlur = 0; 
+                            }
+                        });
+                    } else if (currentPattern === 'nebula') {
+                        ctx.fillStyle = '#080514'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        if(particles.length === 0) {
+                            for(let i=0; i<300; i++) particles.push({ type: 'star', x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*1.2, speed: Math.random()*0.1 });
+                            for(let i=0; i<60; i++) particles.push({ type: 'sprite', x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3 - 0.05, radius: Math.random() * 3 + 1.5, pulseSpeed: 0.01 + Math.random() * 0.02, pulseTime: Math.random() * Math.PI * 2, hue: Math.random() * 360 });
+                        }
+                        let sprites = particles.filter(p => p.type === 'sprite');
+                        ctx.lineWidth = 0.8;
+                        for(let i = 0; i < sprites.length; i++) {
+                            for(let j = i + 1; j < sprites.length; j++) {
+                                let dx = sprites[i].x - sprites[j].x; let dy = sprites[i].y - sprites[j].y; let dist = dx*dx + dy*dy;
+                                if(dist < 22000) { 
+                                    let alpha = 1 - (dist / 22000); ctx.beginPath(); ctx.moveTo(sprites[i].x, sprites[i].y); ctx.lineTo(sprites[j].x, sprites[j].y);
+                                    let grad = ctx.createLinearGradient(sprites[i].x, sprites[i].y, sprites[j].x, sprites[j].y);
+                                    grad.addColorStop(0, `hsla(${sprites[i].hue}, 80%, 70%, ${alpha * 0.4})`); grad.addColorStop(1, `hsla(${sprites[j].hue}, 80%, 70%, ${alpha * 0.4})`);
+                                    ctx.strokeStyle = grad; ctx.stroke();
+                                }
+                            }
+                        }
+                        particles.forEach(p => {
+                            if (p.type === 'star') {
+                                p.y -= p.speed; if (p.y < 0) { p.y = canvas.height; p.x = Math.random()*canvas.width; }
+                                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+                            } else if (p.type === 'sprite') {
+                                p.x += p.vx; p.y += p.vy; p.hue += 0.1; 
+                                if (p.x < -20) p.x = canvas.width + 20; if (p.x > canvas.width + 20) p.x = -20;
+                                if (p.y < -20) p.y = canvas.height + 20; if (p.y > canvas.height + 20) p.y = -20;
+                                p.pulseTime += p.pulseSpeed; let currentRadius = p.radius + Math.sin(p.pulseTime) * (p.radius * 0.4);
+                                ctx.beginPath(); ctx.arc(p.x, p.y, currentRadius, 0, Math.PI * 2); ctx.fillStyle = `hsla(${p.hue}, 90%, 75%, 1)`; ctx.fill();
+                                let glow = ctx.createRadialGradient(p.x, p.y, currentRadius, p.x, p.y, currentRadius * 5);
+                                glow.addColorStop(0, `hsla(${p.hue}, 90%, 60%, 0.5)`); glow.addColorStop(1, `hsla(${p.hue}, 90%, 60%, 0)`);
+                                ctx.beginPath(); ctx.arc(p.x, p.y, currentRadius * 5, 0, Math.PI * 2); ctx.fillStyle = glow; ctx.fill();
+                            }
+                        });
+                    } else if (currentPattern === 'plasma2') {
+                        ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = "rgba(10, 0, 0, 0.3)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        let t = patternTime * 0.5; 
+                        for(let gridX = -50; gridX < canvas.width + 50; gridX += 60) {
+                            for(let gridY = -50; gridY < canvas.height + 50; gridY += 60) {
+                                let x = gridX + Math.sin(gridY * 0.03 + t) * 25; let y = gridY + Math.cos(gridX * 0.03 + t) * 25;
+                                let v = Math.sin(x/100 + t) + Math.cos(y/100 + t) + Math.sin((x+y)/100 + t);
+                                let r = Math.floor(v * 40 + 215); let g = Math.floor(v * 60 + 90); let b = 10; 
+                                let radius = Math.abs(v) * 22 + 5; 
+                                ctx.shadowBlur = 20; ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.9)`; ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.65)`;
+                                ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI*2); ctx.fill();
+                            }
+                        }
+                        ctx.shadowBlur = 0;
                     }
+
+                    animationFrameRef.current = requestAnimationFrame(renderFrame);
+                };
+                renderFrame();
+                return () => { if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current); };
+            }, [currentPattern]);
+
+            const playPattern = (type) => {
+                setCurrentVideoId(null); setCurrentPattern(type); particlesRef.current = [];
+                if (audioRef.current) {
+                    audioRef.current.pause(); audioRef.current.src = patternMusic[type];
+                    if (isMusicPlaying) audioRef.current.play().catch(e => console.log(e));
                 }
+            };
 
-                particles.forEach(p => {
-                    if (p.type === 'star') {
-                        p.y -= p.speed;
-                        if (p.y < 0) { p.y = canvas.height; p.x = Math.random()*canvas.width; }
-                        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-                        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
-                    } else if (p.type === 'sprite') {
-                        p.x += p.vx;
-                        p.y += p.vy;
-                        p.hue += 0.1; 
+            const playVideo = (url) => {
+                setCurrentPattern(null); setIsMusicPlaying(false);
+                const vidId = extractVideoID(url);
+                if (vidId) setCurrentVideoId(vidId);
+            };
 
-                        if (p.x < -20) p.x = canvas.width + 20;
-                        if (p.x > canvas.width + 20) p.x = -20;
-                        if (p.y < -20) p.y = canvas.height + 20;
-                        if (p.y > canvas.height + 20) p.y = -20;
+            const extractVideoID = (url) => {
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                const match = url.match(regExp);
+                return (match && match[2].length === 11) ? match[2] : null;
+            };
 
-                        p.pulseTime += p.pulseSpeed;
-                        let currentRadius = p.radius + Math.sin(p.pulseTime) * (p.radius * 0.4);
+            // Playlist Actions
+            const addVideo = () => {
+                if (extractVideoID(newYtUrl)) {
+                    const newList = [...playlistData, { url: newYtUrl, title: `Video ${playlistData.length + 1}` }];
+                    setDoc(doc(db, "settings", "learning_zone"), { videos: newList }, { merge: true });
+                    setNewYtUrl('');
+                } else { showError("Please enter a valid YouTube link."); }
+            };
 
-                        ctx.beginPath();
-                        ctx.arc(p.x, p.y, currentRadius, 0, Math.PI * 2);
-                        ctx.fillStyle = `hsla(${p.hue}, 90%, 75%, 1)`;
-                        ctx.fill();
+            const deleteVideo = (index, e) => {
+                e.stopPropagation();
+                const newList = [...playlistData]; newList.splice(index, 1);
+                setDoc(doc(db, "settings", "learning_zone"), { videos: newList }, { merge: true });
+            };
 
-                        let glow = ctx.createRadialGradient(p.x, p.y, currentRadius, p.x, p.y, currentRadius * 5);
-                        glow.addColorStop(0, `hsla(${p.hue}, 90%, 60%, 0.5)`);
-                        glow.addColorStop(1, `hsla(${p.hue}, 90%, 60%, 0)`);
-                        
-                        ctx.beginPath();
-                        ctx.arc(p.x, p.y, currentRadius * 5, 0, Math.PI * 2);
-                        ctx.fillStyle = glow;
-                        ctx.fill();
-                    }
-                });
-
-            // --- HYPNOTIC PLASMA (Soft Fiery Glow) ---
-            } else if (currentPattern === 'plasma2') {
-                // Dim the background gradually to create smooth trails
-                ctx.globalCompositeOperation = 'source-over';
-                ctx.fillStyle = "rgba(10, 0, 0, 0.3)"; 
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                let t = patternTime * 0.5; 
-
-                // Extended beyond canvas edges with slightly wider spacing
-                for(let gridX = -50; gridX < canvas.width + 50; gridX += 60) {
-                    for(let gridY = -50; gridY < canvas.height + 50; gridY += 60) {
-                        // Organic wobble to break the rigid geometric grid
-                        let x = gridX + Math.sin(gridY * 0.03 + t) * 25;
-                        let y = gridY + Math.cos(gridX * 0.03 + t) * 25;
-
-                        let v = Math.sin(x/100 + t) + Math.cos(y/100 + t) + Math.sin((x+y)/100 + t);
-                        
-                        // Fiery colors
-                        let r = Math.floor(v * 40 + 215); 
-                        let g = Math.floor(v * 60 + 90); 
-                        let b = 10; 
-                        
-                        // Distinct but varying circles
-                        let radius = Math.abs(v) * 22 + 5; 
-                        
-                        // Add underglow/shadow to make them look soft and glowing
-                        ctx.shadowBlur = 20;
-                        ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.9)`;
-                        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.65)`;
-                        
-                        ctx.beginPath();
-                        ctx.arc(x, y, radius, 0, Math.PI*2);
-                        ctx.fill();
-                    }
+            // Timers
+            useEffect(() => {
+                if (!timeMode) {
+                    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+                    return;
                 }
-                
-                // Reset shadow blur to prevent leaking to other frames
-                ctx.shadowBlur = 0;
-            }
-            
-            animationId = requestAnimationFrame(window.animatePattern);
-        }
-
-        window.playPattern = (type = 'ps3') => {
-            document.getElementById('video-bg').classList.add('hidden');
-            document.getElementById('pattern-canvas').classList.remove('hidden');
-            document.getElementById('yt-iframe').src = ""; 
-            
-            if (currentPattern !== type) {
-                currentPattern = type;
-                particles = []; 
-                
-                const canvas = document.getElementById('pattern-canvas');
-                if(canvas) {
-                    const ctx = canvas.getContext('2d');
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                }
-
-                if (currentAudio) {
-                    currentAudio.pause();
-                    currentAudio.currentTime = 0;
-                }
-
-                if (patternMusic[type]) {
-                    currentAudio = new Audio(patternMusic[type]);
-                    currentAudio.loop = true;
-                    // Play audio ONLY if the toggle state is true
-                    if (isMusicPlaying) {
-                        currentAudio.play().catch(e => console.log("Audio autoplay blocked:", e));
-                    }
-                }
-            }
-
-            if (!animationId) window.animatePattern();
-        };
-
-        // --- END PATTERN LOGIC ---
-
-        signInAnonymously(auth).then(() => {
-            const docRef = doc(db, "settings", "learning_zone");
-            onSnapshot(docRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    playlistData = docSnap.data().videos || [];
-                } else {
-                    playlistData = [{ url: "https://www.youtube.com/watch?v=lTRiuFIWV54", title: "Lofi Focus Music" }];
-                    setDoc(docRef, { videos: playlistData }, { merge: true });
-                }
-                renderPlaylist();
-                
-                const btn = document.getElementById('enter-zone-btn');
-                if (btn && !zoneStarted) {
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fa-solid fa-play mr-4"></i> Enter Learning Zone';
-                    btn.className = 'bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 hover:text-white font-extrabold text-2xl md:text-4xl py-6 px-12 rounded-3xl shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)] transition-all hover:scale-105 border border-emerald-400/30 flex items-center backdrop-blur-md cursor-pointer';
-                }
-                
-                if (zoneStarted && document.getElementById('yt-iframe').src === "" && !currentPattern) {
-                    playPattern('ps3');
-                }
-            });
-        });
-
-        window.startZone = () => {
-            const overlay = document.getElementById('start-overlay');
-            overlay.style.opacity = '0';
-            setTimeout(() => overlay.classList.add('hidden'), 500);
-            zoneStarted = true;
-            playPattern('ps3');
-        };
-
-        function extractVideoID(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
-        }
-
-        window.addVideo = () => {
-            const input = document.getElementById('new-yt-url');
-            const url = input.value;
-            if (extractVideoID(url)) {
-                playlistData.push({ url: url, title: `Video ${playlistData.length + 1}` });
-                setDoc(doc(db, "settings", "learning_zone"), { videos: playlistData }, { merge: true });
-                input.value = '';
-            } else {
-                alert("Please enter a valid YouTube link.");
-            }
-        }
-
-        window.playVideo = (url) => {
-            currentPattern = null;
-            if(animationId) {
-                cancelAnimationFrame(animationId);
-                animationId = null;
-            }
-
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio.currentTime = 0;
-                
-                // Reset toggle button state if canvas music was manually playing
-                if (isMusicPlaying) {
-                    isMusicPlaying = false;
-                    const icon = document.getElementById('music-toggle-icon');
-                    const btn = document.getElementById('music-toggle-btn');
-                    if (icon) icon.classList.replace('fa-pause', 'fa-play');
-                    if (btn) {
-                        btn.classList.remove('text-emerald-300', 'bg-emerald-500/30', 'border-emerald-500/40');
-                        btn.classList.add('text-white/70', 'bg-white/10', 'border-white/10');
-                    }
-                }
-            }
-
-            document.getElementById('pattern-canvas').classList.add('hidden');
-            document.getElementById('video-bg').classList.remove('hidden');
-
-            const vidId = extractVideoID(url);
-            if(vidId) {
-                document.getElementById('yt-iframe').src = `https://www.youtube.com/embed/${vidId}?autoplay=1&mute=0&controls=0&modestbranding=1&showinfo=0&rel=0&iv_load_policy=3`;
-            }
-        }
-
-        window.deleteVideo = (index) => {
-            playlistData.splice(index, 1);
-            setDoc(doc(db, "settings", "learning_zone"), { videos: playlistData }, { merge: true });
-        }
-
-        function renderPlaylist() {
-            const container = document.getElementById('playlist');
-            container.innerHTML = '';
-
-            container.innerHTML += `
-            <div class="flex flex-col gap-1.5 mb-2">
-                <div onclick="playPattern('ps3')" class="flex items-center justify-between bg-emerald-500/10 hover:bg-emerald-500/30 p-2 rounded-lg border border-emerald-500/20 group transition-all backdrop-blur-sm shadow-sm cursor-pointer">
-                    <div class="flex-1 text-left flex items-center text-emerald-400 group-hover:text-emerald-200 transition-colors overflow-hidden pr-2 pointer-events-none">
-                        <i class="fa-solid fa-atom text-emerald-500 mr-2 text-[10px] md:text-xs drop-shadow shrink-0"></i>
-                        <span class="text-[10px] md:text-xs font-bold truncate">Ethereal Plasma</span>
-                    </div>
-                </div>
-                <div onclick="playPattern('tendrils')" class="flex items-center justify-between bg-cyan-500/10 hover:bg-cyan-500/30 p-2 rounded-lg border border-cyan-500/20 group transition-all backdrop-blur-sm shadow-sm cursor-pointer">
-                    <div class="flex-1 text-left flex items-center text-cyan-400 group-hover:text-cyan-200 transition-colors overflow-hidden pr-2 pointer-events-none">
-                        <i class="fa-solid fa-cloud-showers-heavy text-cyan-500 mr-2 text-[10px] md:text-xs drop-shadow shrink-0"></i>
-                        <span class="text-[10px] md:text-xs font-bold truncate">Raining Tendrils</span>
-                    </div>
-                </div>
-                <div onclick="playPattern('nebula')" class="flex items-center justify-between bg-purple-500/10 hover:bg-purple-500/30 p-2 rounded-lg border border-purple-500/20 group transition-all backdrop-blur-sm shadow-sm cursor-pointer">
-                    <div class="flex-1 text-left flex items-center text-purple-400 group-hover:text-purple-200 transition-colors overflow-hidden pr-2 pointer-events-none">
-                        <i class="fa-solid fa-certificate text-purple-500 mr-2 text-[10px] md:text-xs drop-shadow shrink-0"></i>
-                        <span class="text-[10px] md:text-xs font-bold truncate">Cosmic Drift</span>
-                    </div>
-                </div>
-                <div onclick="playPattern('plasma2')" class="flex items-center justify-between bg-rose-500/10 hover:bg-rose-500/30 p-2 rounded-lg border border-rose-500/20 group transition-all backdrop-blur-sm shadow-sm cursor-pointer">
-                    <div class="flex-1 text-left flex items-center text-rose-400 group-hover:text-rose-200 transition-colors overflow-hidden pr-2 pointer-events-none">
-                        <i class="fa-solid fa-hurricane text-rose-500 mr-2 text-[10px] md:text-xs drop-shadow shrink-0"></i>
-                        <span class="text-[10px] md:text-xs font-bold truncate">Hypnotic Plasma</span>
-                    </div>
-                </div>
-            </div>`;
-
-            if(playlistData.length === 0) {
-                container.innerHTML += '<p class="text-white/30 text-center text-[10px] md:text-xs mt-4">Add a YouTube link above.</p>';
-            }
-            playlistData.forEach((vid, idx) => {
-                container.innerHTML += `
-                <div onclick="playVideo('${vid.url}')" class="flex items-center justify-between bg-white/5 p-2 rounded-lg border border-white/5 hover:border-white/20 hover:bg-white/10 group transition-all mb-1.5 backdrop-blur-sm shadow-sm cursor-pointer">
-                    <div class="flex-1 text-left flex items-center text-white/60 group-hover:text-white transition-colors overflow-hidden pr-2 pointer-events-none">
-                        <i class="fa-brands fa-youtube text-white/40 mr-2 text-[10px] md:text-xs drop-shadow shrink-0"></i>
-                        <span class="text-[10px] md:text-xs font-medium truncate">${vid.title}</span>
-                    </div>
-                    <button onclick="event.stopPropagation(); deleteVideo(${idx})" class="text-white/20 hover:text-red-400/80 opacity-0 group-hover:opacity-100 transition-opacity p-1 shrink-0 z-10"><i class="fa-solid fa-trash text-[10px]"></i></button>
-                </div>`;
-            });
-        }
-
-        // --- TIME CONTROLS ---
-        let timeInterval = null;
-        let timeMode = null; 
-        let timeRemaining = 0; 
-        let timeElapsed = 0; 
-
-        let audioCtx;
-        function playBeep() {
-            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = audioCtx.createOscillator();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            osc.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 1); 
-        }
-
-        function formatTime(seconds) {
-            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-            const s = (seconds % 60).toString().padStart(2, '0');
-            return `${m}:${s}`;
-        }
-
-        function updateTimeUI(text) {
-            document.getElementById('time-display-container').classList.remove('hidden');
-            document.getElementById('huge-time-text').innerText = text;
-        }
-
-        window.promptTimer = () => {
-            const mins = prompt("Enter minutes for Countdown Timer:", "5");
-            if (!mins || isNaN(mins)) return;
-            
-            clearInterval(timeInterval);
-            timeMode = 'timer';
-            timeRemaining = parseInt(mins) * 60;
-            updateTimeUI(formatTime(timeRemaining));
-
-            timeInterval = setInterval(() => {
-                timeRemaining--;
-                updateTimeUI(formatTime(timeRemaining));
-                if(timeRemaining <= 0) {
-                    clearInterval(timeInterval);
-                    playBeep();
-                    document.getElementById('huge-time-text').innerText = "TIME'S UP!";
-                }
-            }, 1000);
-        }
-
-        window.toggleStopwatch = () => {
-            const btn = document.getElementById('stopwatch-btn');
-            if(timeMode === 'stopwatch') {
-                clearInterval(timeInterval);
-                timeMode = null;
-                btn.innerHTML = '<i class="fa-solid fa-stopwatch text-lg md:text-xl"></i>';
-                btn.classList.remove('bg-emerald-500/30', 'border-emerald-500/40', 'text-emerald-300');
-                btn.classList.add('bg-white/10', 'border-white/10', 'text-white/70');
-            } else {
-                clearInterval(timeInterval);
-                timeMode = 'stopwatch';
-                timeElapsed = 0;
-                btn.innerHTML = '<i class="fa-solid fa-pause text-lg md:text-xl"></i>';
-                btn.classList.remove('bg-white/10', 'border-white/10', 'text-white/70');
-                btn.classList.add('bg-emerald-500/30', 'border-emerald-500/40', 'text-emerald-300');
-                
-                updateTimeUI(formatTime(timeElapsed));
-                
-                timeInterval = setInterval(() => {
-                    timeElapsed++;
-                    updateTimeUI(formatTime(timeElapsed));
+                timerIntervalRef.current = setInterval(() => {
+                    setTimeValue(prev => {
+                        if (timeMode === 'timer') {
+                            if (prev <= 1) {
+                                clearInterval(timerIntervalRef.current);
+                                playBeep(); setTimesUp(true); return 0;
+                            }
+                            return prev - 1;
+                        } else if (timeMode === 'stopwatch') { return prev + 1; }
+                        return prev;
+                    });
                 }, 1000);
-            }
-        }
+                return () => clearInterval(timerIntervalRef.current);
+            }, [timeMode]);
 
-        window.dismissTime = () => {
-            clearInterval(timeInterval);
-            timeMode = null;
-            document.getElementById('time-display-container').classList.add('hidden');
-            const btn = document.getElementById('stopwatch-btn');
-            btn.innerHTML = '<i class="fa-solid fa-stopwatch text-lg md:text-xl"></i>';
-            btn.classList.remove('bg-emerald-500/30', 'border-emerald-500/40', 'text-emerald-300');
-            btn.classList.add('bg-white/10', 'border-white/10', 'text-white/70');
-        }
+            const playBeep = () => {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator(); osc.type = 'sine'; osc.frequency.setValueAtTime(800, ctx.currentTime);
+                    osc.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 1);
+                } catch(e) {}
+            };
 
-        // --- AUDIO METER & ALARM LOGIC ---
-        let analyser, microphone, scriptNode;
-        let redStartTime = null;
-        let alarmOscillator = null;
+            const formatTime = (seconds) => {
+                const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+                const s = (seconds % 60).toString().padStart(2, '0');
+                return `${m}:${s}`;
+            };
 
-        window.startMic = async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                document.getElementById('start-mic-btn').classList.add('hidden');
-                document.getElementById('meter-container').classList.remove('hidden');
+            const startTimer = () => {
+                const mins = parseInt(timerInput);
+                if (!isNaN(mins) && mins > 0) {
+                    setTimeValue(mins * 60); setTimeMode('timer'); setTimesUp(false); setShowTimerPrompt(false);
+                }
+            };
 
-                if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioCtx.createAnalyser();
-                analyser.smoothingTimeConstant = 0.8;
-                analyser.fftSize = 1024;
+            const toggleStopwatch = () => {
+                if (timeMode === 'stopwatch') setTimeMode(null);
+                else { setTimeValue(0); setTimeMode('stopwatch'); setTimesUp(false); }
+            };
 
-                microphone = audioCtx.createMediaStreamSource(stream);
-                scriptNode = audioCtx.createScriptProcessor(2048, 1, 1);
+            // Microphone Setup
+            const startMic = async () => {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    setMicEnabled(true);
+                    if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+                    const audioCtx = audioCtxRef.current;
+                    const analyser = audioCtx.createAnalyser();
+                    analyser.smoothingTimeConstant = 0.8; analyser.fftSize = 1024;
+                    const microphone = audioCtx.createMediaStreamSource(stream);
+                    const scriptNode = audioCtx.createScriptProcessor(2048, 1, 1);
+                    microphone.connect(analyser); analyser.connect(scriptNode); scriptNode.connect(audioCtx.destination);
 
-                microphone.connect(analyser);
-                analyser.connect(scriptNode);
-                scriptNode.connect(audioCtx.destination);
+                    scriptNode.onaudioprocess = function() {
+                        const array = new Uint8Array(analyser.frequencyBinCount);
+                        analyser.getByteFrequencyData(array);
+                        let values = 0; for (let i = 0; i < array.length; i++) { values += array[i]; }
+                        const average = values / array.length;
+                        let vol = Math.min(Math.round(average * 1.5), 100);
+                        setVolumePercent(vol);
 
-                scriptNode.onaudioprocess = function() {
-                    const array = new Uint8Array(analyser.frequencyBinCount);
-                    analyser.getByteFrequencyData(array);
-                    let values = 0;
-                    for (let i = 0; i < array.length; i++) { values += array[i]; }
-                    const average = values / array.length;
+                        if (vol >= 85) {
+                            if (!redStartTimeRef.current) redStartTimeRef.current = Date.now();
+                            else if (Date.now() - redStartTimeRef.current > 5000) triggerAlarm();
+                        } else { redStartTimeRef.current = null; }
+                    };
+                } catch (err) { showError("Microphone access denied."); console.error(err); }
+            };
+
+            const triggerAlarm = () => {
+                if (alarmOscillatorRef.current) return; 
+                setIsAlarmActive(true);
+                const audioCtx = audioCtxRef.current;
+                if(audioCtx) {
+                    const osc = audioCtx.createOscillator();
+                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(440, audioCtx.currentTime); 
+                    osc.connect(audioCtx.destination); osc.start();
+                    alarmOscillatorRef.current = osc;
+                }
+            };
+
+            const dismissAlarm = () => {
+                if (alarmOscillatorRef.current) {
+                    alarmOscillatorRef.current.stop(); alarmOscillatorRef.current.disconnect(); alarmOscillatorRef.current = null;
+                }
+                redStartTimeRef.current = null; setIsAlarmActive(false);
+            };
+
+            const showError = (msg) => { setErrorMsg(msg); setTimeout(() => setErrorMsg(''), 3000); };
+            const goBack = () => { window.history.back(); };
+            const getMeterColor = () => { if (volumePercent < 60) return 'rgba(16, 185, 129, 0.7)'; if (volumePercent < 85) return 'rgba(234, 179, 8, 0.7)'; return 'rgba(239, 68, 68, 0.8)'; };
+            const getMeterShadow = () => { if (volumePercent < 60) return '0 0 15px rgba(16,185,129,0.5)'; if (volumePercent < 85) return '0 0 15px rgba(234,179,8,0.5)'; return '0 0 25px rgba(239,68,68,0.7)'; };
+
+            return (
+                <>
+                    <audio ref={audioRef} loop />
+
+                    {errorMsg && (
+                        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] bg-rose-600/90 text-white px-6 py-3 rounded-xl shadow-2xl backdrop-blur-md font-bold flex items-center animate-bounce">
+                            <i className="fa-solid fa-triangle-exclamation mr-3"></i> {errorMsg}
+                        </div>
+                    )}
+
+                    {!zoneStarted && (
+                        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center pointer-events-auto transition-opacity duration-500">
+                            <button onClick={() => { setZoneStarted(true); playPattern('ps3'); }} className="bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 hover:text-white font-extrabold text-2xl md:text-4xl py-6 px-12 rounded-3xl shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)] transition-all hover:scale-105 border border-emerald-400/30 flex items-center backdrop-blur-md cursor-pointer">
+                                <i className="fa-solid fa-play mr-4"></i> Enter Learning Zone
+                            </button>
+                        </div>
+                    )}
+
+                    {currentPattern && <canvas ref={canvasRef} className="fixed top-0 left-0 w-screen h-screen z-0 pointer-events-none" />}
                     
-                    let volumePercent = Math.min(Math.round(average * 1.5), 100);
-                    updateMeter(volumePercent);
-                }
-            } catch (err) {
-                alert("Microphone access denied or not available.");
-                console.error(err);
-            }
+                    {currentVideoId && (
+                        <div className="fixed top-0 left-0 w-screen h-screen z-0 pointer-events-none overflow-hidden bg-transparent">
+                            <iframe className="absolute top-1/2 left-1/2 w-[100vw] h-[56.25vw] min-h-[100vh] min-w-[177.77vh] -translate-x-1/2 -translate-y-1/2 pointer-events-none" src={`https://www.youtube.com/embed/${currentVideoId}?autoplay=1&mute=0&controls=0&modestbranding=1&showinfo=0&rel=0&iv_load_policy=3`} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                        </div>
+                    )}
+
+                    <div className="absolute inset-0 z-10 flex flex-col p-4 md:p-6 pointer-events-none text-slate-50">
+                        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div className="absolute w-[30vw] h-[30vw] bg-emerald-500/10 blur-[100px] rounded-full top-1/4 left-1/4 animate-[pulse_8s_ease-in-out_infinite]"></div>
+                            <div className="absolute w-[40vw] h-[40vw] bg-cyan-500/10 blur-[120px] rounded-full bottom-1/4 right-1/4 animate-[pulse_12s_ease-in-out_infinite_alternate]"></div>
+                        </div>
+
+                        <div className="relative z-10 flex justify-between items-center mb-6 shrink-0 pointer-events-auto">
+                            <div><h1 className="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 flex items-center drop-shadow-[0_0_10px_rgba(0,0,0,0.8)]"><i className="fa-solid fa-headphones mr-4 text-emerald-400"></i> Learning Zone</h1></div>
+                            <div className="flex items-center gap-2 md:gap-3">
+                                <button onClick={toggleMusic} className={`backdrop-blur-md w-11 h-11 md:w-12 md:h-12 rounded-xl flex justify-center items-center transition-all shadow-lg border ${isMusicPlaying ? 'bg-emerald-500/30 border-emerald-500/40 text-emerald-300' : 'bg-white/10 hover:bg-white/20 border-white/10 text-white/70'}`} title="Toggle Background Music"><i className={`fa-solid ${isMusicPlaying ? 'fa-pause' : 'fa-play'} text-lg md:text-xl`}></i></button>
+                                <button onClick={() => setShowTimerPrompt(true)} className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white/70 w-11 h-11 md:w-12 md:h-12 rounded-xl flex justify-center items-center transition-all shadow-lg border border-white/10"><i className="fa-solid fa-hourglass-start text-lg md:text-xl"></i></button>
+                                <button onClick={toggleStopwatch} className={`backdrop-blur-md w-11 h-11 md:w-12 md:h-12 rounded-xl flex justify-center items-center transition-all shadow-lg border ${timeMode === 'stopwatch' ? 'bg-emerald-500/30 border-emerald-500/40 text-emerald-300' : 'bg-white/10 hover:bg-white/20 border-white/10 text-white/70'}`}><i className={`fa-solid ${timeMode === 'stopwatch' ? 'fa-pause' : 'fa-stopwatch'} text-lg md:text-xl`}></i></button>
+                                <button onClick={goBack} className="bg-rose-500/20 hover:bg-rose-500/40 backdrop-blur-md text-rose-200 hover:text-white w-11 h-11 md:w-12 md:h-12 rounded-xl flex justify-center items-center transition-all border border-rose-500/30 shadow-lg ml-2"><i className="fa-solid fa-xmark text-xl md:text-2xl"></i></button>
+                            </div>
+                        </div>
+
+                        <div className="relative z-10 flex-1 flex justify-between overflow-hidden pointer-events-none">
+                            <div className="w-[180px] md:w-[220px] bg-slate-900/10 border border-white/10 rounded-2xl p-3 shadow-2xl flex flex-col pointer-events-auto backdrop-blur-md h-full">
+                                <h2 className="text-sm md:text-base font-bold text-white/60 mb-3 drop-shadow-md flex items-center"><i className="fa-brands fa-youtube mr-2 text-white/50"></i> Focus Playlist</h2>
+                                <div className="flex gap-1.5 mb-3 shrink-0 w-full">
+                                    <input type="text" value={newYtUrl} onChange={(e) => setNewYtUrl(e.target.value)} placeholder="Paste URL..." className="flex-1 w-0 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] md:text-xs text-white/70 focus:outline-none focus:border-white/30 placeholder-white/30 transition-colors" />
+                                    <button onClick={addVideo} className="bg-white/10 hover:bg-white/20 px-2.5 py-1.5 rounded-lg text-white/60 font-bold shadow-md transition-colors shrink-0"><i className="fa-solid fa-plus text-[10px] md:text-xs"></i></button>
+                                </div>
+                                <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1.5 pr-1">
+                                    <div className="flex flex-col gap-1.5 mb-2">
+                                        {[{ id: 'ps3', icon: 'fa-atom', color: 'emerald', title: 'Ethereal Plasma' }, { id: 'tendrils', icon: 'fa-cloud-showers-heavy', color: 'cyan', title: 'Raining Tendrils' }, { id: 'nebula', icon: 'fa-certificate', color: 'purple', title: 'Cosmic Drift' }, { id: 'plasma2', icon: 'fa-hurricane', color: 'rose', title: 'Hypnotic Plasma' }].map(pat => (
+                                            <div key={pat.id} onClick={() => playPattern(pat.id)} className={`flex items-center justify-between bg-${pat.color}-500/10 hover:bg-${pat.color}-500/30 p-2 rounded-lg border border-${pat.color}-500/20 group transition-all backdrop-blur-sm shadow-sm cursor-pointer`}>
+                                                <div className={`flex-1 text-left flex items-center text-${pat.color}-400 group-hover:text-${pat.color}-200 transition-colors overflow-hidden pr-2 pointer-events-none`}><i className={`fa-solid ${pat.icon} text-${pat.color}-500 mr-2 text-[10px] md:text-xs drop-shadow shrink-0`}></i><span className="text-[10px] md:text-xs font-bold truncate">{pat.title}</span></div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {playlistData.length === 0 && <p className="text-white/30 text-center text-[10px] md:text-xs mt-4">Add a YouTube link above.</p>}
+                                    {playlistData.map((vid, idx) => (
+                                        <div key={idx} onClick={() => playVideo(vid.url)} className="flex items-center justify-between bg-white/5 p-2 rounded-lg border border-white/5 hover:border-white/20 hover:bg-white/10 group transition-all mb-1.5 backdrop-blur-sm shadow-sm cursor-pointer">
+                                            <div className="flex-1 text-left flex items-center text-white/60 group-hover:text-white transition-colors overflow-hidden pr-2 pointer-events-none"><i className="fa-brands fa-youtube text-white/40 mr-2 text-[10px] md:text-xs drop-shadow shrink-0"></i><span className="text-[10px] md:text-xs font-medium truncate">{vid.title}</span></div>
+                                            <button onClick={(e) => deleteVideo(idx, e)} className="text-white/20 hover:text-red-400/80 opacity-0 group-hover:opacity-100 transition-opacity p-1 shrink-0 z-10"><i className="fa-solid fa-trash text-[10px]"></i></button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="w-[120px] md:w-[140px] bg-slate-900/10 border border-white/10 rounded-2xl p-4 shadow-2xl flex flex-col items-center pointer-events-auto backdrop-blur-md h-full">
+                                <h2 className="text-base md:text-lg font-bold text-white/70 mb-4 text-center leading-tight drop-shadow-md"><i className="fa-solid fa-volume-high text-cyan-400/80 block text-xl md:text-2xl mb-1"></i> Noise</h2>
+                                {!micEnabled ? (
+                                    <button onClick={startMic} className="w-full bg-cyan-600/40 hover:bg-cyan-500/60 text-white/80 font-bold py-3 rounded-xl shadow-lg mb-4 text-[10px] md:text-xs flex flex-col items-center border border-cyan-400/30 transition-colors"><i className="fa-solid fa-microphone text-lg md:text-xl mb-1"></i> Enable Mic</button>
+                                ) : (
+                                    <div className="flex-1 w-full bg-black/20 rounded-full border border-white/10 overflow-hidden relative flex flex-col-reverse shadow-inner backdrop-blur-sm">
+                                        <div className="w-full rounded-full transition-all duration-100 ease-out" style={{ height: `${volumePercent}%`, backgroundColor: getMeterColor(), boxShadow: getMeterShadow() }}></div>
+                                        <div className="absolute bottom-[60%] left-0 right-0 border-b-2 md:border-b-4 border-yellow-500/50 z-10 w-full drop-shadow-md"></div><div className="absolute bottom-[85%] left-0 right-0 border-b-2 md:border-b-4 border-red-500/50 z-10 w-full drop-shadow-md"></div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {showTimerPrompt && (
+                        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center pointer-events-auto">
+                            <div className="bg-slate-800 p-8 rounded-3xl border border-slate-600 shadow-2xl flex flex-col items-center">
+                                <h3 className="text-2xl font-bold text-white mb-4">Set Timer (Minutes)</h3>
+                                <input type="number" value={timerInput} onChange={e => setTimerInput(e.target.value)} className="w-32 bg-slate-900 border border-slate-500 rounded-xl px-4 py-3 text-center text-3xl font-black text-emerald-400 focus:outline-none focus:border-emerald-500 mb-6" />
+                                <div className="flex gap-4 w-full">
+                                    <button onClick={() => setShowTimerPrompt(false)} className="flex-1 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold transition-colors">Cancel</button>
+                                    <button onClick={startTimer} className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-colors shadow-lg shadow-emerald-900/50">Start</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {timeMode && (
+                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none bg-transparent">
+                            <div className="bg-black/20 backdrop-blur-md rounded-[3rem] p-8 md:p-12 flex flex-col items-center border border-white/10 pointer-events-auto shadow-2xl">
+                                <h1 className="text-[12vw] md:text-[14vw] font-black text-white/90 drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)] tracking-tighter leading-none">{timesUp ? "TIME'S UP!" : formatTime(timeValue)}</h1>
+                                <button onClick={() => setTimeMode(null)} className="mt-6 md:mt-8 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white/80 px-8 py-3 rounded-full text-lg md:text-xl font-bold transition-all shadow-xl pointer-events-auto">Dismiss Timer</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {isAlarmActive && (
+                        <div className="fixed inset-0 z-[999] bg-red-600/95 backdrop-blur-xl flex flex-col items-center justify-center animate-pulse pointer-events-auto">
+                            <i className="fa-solid fa-triangle-exclamation text-white text-9xl mb-8 drop-shadow-2xl"></i>
+                            <h1 className="text-6xl md:text-8xl font-black text-white text-center tracking-tight mb-8 drop-shadow-2xl">TOO LOUD</h1>
+                            <p className="text-3xl text-white font-bold mb-12 drop-shadow-lg">We need to be silent now.</p>
+                            <button onClick={dismissAlarm} className="bg-white text-red-600 hover:bg-slate-200 font-extrabold text-2xl px-12 py-6 rounded-full shadow-2xl border-4 border-red-800 transition-transform hover:scale-105">Dismiss Alarm</button>
+                        </div>
+                    )}
+                </>
+            );
         }
 
-        function updateMeter(vol) {
-            const bar = document.getElementById('meter-bar');
-            bar.style.height = vol + '%'; 
-
-            if (vol < 60) {
-                bar.style.backgroundColor = 'rgba(16, 185, 129, 0.7)'; 
-                bar.style.boxShadow = '0 0 15px rgba(16,185,129,0.5)';
-                redStartTime = null;
-            } else if (vol >= 60 && vol < 85) {
-                bar.style.backgroundColor = 'rgba(234, 179, 8, 0.7)'; 
-                bar.style.boxShadow = '0 0 15px rgba(234,179,8,0.5)';
-                redStartTime = null;
-            } else {
-                bar.style.backgroundColor = 'rgba(239, 68, 68, 0.8)'; 
-                bar.style.boxShadow = '0 0 25px rgba(239,68,68,0.7)';
-                
-                if (!redStartTime) {
-                    redStartTime = Date.now();
-                } else if (Date.now() - redStartTime > 5000) { 
-                    triggerAlarm();
-                }
-            }
-        }
-
-        function triggerAlarm() {
-            if (alarmOscillator) return; 
-            
-            document.getElementById('alarm-overlay').classList.remove('hidden');
-            
-            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            alarmOscillator = audioCtx.createOscillator();
-            alarmOscillator.type = 'sawtooth';
-            alarmOscillator.frequency.setValueAtTime(440, audioCtx.currentTime); 
-            alarmOscillator.connect(audioCtx.destination);
-            alarmOscillator.start();
-        }
-
-        window.dismissAlarm = () => {
-            if (alarmOscillator) {
-                alarmOscillator.stop();
-                alarmOscillator.disconnect();
-                alarmOscillator = null;
-            }
-            redStartTime = null;
-            document.getElementById('alarm-overlay').classList.add('hidden');
-        }
+        // 6. Tell React to "Draw" the app onto the screen
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<LearningZone />);
     </script>
 </body>
 </html>
