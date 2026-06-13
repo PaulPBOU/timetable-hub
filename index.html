@@ -691,6 +691,57 @@
         };
 
         // --- TODO LOGIC ---
+        
+        // Auto carry-over logic for previous day's unfinished tasks
+        window.autoCarryOverTodos = async (currentDay) => {
+            if (!currentDay) return;
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+            const curIdx = days.indexOf(currentDay);
+            let prevTodos = [];
+
+            if (curIdx > 0) {
+                // Same week, previous day
+                prevTodos = window.appState.todosData[days[curIdx - 1]] || [];
+            } else if (curIdx === 0) {
+                // Cross week (Thursday to Monday)
+                const prevTime = getPreviousSchoolWeek(window.appState.term, window.appState.week);
+                if (prevTime) {
+                    try {
+                        const docRef = doc(db, "timetables", `2026_${prevTime.term.replace(' ', '')}_${prevTime.week.replace(' ', '')}`);
+                        const docSnap = await getDoc(docRef);
+                        if (docSnap.exists() && docSnap.data().todos && docSnap.data().todos['Thursday']) {
+                            prevTodos = docSnap.data().todos['Thursday'];
+                        }
+                    } catch(e) { console.error("Error fetching previous week todos", e); }
+                }
+            }
+
+            const undone = prevTodos.filter(t => !t.done);
+            if (undone.length === 0) return;
+
+            let currentTodos = [...(window.appState.todosData[currentDay] || [])];
+            let added = false;
+            
+            undone.forEach(ut => {
+                // Only add if it doesn't already exist to prevent duplicate carry-overs
+                if (!currentTodos.find(ct => ct.text.toLowerCase() === ut.text.toLowerCase())) {
+                    currentTodos.push({ text: ut.text, done: false });
+                    added = true;
+                }
+            });
+
+            if (added) {
+                window.appState.todosData[currentDay] = currentTodos;
+                setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { 
+                    todos: { ...window.appState.todosData, [currentDay]: currentTodos } 
+                }, { merge: true });
+                
+                if (window.appState.view === 'day' || window.appState.view === 'start-day') {
+                    window.updateTodoUI();
+                }
+            }
+        };
+
         window.toggleStartDayTodos = () => {
             const animWrapper = document.getElementById('start-day-todos-anim');
             const chevron = document.getElementById('todo-chevron');
@@ -842,6 +893,7 @@
                 
                 if (view === 'start-day') {
                     renderStartDay();
+                    window.autoCarryOverTodos(window.appState.day);
                     if (!window.appState.soundPlayed) {
                         playStartSound();
                         window.appState.soundPlayed = true;
@@ -900,6 +952,7 @@
                     if(todoBtn) { todoBtn.classList.remove('hidden'); todoBtn.classList.add('flex'); }
                     window.updateTodoUI(); 
                     renderDayBlocks();
+                    window.autoCarryOverTodos(window.appState.day);
                 }
             }
         };
@@ -913,9 +966,9 @@
 
         const getSkeleton = () => [
             { id: 'b0', type: 'lesson', time: '9:00am - 9:20am', subject: 'English', topic: 'Spelling', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
-            { id: 'b1', type: 'lesson', time: '9:20am - 10:00am', subject: 'English', topic: '', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
+            { id: 'b1', type: 'lesson', time: '9:20am - 10:00am', subject: 'English', topic: 'Shared Reading', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
             { id: 'b2', type: 'lesson', time: '10:00am - 10:10am', subject: 'English', topic: 'Daily Write', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
-            { id: 'b3', type: 'lesson', time: '10:10am - 10:50am', subject: 'English', topic: 'Imaginative Writing', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
+            { id: 'b3', type: 'lesson', time: '10:10am - 10:50am', subject: 'English', topic: 'Writing', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
             { id: 'br1', type: 'break', time: '11:00am - 11:30am', topic: 'Break 1', icon: 'mug-hot' },
             { id: 'b4', type: 'lesson', time: '11:30am - 12:30pm', subject: 'History', topic: '', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
             { id: 'b5', type: 'lesson', time: '12:30pm - 1:30pm', subject: 'Maths', topic: '', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
@@ -1021,39 +1074,62 @@
             return null; 
         };
 
-        // Move single lesson block logic
-        window.moveLessonToNextDay = async (day, idx, btn) => {
+        // Move single lesson block logic (Now supports Forward/Backward)
+        window.moveLesson = async (day, idx, direction, btn) => {
             const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday'];
             const curIdx = days.indexOf(day);
             
             if (btn.dataset.confirmed === "true") {
-                let targetDay = days[curIdx + 1];
+                let targetDay;
                 let targetTerm = window.appState.term;
                 let targetWeek = window.appState.week;
-                let isNextWeek = false;
+                let isDiffWeek = false;
 
-                // Handle Thursday rollover to next Monday
-                if (curIdx === days.length - 1) {
-                    targetDay = 'Monday';
-                    isNextWeek = true;
-                    let termNum = parseInt(window.appState.term.replace('Term ', ''));
-                    let weekNum = parseInt(window.appState.week.replace('Week ', ''));
-                    weekNum += 1;
-                    if (weekNum > 12) {
-                        termNum += 1;
-                        if (termNum > 4) {
-                            showToast("Cannot copy lesson past Term 4.");
-                            return;
+                if (direction === 1) {
+                    if (curIdx === days.length - 1) {
+                        targetDay = 'Monday';
+                        isDiffWeek = true;
+                        let termNum = parseInt(window.appState.term.replace('Term ', ''));
+                        let weekNum = parseInt(window.appState.week.replace('Week ', ''));
+                        weekNum += 1;
+                        if (weekNum > 12) {
+                            termNum += 1;
+                            if (termNum > 4) {
+                                showToast("Cannot copy lesson past Term 4.");
+                                return;
+                            }
+                            weekNum = 1;
                         }
-                        weekNum = 1;
+                        targetTerm = `Term ${termNum}`;
+                        targetWeek = `Week ${weekNum}`;
+                    } else {
+                        targetDay = days[curIdx + 1];
                     }
-                    targetTerm = `Term ${termNum}`;
-                    targetWeek = `Week ${weekNum}`;
+                } else {
+                    if (curIdx === 0) {
+                        targetDay = 'Thursday';
+                        isDiffWeek = true;
+                        let termNum = parseInt(window.appState.term.replace('Term ', ''));
+                        let weekNum = parseInt(window.appState.week.replace('Week ', ''));
+                        weekNum -= 1;
+                        if (weekNum < 1) {
+                            termNum -= 1;
+                            if (termNum < 1) {
+                                showToast("Cannot copy lesson before Term 1.");
+                                return;
+                            }
+                            weekNum = 12;
+                        }
+                        targetTerm = `Term ${termNum}`;
+                        targetWeek = `Week ${weekNum}`;
+                    } else {
+                        targetDay = days[curIdx - 1];
+                    }
                 }
                 
                 const blockToMove = { ...window.appState.weekData[day][idx] };
 
-                if (!isNextWeek) {
+                if (!isDiffWeek) {
                     // Normal move within the same week
                     let updatedWeekData = { ...window.appState.weekData };
                     
@@ -1066,24 +1142,23 @@
                     setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: updatedWeekData }, { merge: true });
                     showToast(`Lesson copied to ${targetDay}`);
                 } else {
-                    // Move across to the next week's Monday
-                    const nextWeekDocRef = doc(db, "timetables", `2026_${targetTerm.replace(' ', '')}_${targetWeek.replace(' ', '')}`);
-                    const nextWeekSnap = await getDoc(nextWeekDocRef);
-                    let nextWeekData = { Monday: [], Tuesday: [], Wednesday: [], Thursday: [] };
+                    // Move across week boundary
+                    const diffWeekDocRef = doc(db, "timetables", `2026_${targetTerm.replace(' ', '')}_${targetWeek.replace(' ', '')}`);
+                    const diffWeekSnap = await getDoc(diffWeekDocRef);
+                    let diffWeekData = { Monday: [], Tuesday: [], Wednesday: [], Thursday: [] };
                     
-                    if (nextWeekSnap.exists() && nextWeekSnap.data().days) {
-                        nextWeekData = nextWeekSnap.data().days;
+                    if (diffWeekSnap.exists() && diffWeekSnap.data().days) {
+                        diffWeekData = diffWeekSnap.data().days;
                     }
                     
-                    if (!nextWeekData[targetDay] || nextWeekData[targetDay].length === 0 || nextWeekData[targetDay][0].type === 'cancelled') {
-                        nextWeekData[targetDay] = getSkeleton();
+                    if (!diffWeekData[targetDay] || diffWeekData[targetDay].length === 0 || diffWeekData[targetDay][0].type === 'cancelled') {
+                        diffWeekData[targetDay] = getSkeleton();
                     }
                     
-                    // Save to future week
-                    nextWeekData[targetDay][idx] = { ...blockToMove };
-                    await setDoc(nextWeekDocRef, { days: nextWeekData }, { merge: true });
+                    diffWeekData[targetDay][idx] = { ...blockToMove };
+                    await setDoc(diffWeekDocRef, { days: diffWeekData }, { merge: true });
                     
-                    showToast(`Lesson copied to Next ${targetDay}`);
+                    showToast(`Lesson copied to ${targetTerm}, ${targetWeek} ${targetDay}`);
                 }
             } else {
                 btn.dataset.confirmed = "true";
@@ -1437,11 +1512,14 @@
                                 <div class="flex justify-between items-center relative z-10">
                                     <span class="${theme.badgeBg} ${theme.badgeText} border ${theme.badgeBorder} px-2 py-0.5 rounded text-[9px] md:text-[10px] font-bold tracking-wide">${block.time}</span>
                                     
-                                    <div class="opacity-0 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex gap-1 relative z-20">
-                                        <button onclick="event.stopPropagation(); moveLessonToNextDay('${day}', ${idx}, this)" class="bg-slate-50 dark:bg-slate-700 hover:bg-amber-50 dark:hover:bg-amber-900/30 text-slate-400 hover:text-amber-500 p-1.5 rounded text-[9px] transition-colors border border-slate-200 dark:border-slate-600 cursor-pointer" title="">
+                                    <div class="opacity-0 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex relative z-20">
+                                        <button onclick="event.stopPropagation(); moveLesson('${day}', ${idx}, -1, this)" class="bg-slate-50 dark:bg-slate-700 hover:bg-amber-50 dark:hover:bg-amber-900/30 text-slate-400 hover:text-amber-500 p-1.5 rounded-l text-[9px] transition-colors border border-slate-200 dark:border-slate-600 cursor-pointer border-r-0" title="Copy to prev day">
+                                            <i class="fa-solid fa-reply"></i>
+                                        </button>
+                                        <button onclick="event.stopPropagation(); moveLesson('${day}', ${idx}, 1, this)" class="bg-slate-50 dark:bg-slate-700 hover:bg-amber-50 dark:hover:bg-amber-900/30 text-slate-400 hover:text-amber-500 p-1.5 text-[9px] transition-colors border border-slate-200 dark:border-slate-600 cursor-pointer" title="Copy to next day">
                                             <i class="fa-solid fa-share"></i>
                                         </button>
-                                        <button onclick="event.stopPropagation(); initEdit('${day}', ${idx})" class="bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded text-[9px] transition-colors border border-slate-200 dark:border-slate-600 cursor-pointer" title="">
+                                        <button onclick="event.stopPropagation(); initEdit('${day}', ${idx})" class="bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-r text-[9px] transition-colors border border-slate-200 dark:border-slate-600 cursor-pointer border-l-0" title="Edit lesson">
                                             <i class="fa-solid fa-pen"></i>
                                         </button>
                                     </div>
@@ -1522,10 +1600,13 @@
                         </span>
                         
                         <div class="flex items-center z-20 transition-all pr-8 md:pr-0">
-                            <button onclick="event.stopPropagation(); moveLessonToNextDay('${window.appState.day}', ${idx}, this)" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none rounded-l-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="">
+                            <button onclick="event.stopPropagation(); moveLesson('${window.appState.day}', ${idx}, -1, this)" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none rounded-l-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="Copy to prev day">
+                                <i class="fa-solid fa-reply text-xs md:text-sm"></i>
+                            </button>
+                            <button onclick="event.stopPropagation(); moveLesson('${window.appState.day}', ${idx}, 1, this)" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="Copy to next day">
                                 <i class="fa-solid fa-share text-xs md:text-sm"></i>
                             </button>
-                            <button onclick="event.stopPropagation(); initEdit('${window.appState.day}', ${idx}); closeModals(); setTimeout(() => document.getElementById('modal-edit').classList.replace('hidden', 'flex'), 100);" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none rounded-r-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer" title="">
+                            <button onclick="event.stopPropagation(); initEdit('${window.appState.day}', ${idx}); closeModals(); setTimeout(() => document.getElementById('modal-edit').classList.replace('hidden', 'flex'), 100);" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none rounded-r-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer" title="Edit lesson">
                                 <i class="fa-solid fa-pen text-xs md:text-sm"></i>
                             </button>
                         </div>
@@ -1716,10 +1797,13 @@
                                 </span>
                                 
                                 <div class="flex items-center z-20 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all">
-                                    <button onclick="event.stopPropagation(); moveLessonToNextDay('${window.appState.day}', ${idx}, this)" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none rounded-l-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="">
+                                    <button onclick="event.stopPropagation(); moveLesson('${window.appState.day}', ${idx}, -1, this)" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none rounded-l-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="Copy to prev day">
+                                        <i class="fa-solid fa-reply text-xs md:text-sm"></i>
+                                    </button>
+                                    <button onclick="event.stopPropagation(); moveLesson('${window.appState.day}', ${idx}, 1, this)" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="Copy to next day">
                                         <i class="fa-solid fa-share text-xs md:text-sm"></i>
                                     </button>
-                                    <button onclick="event.stopPropagation(); initEdit('${window.appState.day}', ${idx})" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none rounded-r-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer" title="">
+                                    <button onclick="event.stopPropagation(); initEdit('${window.appState.day}', ${idx})" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none rounded-r-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer" title="Edit lesson">
                                         <i class="fa-solid fa-pen text-xs md:text-sm"></i>
                                     </button>
                                 </div>
