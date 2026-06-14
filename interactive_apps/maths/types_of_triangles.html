@@ -90,7 +90,6 @@
         const { useState, useEffect, useRef } = React;
 
         // --- DATA ---
-        // Coordinates and angles recalculated for absolute perfection
         const triangleData = {
             equilateral: {
                 name: 'Equilateral Triangle',
@@ -168,6 +167,61 @@
             }
         };
 
+        const angleData = {
+            acute: {
+                name: 'Acute Angle',
+                color: 'text-sky-600',
+                bg: 'bg-sky-50 border-sky-200',
+                stroke: 'stroke-sky-500',
+                fill: 'fill-sky-100',
+                angle: 45,
+                properties: [
+                    "Measures less than 90°.",
+                    "Smaller than a right angle.",
+                    "Looks sharp or pointy."
+                ]
+            },
+            right: {
+                name: 'Right Angle',
+                color: 'text-rose-600',
+                bg: 'bg-rose-50 border-rose-200',
+                stroke: 'stroke-rose-500',
+                fill: 'fill-rose-100',
+                angle: 90,
+                properties: [
+                    "Measures exactly 90°.",
+                    "Forms a perfect square corner.",
+                    "Found in squares and rectangles."
+                ]
+            },
+            obtuse: {
+                name: 'Obtuse Angle',
+                color: 'text-orange-600',
+                bg: 'bg-orange-50 border-orange-200',
+                stroke: 'stroke-orange-500',
+                fill: 'fill-orange-100',
+                angle: 135,
+                properties: [
+                    "Measures greater than 90°.",
+                    "Measures less than 180°.",
+                    "Wider than a right angle."
+                ]
+            },
+            straight: {
+                name: 'Straight Angle',
+                color: 'text-emerald-600',
+                bg: 'bg-emerald-50 border-emerald-200',
+                stroke: 'stroke-emerald-500',
+                fill: 'fill-emerald-100',
+                angle: 180,
+                properties: [
+                    "Measures exactly 180°.",
+                    "Forms a perfectly straight line.",
+                    "Equivalent to two right angles side-by-side."
+                ]
+            }
+        };
+
         const riddles = [
             { q: "Each of my interior angles measure 60°. What am I?", a: "Equilateral", opts: ["Scalene", "Equilateral", "Isosceles"] },
             { q: "I am the longest side of a right-angled triangle. What am I?", a: "Hypotenuse", opts: ["Hypotenuse", "Base", "Vertex"] },
@@ -183,7 +237,6 @@
             const data = triangleData[type];
             return (
                 <div className="relative w-full max-w-sm mx-auto aspect-square bg-white rounded-2xl shadow-inner border border-slate-100 flex items-center justify-center p-6">
-                    {/* -10 -10 220 220 viewBox prevents any stroke from being cut off at the edges */}
                     <svg viewBox="-10 -10 220 220" className="w-full h-full drop-shadow-md">
                         <path d={data.svgPath} className={`${data.fill} stroke-[4] path-draw stroke-linejoin-round`} />
                         
@@ -214,45 +267,158 @@
             );
         };
 
-        const LearnSection = () => {
-            const [activeType, setActiveType] = useState('equilateral');
+        const AngleVisualiser = ({ type }) => {
+            const data = angleData[type];
+            const rad = (data.angle * Math.PI) / 180;
+            const radius = 35;
+            
+            // Base line origin and dimensions
+            const vX = 100, vY = 140; 
+            const lineLen = 80;
+            
+            // Endpoints
+            const e1X = vX + lineLen, e1Y = vY;
+            const e2X = vX + lineLen * Math.cos(rad), e2Y = vY - lineLen * Math.sin(rad);
+
+            // Arc calculations
+            const arcEndX = vX + radius * Math.cos(rad);
+            const arcEndY = vY - radius * Math.sin(rad);
+
+            // Label positioning (bisect the angle)
+            const labelRad = rad / 2;
+            const labelX = vX + 55 * Math.cos(labelRad);
+            const labelY = vY - 55 * Math.sin(labelRad);
 
             return (
-                <div className="flex flex-col md:flex-row gap-4 md:gap-8 animate-fade-in mt-2 w-full">
-                    <div className="flex-1 space-y-3">
-                        <h2 className="text-2xl md:text-3xl font-black text-slate-800 flex items-center gap-3">
-                            <i className="fa-solid fa-shapes text-cyan-500"></i> Explore
-                        </h2>
-                        <p className="text-slate-600 font-medium text-sm md:text-base">Click on a triangle type to learn its unique properties. Remember: <strong>All interior angles of any triangle always add up to 180°!</strong></p>
+                <div className="relative w-full max-w-sm mx-auto aspect-square bg-white rounded-2xl shadow-inner border border-slate-100 flex items-center justify-center p-6">
+                    <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-md">
+                        {/* Angle Fill (Optional soft fill to highlight the interior) */}
+                        {data.angle !== 180 && (
+                            <path d={`M ${vX} ${vY} L ${e1X} ${e1Y} A ${lineLen} ${lineLen} 0 0 0 ${e2X} ${e2Y} Z`} className={`${data.fill} opacity-50`} />
+                        )}
+                        {data.angle === 180 && (
+                            <path d={`M ${vX - lineLen} ${vY} A ${lineLen} ${lineLen} 0 0 1 ${vX + lineLen} ${vY} Z`} className={`${data.fill} opacity-50`} />
+                        )}
+
+                        {/* Draw arms */}
+                        <path d={`M ${e2X} ${e2Y} L ${vX} ${vY} L ${e1X} ${e1Y}`} fill="none" className={`${data.stroke} stroke-[6] stroke-linecap-round stroke-linejoin-round path-draw`} />
                         
-                        <div className="grid grid-cols-2 gap-2.5 mt-4">
-                            {Object.entries(triangleData).map(([key, data]) => (
-                                <button 
-                                    key={key}
-                                    onClick={() => setActiveType(key)}
-                                    className={`p-3 md:p-4 rounded-xl md:rounded-2xl border-2 text-left transition-all ${activeType === key ? `${data.bg} shadow-md scale-[1.02]` : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}
-                                >
-                                    <h3 className={`font-bold text-base md:text-lg leading-tight ${activeType === key ? data.color : 'text-slate-700'}`}>{data.name}</h3>
-                                </button>
-                            ))}
-                        </div>
+                        {/* Draw angle marker */}
+                        {data.angle === 90 ? (
+                            <path d={`M ${vX} ${vY - 25} L ${vX + 25} ${vY - 25} L ${vX + 25} ${vY}`} fill="none" className="stroke-slate-800 stroke-[3] stroke-linejoin-round stroke-linecap-round" />
+                        ) : (
+                            <path d={`M ${vX + radius} ${vY} A ${radius} ${radius} 0 0 0 ${arcEndX} ${arcEndY}`} fill="none" className="stroke-slate-800 stroke-[3]" />
+                        )}
+                        
+                        {/* Angle text */}
+                        <text x={labelX} y={labelY} fill="#1e293b" fontSize="18" fontWeight="bold" textAnchor="middle" dominantBaseline="middle">{data.angle}°</text>
 
-                        <div className={`mt-4 p-5 rounded-2xl border ${triangleData[activeType].bg} bg-white shadow-sm transition-all`}>
-                            <h3 className={`text-xl font-black mb-3 ${triangleData[activeType].color}`}>Properties</h3>
-                            <ul className="space-y-2">
-                                {triangleData[activeType].properties.map((prop, i) => (
-                                    <li key={i} className="flex items-start gap-2.5">
-                                        <i className={`fa-solid fa-check mt-1 text-xs md:text-sm ${triangleData[activeType].color}`}></i>
-                                        <span className="text-slate-700 font-medium text-sm md:text-base">{prop}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                        {/* Origin Dot */}
+                        <circle cx={vX} cy={vY} r="5" className="fill-slate-800" />
+                    </svg>
+                </div>
+            );
+        };
+
+        const LearnSection = () => {
+            const [subTab, setSubTab] = useState('triangles'); // 'triangles' or 'angles'
+            const [activeTriType, setActiveTriType] = useState('equilateral');
+            const [activeAngType, setActiveAngType] = useState('acute');
+
+            return (
+                <div className="flex flex-col animate-fade-in mt-2 w-full">
+                    
+                    {/* Sub-tab Navigation */}
+                    <div className="bg-slate-200/60 p-1 rounded-xl flex w-full max-w-sm mx-auto mb-3 md:mb-4 border border-slate-200 shadow-sm">
+                        <button 
+                            onClick={() => setSubTab('triangles')} 
+                            className={`flex-1 py-1.5 md:py-2 rounded-lg font-bold text-sm md:text-base transition-all ${subTab === 'triangles' ? 'bg-white shadow-sm text-cyan-600' : 'text-slate-500 hover:text-slate-700'}`}
+                        >
+                            <i className="fa-solid fa-shapes mr-2"></i>Triangles
+                        </button>
+                        <button 
+                            onClick={() => setSubTab('angles')} 
+                            className={`flex-1 py-1.5 md:py-2 rounded-lg font-bold text-sm md:text-base transition-all ${subTab === 'angles' ? 'bg-white shadow-sm text-cyan-600' : 'text-slate-500 hover:text-slate-700'}`}
+                        >
+                            <i className="fa-solid fa-angle-right mr-2"></i>Angles
+                        </button>
                     </div>
 
-                    <div className="flex-1 flex flex-col justify-center">
-                        <TriangleVisualiser type={activeType} />
-                    </div>
+                    {subTab === 'triangles' ? (
+                        /* Triangles Content */
+                        <div className="flex flex-col md:flex-row gap-4 md:gap-8 w-full animate-fade-in">
+                            <div className="flex-1 space-y-3">
+                                <h2 className="text-2xl md:text-3xl font-black text-slate-800 flex items-center gap-3">
+                                    <i className="fa-solid fa-play -rotate-90 text-indigo-500"></i> Types of Triangles
+                                </h2>
+                                <p className="text-slate-600 font-medium text-sm md:text-base">Remember: <strong>All interior angles of any triangle always add up to 180°</strong></p>
+                                
+                                <div className="grid grid-cols-2 gap-2.5 mt-4">
+                                    {Object.entries(triangleData).map(([key, data]) => (
+                                        <button 
+                                            key={key}
+                                            onClick={() => setActiveTriType(key)}
+                                            className={`p-3 md:p-4 rounded-xl md:rounded-2xl border-2 text-left transition-all ${activeTriType === key ? `${data.bg} shadow-md scale-[1.02]` : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}
+                                        >
+                                            <h3 className={`font-bold text-base md:text-lg leading-tight ${activeTriType === key ? data.color : 'text-slate-700'}`}>{data.name}</h3>
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className={`mt-4 p-5 rounded-2xl border ${triangleData[activeTriType].bg} bg-white shadow-sm transition-all`}>
+                                    <h3 className={`text-xl font-black mb-3 ${triangleData[activeTriType].color}`}>Properties</h3>
+                                    <ul className="space-y-2">
+                                        {triangleData[activeTriType].properties.map((prop, i) => (
+                                            <li key={i} className="flex items-start gap-2.5">
+                                                <i className={`fa-solid fa-check mt-1 text-xs md:text-sm ${triangleData[activeTriType].color}`}></i>
+                                                <span className="text-slate-700 font-medium text-sm md:text-base">{prop}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                            <div className="flex-1 flex flex-col justify-center">
+                                <TriangleVisualiser type={activeTriType} />
+                            </div>
+                        </div>
+                    ) : (
+                        /* Angles Content */
+                        <div className="flex flex-col md:flex-row gap-4 md:gap-8 w-full animate-fade-in">
+                            <div className="flex-1 space-y-3">
+                                <h2 className="text-2xl md:text-3xl font-black text-slate-800 flex items-center gap-3">
+                                    <i className="fa-solid fa-pen-ruler text-sky-500"></i> Types of Angles
+                                </h2>
+                                
+                                <div className="grid grid-cols-2 gap-2.5 mt-4">
+                                    {Object.entries(angleData).map(([key, data]) => (
+                                        <button 
+                                            key={key}
+                                            onClick={() => setActiveAngType(key)}
+                                            className={`p-3 md:p-4 rounded-xl md:rounded-2xl border-2 text-left transition-all ${activeAngType === key ? `${data.bg} shadow-md scale-[1.02]` : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}
+                                        >
+                                            <h3 className={`font-bold text-base md:text-lg leading-tight ${activeAngType === key ? data.color : 'text-slate-700'}`}>{data.name}</h3>
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className={`mt-4 p-5 rounded-2xl border ${angleData[activeAngType].bg} bg-white shadow-sm transition-all`}>
+                                    <h3 className={`text-xl font-black mb-3 ${angleData[activeAngType].color}`}>Properties</h3>
+                                    <ul className="space-y-2">
+                                        {angleData[activeAngType].properties.map((prop, i) => (
+                                            <li key={i} className="flex items-start gap-2.5">
+                                                <i className={`fa-solid fa-check mt-1 text-xs md:text-sm ${angleData[activeAngType].color}`}></i>
+                                                <span className="text-slate-700 font-medium text-sm md:text-base">{prop}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                            <div className="flex-1 flex flex-col justify-center">
+                                <AngleVisualiser type={activeAngType} />
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             );
         };
@@ -525,7 +691,6 @@
         const TriangleSandbox = () => {
             const svgRef = useRef(null);
             
-            // Shifted points to avoid the top-left badges overlapping the triangle
             const [points, setPoints] = useState({
                 A: { x: 250, y: 150 },
                 B: { x: 150, y: 300 },
@@ -535,14 +700,12 @@
             const [hoveredPoint, setHoveredPoint] = useState(null);
             const [stats, setStats] = useState({ type: '', angleType: '', angles: {}, lengths: {} });
 
-            // Math calculations
             useEffect(() => {
                 const dist = (p1, p2) => Math.sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2);
                 const a = dist(points.B, points.C);
                 const b = dist(points.A, points.C);
                 const c = dist(points.A, points.B);
 
-                // Law of Cosines
                 const angleARad = Math.acos((b**2 + c**2 - a**2) / (2 * b * c));
                 const angleBRad = Math.acos((a**2 + c**2 - b**2) / (2 * a * c));
                 const angleCRad = Math.PI - angleARad - angleBRad;
@@ -551,12 +714,10 @@
                 let degB = Math.round((angleBRad * 180) / Math.PI);
                 let degC = Math.round((angleCRad * 180) / Math.PI); 
                 
-                // Snap right angles first (within 1 degree)
                 if (Math.abs(degA - 90) <= 1) { degA = 90; }
                 else if (Math.abs(degB - 90) <= 1) { degB = 90; }
                 else if (Math.abs(degC - 90) <= 1) { degC = 90; }
 
-                // Snap isosceles sides (3 pixels tolerance)
                 const eps = 3;
                 if (Math.abs(a - b) < eps && Math.abs(b - c) < eps) {
                     degA = 60; degB = 60; degC = 60;
@@ -570,11 +731,9 @@
                     let avg = Math.round((degA + degC) / 2);
                     degA = avg; degC = avg; degB = 180 - degA - degC;
                 } else {
-                    // Handling rounding quirks to ensure exactly 180 display for scalene
                     degC = 180 - degA - degB;
                 }
 
-                // Strict evaluation based on displayed angles guarantees UI consistency
                 let sideType = "Scalene";
                 if (degA === 60 && degB === 60 && degC === 60) sideType = "Equilateral"; 
                 else if (degA === degB || degB === degC || degA === degC) sideType = "Isosceles";
@@ -596,33 +755,22 @@
                 const rect = svgRef.current.getBoundingClientRect();
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                return {
-                    x: clientX - rect.left,
-                    y: clientY - rect.top
-                };
+                return { x: clientX - rect.left, y: clientY - rect.top };
             };
 
-            const handlePointerDown = (pointId, e) => {
-                e.preventDefault(); 
-                setDragging(pointId);
-            };
-
+            const handlePointerDown = (pointId, e) => { e.preventDefault(); setDragging(pointId); };
             const handlePointerMove = (e) => {
                 if (!dragging) return;
                 e.preventDefault();
                 const coords = getRelativeCoords(e);
-                
                 const width = svgRef.current.clientWidth;
                 const height = svgRef.current.clientHeight;
                 coords.x = Math.max(10, Math.min(width - 10, coords.x));
                 coords.y = Math.max(10, Math.min(height - 10, coords.y));
-
                 setPoints(prev => ({ ...prev, [dragging]: coords }));
             };
-
             const handlePointerUp = () => setDragging(null);
 
-            // Shifted generation points to ensure they form off-center and don't overlap with labels
             const makeShape = (shape) => {
                 if (shape === 'right') {
                     setPoints({ A: { x: 180, y: 150 }, B: { x: 180, y: 300 }, C: { x: 380, y: 300 } });
@@ -639,7 +787,6 @@
                 }
             };
 
-            // Dynamic badges
             const getBadgeColor = (type) => {
                 if (type === 'Equilateral') return 'bg-emerald-100 text-emerald-800 border-emerald-300';
                 if (type === 'Isosceles') return 'bg-amber-100 text-amber-800 border-amber-300';
@@ -664,30 +811,24 @@
                 return '';
             }
 
-            // Calculate label offsets (Push label slightly away from centroid)
             const getLabelPos = (vertex) => {
                 const centroidX = (points.A.x + points.B.x + points.C.x) / 3;
                 const centroidY = (points.A.y + points.B.y + points.C.y) / 3;
                 const dx = centroidX - vertex.x;
                 const dy = centroidY - vertex.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
-                return {
-                    x: vertex.x + (dx/dist) * 35,
-                    y: vertex.y + (dy/dist) * 35
-                };
+                return { x: vertex.x + (dx/dist) * 35, y: vertex.y + (dy/dist) * 35 };
             };
 
             const labelA = getLabelPos(points.A);
             const labelB = getLabelPos(points.B);
             const labelC = getLabelPos(points.C);
 
-            // Helper to draw a square marker at a 90 degree vertex
             const getRightAnglePath = (vertex, p1, p2) => {
                 const size = 20;
                 const dx1 = p1.x - vertex.x; const dy1 = p1.y - vertex.y;
                 const len1 = Math.sqrt(dx1*dx1 + dy1*dy1);
                 const u1x = dx1 / len1; const u1y = dy1 / len1;
-
                 const dx2 = p2.x - vertex.x; const dy2 = p2.y - vertex.y;
                 const len2 = Math.sqrt(dx2*dx2 + dy2*dy2);
                 const u2x = dx2 / len2; const u2y = dy2 / len2;
@@ -695,14 +836,11 @@
                 const pt1 = { x: vertex.x + u1x * size, y: vertex.y + u1y * size };
                 const pt2 = { x: pt1.x + u2x * size, y: pt1.y + u2y * size };
                 const pt3 = { x: vertex.x + u2x * size, y: vertex.y + u2y * size };
-
                 return `M ${pt1.x},${pt1.y} L ${pt2.x},${pt2.y} L ${pt3.x},${pt3.y}`;
             };
 
             return (
                 <div className="flex flex-col lg:flex-row gap-4 md:gap-6 mt-2 animate-fade-in w-full items-stretch">
-                    
-                    {/* Left Column: Title + Controls */}
                     <div className="flex flex-col gap-4 w-full lg:w-56 shrink-0 z-10">
                         <div className="bg-white rounded-2xl md:rounded-3xl shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col gap-1">
                             <h2 className="text-xl md:text-2xl font-black text-slate-800 flex items-center gap-2"><i className="fa-solid fa-gamepad text-indigo-500"></i> Sandbox</h2>
@@ -717,11 +855,9 @@
                         </div>
                     </div>
 
-                    {/* Center Canvas Area */}
                     <div className="flex-1 bg-white rounded-2xl md:rounded-3xl shadow-md border border-slate-200 overflow-hidden relative min-h-[350px] md:min-h-[450px]" style={{ touchAction: 'none' }}>
                         <div className="absolute inset-0 bg-grid-pattern opacity-50"></div>
                         
-                        {/* Live Badge Overlay with Explanations */}
                         <div className="absolute top-3 left-3 md:top-4 md:left-4 z-10 flex flex-col gap-2 pointer-events-none">
                             <div className={`px-3 md:px-4 py-1.5 md:py-2 rounded-xl border-2 shadow-sm flex flex-col ${getBadgeColor(stats.type)}`}>
                                 <span className="font-black text-sm md:text-base leading-tight">{stats.type} Triangle</span>
@@ -741,7 +877,6 @@
                             onPointerLeave={handlePointerUp}
                             onTouchMove={(e) => { if(dragging) e.preventDefault() }}
                         >
-                            {/* Triangle Path */}
                             <polygon 
                                 points={`${points.A.x},${points.A.y} ${points.B.x},${points.B.y} ${points.C.x},${points.C.y}`} 
                                 className={`fill-indigo-100/50 stroke-indigo-600 stroke-[4] stroke-linejoin-round transition-colors duration-300
@@ -751,17 +886,14 @@
                                 `}
                             />
 
-                            {/* Right Angle Square Indicator if exactly 90 */}
                             {stats.angles.A === 90 ? <path d={getRightAnglePath(points.A, points.B, points.C)} fill="none" stroke="#f43f5e" strokeWidth="3" strokeLinejoin="round" /> : null}
                             {stats.angles.B === 90 ? <path d={getRightAnglePath(points.B, points.A, points.C)} fill="none" stroke="#f43f5e" strokeWidth="3" strokeLinejoin="round" /> : null}
                             {stats.angles.C === 90 ? <path d={getRightAnglePath(points.C, points.A, points.B)} fill="none" stroke="#f43f5e" strokeWidth="3" strokeLinejoin="round" /> : null}
 
-                            {/* Angle Text */}
                             <text x={labelA.x} y={labelA.y} fill="#1e293b" fontSize="16" fontWeight="bold" textAnchor="middle" dominantBaseline="middle">{stats.angles.A}°</text>
                             <text x={labelB.x} y={labelB.y} fill="#1e293b" fontSize="16" fontWeight="bold" textAnchor="middle" dominantBaseline="middle">{stats.angles.B}°</text>
                             <text x={labelC.x} y={labelC.y} fill="#1e293b" fontSize="16" fontWeight="bold" textAnchor="middle" dominantBaseline="middle">{stats.angles.C}°</text>
 
-                            {/* Draggable Points */}
                             {Object.keys(points).map(key => (
                                 <g key={key} 
                                     onPointerDown={(e) => handlePointerDown(key, e)}
@@ -769,7 +901,7 @@
                                     onMouseLeave={() => setHoveredPoint(null)}
                                     className="cursor-grab active:cursor-grabbing"
                                 >
-                                    <circle cx={points[key].x} cy={points[key].y} r="35" fill="transparent" /> {/* Invisible larger hit area to stop hover dropping */}
+                                    <circle cx={points[key].x} cy={points[key].y} r="35" fill="transparent" /> 
                                     <circle 
                                         cx={points[key].x} 
                                         cy={points[key].y} 
@@ -778,14 +910,12 @@
                                             ${dragging === key ? 'stroke-cyan-500' : hoveredPoint === key ? 'stroke-indigo-400' : 'stroke-slate-800'}
                                         `}
                                     />
-                                    {/* Point Label floating outside */}
                                     <text x={points[key].x} y={points[key].y - 22} fill="#64748b" fontSize="14" fontWeight="bold" textAnchor="middle">{key}</text>
                                 </g>
                             ))}
                         </svg>
                     </div>
 
-                    {/* Right Stats Panel */}
                     <div className="w-full lg:w-64 xl:w-72 bg-slate-800 text-white rounded-2xl md:rounded-3xl shadow-lg p-5 md:p-6 flex flex-col gap-4 md:gap-6 shrink-0">
                         <div>
                             <h3 className="text-slate-400 font-bold text-xs uppercase tracking-widest mb-3">Live Angles</h3>
@@ -835,7 +965,6 @@
             const [feedback, setFeedback] = useState(null);
             const [streak, setStreak] = useState(0);
 
-            // Math calculations
             useEffect(() => {
                 const dist = (p1, p2) => Math.sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2);
                 const a = dist(points.B, points.C);
@@ -885,7 +1014,6 @@
                     lengths: { a: Math.round(a), b: Math.round(b), c: Math.round(c) }
                 });
 
-                // Clear feedback when the triangle changes
                 setFeedback(null);
 
             }, [points]);
@@ -926,7 +1054,6 @@
             const handleSubmit = (e) => {
                 e.preventDefault();
                 
-                // Allow validation only if user selected options
                 if(!guessSide || !guessAngleType) {
                     setFeedback({ success: false, msg: "Please select a triangle type and angle type!"});
                     return;
@@ -980,7 +1107,6 @@
             return (
                 <div className="flex flex-col gap-3 md:gap-4 mt-2 animate-fade-in w-full">
                     
-                    {/* Top Horizontal Bar: Title + Controls */}
                     <div className="bg-white rounded-xl md:rounded-2xl shadow-sm border border-slate-200 p-3 md:p-4 flex flex-col md:flex-row items-center justify-between gap-3 z-10">
                         <div className="flex flex-col w-full md:w-auto">
                             <h2 className="text-lg md:text-xl font-black text-slate-800 flex items-center gap-2"><i className="fa-solid fa-star text-amber-400"></i> Challenge</h2>
@@ -993,7 +1119,6 @@
                     </div>
 
                     <div className="flex flex-col lg:flex-row gap-3 md:gap-4 items-stretch">
-                        {/* Center Canvas Area */}
                         <div className="flex-1 bg-white rounded-2xl md:rounded-3xl shadow-md border border-slate-200 overflow-hidden relative min-h-[300px] md:min-h-[380px]" style={{ touchAction: 'none' }}>
                             <div className="absolute inset-0 bg-grid-pattern opacity-50"></div>
                             
@@ -1005,7 +1130,6 @@
                                 onPointerLeave={handlePointerUp}
                                 onTouchMove={(e) => { if(dragging) e.preventDefault() }}
                             >
-                                {/* Triangle Path */}
                                 <polygon 
                                     points={`${points.A.x},${points.A.y} ${points.B.x},${points.B.y} ${points.C.x},${points.C.y}`} 
                                     className={`fill-indigo-100/50 stroke-indigo-600 stroke-[4] stroke-linejoin-round transition-colors duration-300
@@ -1013,17 +1137,14 @@
                                     `}
                                 />
 
-                                {/* Right Angle Square Indicator (Hide if it's the hidden angle so we don't give the answer away) */}
                                 {stats.angles.A === 90 && hiddenAngleId !== 'A' ? <path d={getRightAnglePath(points.A, points.B, points.C)} fill="none" stroke="#f43f5e" strokeWidth="3" strokeLinejoin="round" /> : null}
                                 {stats.angles.B === 90 && hiddenAngleId !== 'B' ? <path d={getRightAnglePath(points.B, points.A, points.C)} fill="none" stroke="#f43f5e" strokeWidth="3" strokeLinejoin="round" /> : null}
                                 {stats.angles.C === 90 && hiddenAngleId !== 'C' ? <path d={getRightAnglePath(points.C, points.A, points.B)} fill="none" stroke="#f43f5e" strokeWidth="3" strokeLinejoin="round" /> : null}
 
-                                {/* Angle Text */}
                                 <text x={labelA.x} y={labelA.y} fill={hiddenAngleId === 'A' ? '#f43f5e' : '#1e293b'} fontSize={hiddenAngleId === 'A' ? '28' : '16'} fontWeight={hiddenAngleId === 'A' ? 'black' : 'bold'} textAnchor="middle" dominantBaseline="middle">{hiddenAngleId === 'A' ? '?' : `${stats.angles.A}°`}</text>
                                 <text x={labelB.x} y={labelB.y} fill={hiddenAngleId === 'B' ? '#f43f5e' : '#1e293b'} fontSize={hiddenAngleId === 'B' ? '28' : '16'} fontWeight={hiddenAngleId === 'B' ? 'black' : 'bold'} textAnchor="middle" dominantBaseline="middle">{hiddenAngleId === 'B' ? '?' : `${stats.angles.B}°`}</text>
                                 <text x={labelC.x} y={labelC.y} fill={hiddenAngleId === 'C' ? '#f43f5e' : '#1e293b'} fontSize={hiddenAngleId === 'C' ? '28' : '16'} fontWeight={hiddenAngleId === 'C' ? 'black' : 'bold'} textAnchor="middle" dominantBaseline="middle">{hiddenAngleId === 'C' ? '?' : `${stats.angles.C}°`}</text>
 
-                                {/* Draggable Points */}
                                 {Object.keys(points).map(key => (
                                     <g key={key} 
                                         onPointerDown={(e) => handlePointerDown(key, e)}
@@ -1046,7 +1167,6 @@
                             </svg>
                         </div>
 
-                        {/* Right Form Panel */}
                         <div className="w-full lg:w-[380px] xl:w-[450px] bg-slate-800 text-white rounded-2xl md:rounded-3xl shadow-lg p-4 md:p-5 flex flex-col gap-3 md:gap-4 shrink-0 relative">
                             <div className="absolute top-3 right-3 bg-amber-500/20 text-amber-400 font-bold px-2.5 py-0.5 rounded-full text-xs flex items-center border border-amber-500/30">
                                 <i className="fa-solid fa-fire mr-1.5"></i> Streak: {streak}
@@ -1120,7 +1240,7 @@
         };
 
         const TriangleApp = () => {
-            const [activeTab, setActiveTab] = useState('sandbox'); // Defaulting to the new sandbox tab
+            const [activeTab, setActiveTab] = useState('learn'); // Defaulting to explore
 
             const tabs = [
                 { id: 'learn', label: 'Explore', icon: 'fa-shapes' },
@@ -1133,7 +1253,6 @@
             return (
                 <div className="flex flex-col h-full w-full">
                     
-                    {/* Compact Header Layout */}
                     <header className="flex flex-col md:flex-row justify-between items-center mb-4 md:mb-6 gap-4">
                         <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
                             <div className="inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-cyan-100 rounded-full shrink-0 shadow-inner">
@@ -1145,7 +1264,6 @@
                             </div>
                         </div>
 
-                        {/* Navigation Tabs (Moved up to save vertical space) */}
                         <div className="bg-white rounded-full shadow-sm border border-slate-200 p-1 flex w-full md:w-auto overflow-x-auto no-scrollbar shrink-0">
                             {tabs.map(tab => (
                                 <button 
@@ -1163,9 +1281,9 @@
                     <main className="flex-1 w-full flex flex-col">
                         {activeTab === 'learn' && <LearnSection />}
                         {activeTab === 'sandbox' && <TriangleSandbox />}
-                        {activeTab === 'challenge' && <TriangleChallenge />}
                         {activeTab === 'quiz' && <QuizSection />}
                         {activeTab === 'angles' && <AngleCalculator />}
+                        {activeTab === 'challenge' && <TriangleChallenge />}
                     </main>
                 </div>
             );
