@@ -633,24 +633,39 @@
         };
 
         window.getCurrentSchoolTime = () => {
-            const now = new Date(); 
+            const realNow = new Date();
+            const now = new Date(realNow); 
+            now.setHours(0, 0, 0, 0); // Normalize to local midnight to prevent UTC drift
+            
+            // Use (Year, MonthIndex, Day) to ensure dates are parsed in local time
             const terms = [
-                { name: 'Term 1', start: new Date('2026-01-28') }, { name: 'Term 2', start: new Date('2026-04-20') },
-                { name: 'Term 3', start: new Date('2026-07-20') }, { name: 'Term 4', start: new Date('2026-10-12') }
+                { name: 'Term 1', start: new Date(2026, 0, 28) }, // Jan 28
+                { name: 'Term 2', start: new Date(2026, 3, 20) }, // Apr 20
+                { name: 'Term 3', start: new Date(2026, 6, 20) }, // Jul 20
+                { name: 'Term 4', start: new Date(2026, 9, 12) }  // Oct 12
             ];
+            
             let curTerm = 'Term 2', weekNum = 1;
+            
             for(let i = terms.length - 1; i >= 0; i--) {
                 if(now >= terms[i].start) {
                     curTerm = terms[i].name;
-                    weekNum = Math.floor((now - terms[i].start) / (7 * 24 * 60 * 60 * 1000)) + 1;
+                    // Calculate exact days difference
+                    const daysDiff = Math.round((now - terms[i].start) / (1000 * 60 * 60 * 24));
+                    weekNum = Math.floor(daysDiff / 7) + 1;
                     break;
                 }
             }
+            
             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            let curDay = days[now.getDay()];
+            let curDay = days[realNow.getDay()];
+            
+            // Jump to next week on Friday, Saturday, Sunday
             if (curDay === 'Saturday' || curDay === 'Sunday' || curDay === 'Friday') {
-                curDay = 'Monday'; weekNum += 1;
+                curDay = 'Monday'; 
+                weekNum += 1;
             }
+            
             return { term: curTerm, week: `Week ${Math.min(Math.max(weekNum, 1), 12)}`, day: curDay };
         };
 
