@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Multiplication Algorithm Master</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'], mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'] },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                        'shake': 'shake 0.4s cubic-bezier(.36,.07,.19,.97) both',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        pop: {
+                            '0%': { transform: 'scale(0.5)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        },
+                        shake: {
+                            '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                            '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                            '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                            '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
+                        },
+                        moveBg: {
+                            '0%': { backgroundPosition: '0 0' },
+                            '100%': { backgroundPosition: '30px 30px' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Strict No-Scroll & Fixed Viewport setup */
+        html, body { 
+            font-family: 'Outfit', sans-serif; 
+            background-color: #f8fafc; 
+            margin: 0; 
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden; /* NO SCROLLING */
+            position: fixed;
+        }
+
+        /* Hide Number Arrows */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        /* Grid Backgrounds */
+        .bg-math-grid {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(148, 163, 184, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.1) 1px, transparent 1px);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+
+        .bg-scrolling-pattern {
+            background-image: radial-gradient(circle, rgba(255,255,255,0.4) 2px, transparent 2px);
+            background-size: 30px 30px;
+            animation: moveBg 3s linear infinite;
+        }
+
+        /* 3D Tilt container */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .preserve-3d {
+            transform-style: preserve-3d;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Ambient Background Blobs -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-blob"></div>
+        <div class="absolute top-[20%] right-[-10%] w-[400px] h-[400px] bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-blob" style="animation-delay: 2s"></div>
+        <div class="absolute bottom-[-20%] left-[20%] w-[600px] h-[600px] bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-blob" style="animation-delay: 4s"></div>
+    </div>
+
+    <!-- Main React Root -->
+    <div id="root" class="relative z-10 w-full h-full flex flex-col pt-0 md:pt-4"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- DATA ---
+        const practiceProblems = [
+            { top: 96, bot: 8 }, { top: 25, bot: 7 }, { top: 42, bot: 2 },
+            { top: 34, bot: 9 }, { top: 46, bot: 3 }, { top: 338, bot: 6 },
+            { top: 961, bot: 2 }, { top: 984, bot: 8 }, { top: 1731, bot: 6 },
+            { top: 2401, bot: 7 }
+        ];
+
+        const wordProblems = [
+            { id: 1, text: "Alisha went on a shopping spree and bought 9 pairs of shoes. Each pair cost $65. How much did she spend?", calc: { top: 65, bot: 9 }, ans: 585 },
+            { id: 2, text: "If Riley eats 5 biscuits a day, how many does he eat over 234 days?", calc: { top: 234, bot: 5 }, ans: 1170 },
+            { id: 3, text: "Mr Burroughs wants to replace the school's footballs. Each football costs $19 and he wants to order 134. How much will they cost?", calc: null, ans: 2546, note: "(Hint: This is 134 x 19. Try solving it on paper first!)" }
+        ];
+
+        // --- COMPONENTS ---
+
+        // 1. Learn Component (Step-by-step animated walkthrough)
+        const LearnTab = () => {
+            const [step, setStep] = useState(0);
+            const [example, setExample] = useState(1); // 1 = 63x4, 2 = 238x4
+
+            const examples = {
+                1: {
+                    title: "Example 1: Regrouping Once",
+                    top: "63", bot: "4",
+                    steps: [
+                        { msg: "Let's multiply 63 x 4. Always start with the ones column on the right.", highlight: 'ones' },
+                        { msg: "Multiply the ones: 4 x 3 = 12.", highlight: 'ones', calc: "4 x 3 = 12" },
+                        { msg: "Place the 2 in the ones place.", highlight: 'ans-ones', showAnsOnes: '2' },
+                        { msg: "Regroup (carry) the 1 ten to the tens column.", highlight: 'carry-tens', showAnsOnes: '2', showCarryTens: '1' },
+                        { msg: "Now multiply the tens: 4 x 6 = 24.", highlight: 'tens', showAnsOnes: '2', showCarryTens: '1', calc: "4 x 6 = 24" },
+                        { msg: "Add the regrouped 1: 24 + 1 = 25.", highlight: 'carry-tens', showAnsOnes: '2', showCarryTens: '1', calc: "24 + 1 = 25" },
+                        { msg: "Write 25 in the front. The answer is 252!", highlight: 'ans-all', showAnsOnes: '2', showCarryTens: '1', showAnsTens: '5', showAnsHuns: '2' }
+                    ]
+                },
+                2: {
+                    title: "Example 2: Regrouping Twice",
+                    top: "238", bot: "4",
+                    steps: [
+                        { msg: "Multiply the ones first: 4 x 8 = 32.", highlight: 'ones', calc: "4 x 8 = 32" },
+                        { msg: "Write 2 in the ones place, regroup the 3.", highlight: 'carry-tens', showAnsOnes: '2', showCarryTens: '3' },
+                        { msg: "Multiply the tens: 4 x 3 = 12.", highlight: 'tens', showAnsOnes: '2', showCarryTens: '3', calc: "4 x 3 = 12" },
+                        { msg: "Add the 3 regrouped tens: 12 + 3 = 15.", highlight: 'carry-tens', showAnsOnes: '2', showCarryTens: '3', calc: "12 + 3 = 15" },
+                        { msg: "Write 5 in the tens place, regroup the 1.", highlight: 'carry-huns', showAnsOnes: '2', showCarryTens: '3', showAnsTens: '5', showCarryHuns: '1' },
+                        { msg: "Multiply the hundreds: 4 x 2 = 8.", highlight: 'huns', showAnsOnes: '2', showCarryTens: '3', showAnsTens: '5', showCarryHuns: '1', calc: "4 x 2 = 8" },
+                        { msg: "Add the 1 regrouped hundred: 8 + 1 = 9.", highlight: 'carry-huns', showAnsOnes: '2', showCarryTens: '3', showAnsTens: '5', showCarryHuns: '1', calc: "8 + 1 = 9" },
+                        { msg: "Write 9. The answer is 952!", highlight: 'ans-all', showAnsOnes: '2', showCarryTens: '3', showAnsTens: '5', showCarryHuns: '1', showAnsHuns: '9' }
+                    ]
+                }
+            };
+
+            const curEx = examples[example];
+            const curStep = curEx.steps[step];
+
+            const nextStep = () => { if (step < curEx.steps.length - 1) setStep(step + 1); };
+            const prevStep = () => { if (step > 0) setStep(step - 1); };
+            const toggleExample = () => { setExample(example === 1 ? 2 : 1); setStep(0); };
+
+            const getColClass = (colName) => {
+                if (curStep.highlight === colName) return "bg-cyan-100 text-cyan-800 ring-2 ring-cyan-400 scale-110 z-10 font-black rounded-lg shadow-md transition-all duration-300";
+                if (curStep.highlight === 'ans-all' && colName.startsWith('ans-')) return "text-emerald-600 font-black scale-105 transition-all duration-300";
+                return "text-slate-700 transition-all duration-300";
+            };
+
+            return (
+                <div className="flex-1 flex flex-col items-center justify-center min-h-0 w-full animate-pop">
+                    
+                    <div className="flex justify-between items-center w-full max-w-2xl mb-4 px-2">
+                        <h2 className="text-xl md:text-2xl font-black text-slate-800"><i className="fa-solid fa-person-chalkboard text-indigo-500 mr-2"></i> {curEx.title}</h2>
+                        <button onClick={toggleExample} className="bg-white border border-slate-200 px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm font-bold text-indigo-600 hover:bg-indigo-50 shadow-sm transition-all flex items-center">
+                            Switch Example <i className="fa-solid fa-rotate ml-2"></i>
+                        </button>
+                    </div>
+
+                    <div className="glass-panel w-full max-w-2xl rounded-[2rem] p-6 md:p-10 flex flex-col items-center relative overflow-hidden shadow-xl mx-2">
+                        
+                        {/* Interactive Board */}
+                        <div className="font-mono text-5xl md:text-7xl font-bold grid gap-y-2 gap-x-4 mb-8" style={{ gridTemplateColumns: `auto repeat(${curEx.top.length}, minmax(0, 1fr))` }}>
+                            
+                            {/* Carry Row */}
+                            <div></div> {/* Operator col space */}
+                            {example === 2 && <div className={`text-center text-rose-500 text-3xl md:text-4xl h-12 flex items-end justify-center ${getColClass('carry-huns')}`}>{curStep.showCarryHuns || ''}</div>}
+                            <div className={`text-center text-rose-500 text-3xl md:text-4xl h-12 flex items-end justify-center ${getColClass('carry-tens')}`}>{curStep.showCarryTens || ''}</div>
+                            <div></div> {/* Ones carry space (rarely used here) */}
+
+                            {/* Top Number Row */}
+                            <div></div>
+                            {example === 2 && <div className={`text-center ${getColClass('huns')}`}>{curEx.top[0]}</div>}
+                            <div className={`text-center ${getColClass('tens')}`}>{example === 2 ? curEx.top[1] : curEx.top[0]}</div>
+                            <div className={`text-center ${getColClass('ones')}`}>{example === 2 ? curEx.top[2] : curEx.top[1]}</div>
+
+                            {/* Bottom Number Row */}
+                            <div className="text-slate-400 self-end pb-1 pr-2">×</div>
+                            {example === 2 && <div></div>}
+                            <div></div>
+                            <div className={`text-center ${getColClass('ones')}`}>{curEx.bot}</div>
+
+                            {/* Divider */}
+                            <div className="col-span-full h-1 bg-slate-800 rounded-full my-2"></div>
+
+                            {/* Answer Row */}
+                            <div></div>
+                            {example === 2 && <div className={`text-center ${getColClass('ans-huns')}`}>{curStep.showAnsHuns || ''}</div>}
+                            <div className={`text-center ${getColClass('ans-tens')}`}>{curStep.showAnsTens || ''}</div>
+                            <div className={`text-center ${getColClass('ans-ones')}`}>{curStep.showAnsOnes || ''}</div>
+                        </div>
+
+                        {/* Instructions Box */}
+                        <div className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between min-h-[100px]">
+                            <div className="flex-1 pr-4">
+                                <p className="text-base md:text-xl font-bold text-slate-700 leading-tight">{curStep.msg}</p>
+                                {curStep.calc && <p className="text-cyan-600 font-mono font-black mt-2 text-base md:text-lg bg-cyan-50 inline-block px-3 py-1 rounded-lg border border-cyan-100">{curStep.calc}</p>}
+                            </div>
+                            
+                            {/* Nav Buttons */}
+                            <div className="flex flex-col gap-2 shrink-0">
+                                <button onClick={prevStep} disabled={step === 0} className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center shadow-sm">
+                                    <i className="fa-solid fa-chevron-up"></i>
+                                </button>
+                                <button onClick={nextStep} disabled={step === curEx.steps.length - 1} className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-indigo-600 text-white hover:bg-indigo-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center shadow-md shadow-indigo-900/20">
+                                    <i className="fa-solid fa-chevron-down"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            );
+        };
+
+
+        // 2. Guided Practice Component
+        const PracticeTab = () => {
+            const [probIndex, setProbIndex] = useState(0);
+            const [topStr, setTopStr] = useState('');
+            const [botStr, setBotStr] = useState('');
+            
+            const [ansVals, setAnsVals] = useState({}); 
+            const [carryVals, setCarryVals] = useState({}); 
+            const [activeCell, setActiveCell] = useState(null); 
+            const [feedback, setFeedback] = useState(null); 
+            const [isShake, setIsShake] = useState(false);
+            const [isComplete, setIsComplete] = useState(false);
+
+            const inputRef = useRef(null);
+
+            useEffect(() => {
+                const prob = practiceProblems[probIndex];
+                setTopStr(prob.top.toString());
+                setBotStr(prob.bot.toString());
+                setAnsVals({});
+                setCarryVals({});
+                setFeedback({ type: 'info', msg: "Let's start by multiplying the ones column!" });
+                setIsComplete(false);
+                setActiveCell({ type: 'ans', col: 0 });
+            }, [probIndex]);
+
+            useEffect(() => {
+                if (inputRef.current && !isComplete) {
+                    inputRef.current.focus();
+                }
+            }, [activeCell, isComplete]);
+
+            const checkLogic = (val) => {
+                if (!activeCell || isComplete) return;
+
+                const col = activeCell.col;
+                const topDigits = topStr.split('').reverse().map(Number);
+                const botNum = parseInt(botStr);
+
+                let previousCarry = 0;
+                if (col > 0) {
+                    previousCarry = parseInt(carryVals[col - 1] || 0);
+                }
+
+                const currentTopDigit = topDigits[col] || 0;
+                const product = (currentTopDigit * botNum) + previousCarry;
+
+                const expectedAnsDigit = (col < topDigits.length) ? product % 10 : previousCarry;
+                const expectedCarryDigit = Math.floor(product / 10);
+
+                if (activeCell.type === 'ans') {
+                    if (parseInt(val) === expectedAnsDigit) {
+                        setAnsVals(prev => ({ ...prev, [col]: val }));
+                        
+                        if (col < topDigits.length - 1 && expectedCarryDigit > 0) {
+                            setActiveCell({ type: 'carry', col: col });
+                            setFeedback({ type: 'info', msg: "Great! Now regroup the tens digit to the top of the next column." });
+                        } else if (col < topDigits.length - 1) {
+                            setActiveCell({ type: 'ans', col: col + 1 });
+                            setFeedback({ type: 'info', msg: "Correct! Now multiply the next column." });
+                        } else if (col === topDigits.length - 1 && expectedCarryDigit > 0) {
+                            setActiveCell({ type: 'carry', col: col });
+                            setFeedback({ type: 'info', msg: "Regroup the final digit." });
+                        } else {
+                            finishProblem();
+                        }
+                    } else {
+                        triggerError(`Not quite. Multiply ${currentTopDigit} x ${botNum} ${previousCarry > 0 ? `and add ${previousCarry}` : ''}.`);
+                    }
+                } else if (activeCell.type === 'carry') {
+                    if (parseInt(val) === expectedCarryDigit) {
+                        setCarryVals(prev => ({ ...prev, [col]: val }));
+                        setActiveCell({ type: 'ans', col: col + 1 });
+                        setFeedback({ type: 'info', msg: "Got it! Now multiply the next column." });
+                    } else {
+                        triggerError(`Wrong carry. The number was ${product}. What is the tens digit?`);
+                    }
+                }
+            };
+
+            const finishProblem = () => {
+                setIsComplete(true);
+                setActiveCell(null);
+                setFeedback({ type: 'success', msg: "Awesome job! You solved it correctly." });
+            };
+
+            const triggerError = (msg) => {
+                setFeedback({ type: 'error', msg });
+                setIsShake(true);
+                setTimeout(() => setIsShake(false), 500);
+            };
+
+            const handleKeyDown = (e) => {
+                if (isComplete) return;
+                const key = e.key;
+                if (/^[0-9]$/.test(key)) {
+                    checkLogic(key);
+                }
+            };
+
+            const totalCols = topStr.length + 1;
+            const topArr = topStr.split('').reverse();
+
+            const renderCarryRow = () => {
+                let cells = [];
+                for (let i = totalCols - 1; i >= 0; i--) {
+                    const isActive = activeCell?.type === 'carry' && activeCell.col === i;
+                    const val = carryVals[i];
+                    cells.push(
+                        <div key={`carry-${i}`} className={`h-10 w-10 md:w-12 flex items-center justify-center text-xl md:text-2xl font-bold rounded-lg transition-all
+                            ${isActive ? 'bg-amber-100 text-amber-700 ring-2 ring-amber-400 scale-110 shadow-md ' + (isShake ? 'animate-shake' : '') : 'text-rose-500'}
+                        `}>
+                            {val !== undefined ? val : (isActive ? '?' : '')}
+                        </div>
+                    );
+                }
+                return cells;
+            };
+
+            const renderTopRow = () => {
+                let cells = [];
+                for (let i = totalCols - 1; i >= 0; i--) {
+                    const isColActive = activeCell && activeCell.col === i && i < topArr.length;
+                    const val = topArr[i] || '';
+                    cells.push(
+                        <div key={`top-${i}`} className={`h-12 w-10 md:h-14 md:w-12 flex items-center justify-center text-3xl md:text-4xl font-black rounded-lg transition-all
+                            ${isColActive ? 'bg-cyan-50 text-cyan-600' : 'text-slate-800'}
+                        `}>
+                            {val}
+                        </div>
+                    );
+                }
+                return cells;
+            };
+
+            const renderAnsRow = () => {
+                let cells = [];
+                for (let i = totalCols - 1; i >= 0; i--) {
+                    const isActive = activeCell?.type === 'ans' && activeCell.col === i;
+                    const val = ansVals[i];
+                    cells.push(
+                        <div key={`ans-${i}`} className={`h-12 w-10 md:h-14 md:w-12 flex items-center justify-center text-3xl md:text-4xl font-black rounded-lg transition-all
+                            ${isActive ? 'bg-cyan-100 text-cyan-700 ring-2 ring-cyan-500 scale-110 shadow-lg ' + (isShake ? 'animate-shake' : '') : (val !== undefined ? 'text-emerald-600' : 'text-transparent')}
+                        `}>
+                            {val !== undefined ? val : (isActive ? '?' : '')}
+                        </div>
+                    );
+                }
+                return cells;
+            };
+
+            return (
+                <div className="flex-1 flex flex-col items-center min-h-0 w-full animate-pop relative px-2">
+                    
+                    <input 
+                        ref={inputRef} 
+                        type="number" 
+                        className="absolute opacity-0 pointer-events-none" 
+                        onKeyDown={handleKeyDown}
+                        autoFocus
+                    />
+
+                    <div className="w-full max-w-xl flex justify-between items-center mb-4 md:mb-6">
+                        <div className="bg-white px-3 md:px-4 py-2 rounded-xl font-bold text-xs md:text-sm text-slate-500 shadow-sm border border-slate-200">
+                            Problem {probIndex + 1} of {practiceProblems.length}
+                        </div>
+                        <div className="flex gap-2">
+                            <button onClick={() => setProbIndex(Math.max(0, probIndex - 1))} disabled={probIndex === 0} className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 shadow-sm border border-slate-200 flex items-center justify-center"><i className="fa-solid fa-arrow-left text-sm"></i></button>
+                            <button onClick={() => setProbIndex(Math.min(practiceProblems.length - 1, probIndex + 1))} disabled={probIndex === practiceProblems.length - 1} className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 shadow-sm border border-slate-200 flex items-center justify-center"><i className="fa-solid fa-arrow-right text-sm"></i></button>
+                        </div>
+                    </div>
+
+                    <div className="glass-panel w-full max-w-xl rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-12 flex flex-col items-center shadow-2xl relative bg-math-grid" onClick={() => inputRef.current?.focus()}>
+                        
+                        <div className="font-mono flex flex-col gap-2 relative">
+                            
+                            <div className="absolute left-[-1.5rem] bottom-[5rem] text-3xl md:text-4xl text-slate-400 font-black"><i className="fa-solid fa-xmark"></i></div>
+
+                            <div className="flex gap-1 md:gap-2">{renderCarryRow()}</div>
+                            <div className="flex gap-1 md:gap-2">{renderTopRow()}</div>
+                            
+                            <div className="flex gap-1 md:gap-2">
+                                {Array.from({length: totalCols - 1}).map((_, i) => <div key={'e'+i} className="w-10 md:w-12 h-12 md:h-14"></div>)}
+                                <div className={`h-12 w-10 md:h-14 md:w-12 flex items-center justify-center text-3xl md:text-4xl font-black rounded-lg transition-all ${activeCell && activeCell.col < topStr.length ? 'bg-cyan-50 text-cyan-600' : 'text-slate-800'}`}>
+                                    {botStr}
+                                </div>
+                            </div>
+
+                            <div className="h-1.5 bg-slate-800 rounded-full w-full my-2 md:my-3"></div>
+
+                            <div className="flex gap-1 md:gap-2">{renderAnsRow()}</div>
+                        </div>
+
+                    </div>
+
+                    {/* Feedback Bar */}
+                    <div className={`mt-6 w-full max-w-xl p-4 rounded-2xl flex items-center gap-3 md:gap-4 text-sm md:text-lg font-bold shadow-lg transition-all transform ${feedback ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}
+                        ${feedback?.type === 'error' ? 'bg-rose-500 text-white shadow-rose-500/30' : 
+                          feedback?.type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 
+                          'bg-white text-slate-700 border border-slate-200'}
+                    `}>
+                        <i className={`fa-solid text-xl md:text-2xl ${feedback?.type === 'error' ? 'fa-triangle-exclamation' : feedback?.type === 'success' ? 'fa-circle-check' : 'fa-circle-info text-cyan-500'}`}></i>
+                        <span className="flex-1">{feedback?.msg}</span>
+                        {isComplete && probIndex < practiceProblems.length - 1 && (
+                            <button onClick={() => setProbIndex(probIndex + 1)} className="bg-white text-emerald-600 px-3 md:px-4 py-2 rounded-xl shadow-sm hover:scale-105 transition-transform active:scale-95 text-xs md:text-base whitespace-nowrap">Next <i className="fa-solid fa-arrow-right ml-1"></i></button>
+                        )}
+                        {isComplete && probIndex === practiceProblems.length - 1 && (
+                            <div className="bg-white text-emerald-600 px-3 md:px-4 py-2 rounded-xl shadow-sm text-xs md:text-base whitespace-nowrap"><i className="fa-solid fa-star text-amber-400 mr-1"></i> All Done!</div>
+                        )}
+                    </div>
+
+                    {/* Mobile Keypad Helper */}
+                    {!isComplete && (
+                        <div className="mt-auto lg:hidden grid grid-cols-5 gap-2 w-full max-w-sm pb-4 pt-4">
+                            {[1,2,3,4,5,6,7,8,9,0].map(num => (
+                                <button key={num} onClick={() => checkLogic(num.toString())} className="bg-white h-10 md:h-12 rounded-xl text-lg md:text-xl font-black text-slate-700 shadow-sm active:bg-cyan-100 active:scale-95 transition-all border border-slate-200">{num}</button>
+                            ))}
+                        </div>
+                    )}
+
+                </div>
+            );
+        };
+
+        // 3. Game Component
+        const GameTab = () => {
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [score, setScore] = useState(0);
+            const [timeLeft, setTimeLeft] = useState(60);
+            const [problem, setProblem] = useState(null);
+            const [userAns, setUserAns] = useState('');
+            const inputRef = useRef(null);
+            const timerRef = useRef(null);
+
+            const generateProblem = () => {
+                const top = Math.floor(Math.random() * 90) + 10;
+                const bot = Math.floor(Math.random() * 8) + 2; 
+                setProblem({ top, bot, ans: top * bot });
+                setUserAns('');
+            };
+
+            const startGame = () => {
+                setScore(0);
+                setTimeLeft(60);
+                generateProblem();
+                setIsPlaying(true);
+                setTimeout(() => inputRef.current?.focus(), 100);
+            };
+
+            useEffect(() => {
+                if (isPlaying && timeLeft > 0) {
+                    timerRef.current = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+                } else if (timeLeft === 0) {
+                    setIsPlaying(false);
+                }
+                return () => clearTimeout(timerRef.current);
+            }, [isPlaying, timeLeft]);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (parseInt(userAns) === problem.ans) {
+                    setScore(score + 100);
+                    generateProblem();
+                } else {
+                    inputRef.current?.classList.add('animate-shake', 'text-rose-500');
+                    setTimeout(() => inputRef.current?.classList.remove('animate-shake', 'text-rose-500'), 400);
+                    setUserAns('');
+                }
+            };
+
+            if (!isPlaying && timeLeft === 0) {
+                return (
+                    <div className="flex-1 flex flex-col items-center justify-center animate-pop px-4">
+                        <div className="bg-white rounded-[3rem] shadow-2xl p-10 md:p-12 flex flex-col items-center text-center border-4 border-indigo-100 w-full max-w-md">
+                            <i className="fa-solid fa-trophy text-5xl md:text-6xl text-amber-400 mb-6 drop-shadow-lg"></i>
+                            <h2 className="text-3xl md:text-4xl font-black text-slate-800 mb-2">Time's Up!</h2>
+                            <p className="text-lg md:text-xl font-bold text-slate-500 mb-8">You scored <span className="text-indigo-600 text-2xl md:text-3xl mx-2">{score}</span> points</p>
+                            <button onClick={startGame} className="bg-gradient-to-r from-indigo-500 to-cyan-500 text-white px-6 md:px-8 py-3 md:py-4 rounded-2xl font-black text-lg md:text-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+                                Play Again
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (!isPlaying) {
+                return (
+                    <div className="flex-1 flex flex-col items-center justify-center animate-pop px-4">
+                        <div className="glass-panel rounded-[3rem] p-8 md:p-12 flex flex-col items-center text-center max-w-lg w-full">
+                            <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-rose-400 to-orange-500 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-rose-500/30 text-white text-3xl md:text-4xl">
+                                <i className="fa-solid fa-bolt"></i>
+                            </div>
+                            <h2 className="text-3xl md:text-4xl font-black text-slate-800 mb-4 leading-tight">Algorithm Dash</h2>
+                            <p className="text-base md:text-lg font-medium text-slate-600 mb-8">Solve as many 2-digit multiplication problems as you can in 60 seconds. Use mental math or scratch paper!</p>
+                            <button onClick={startGame} className="w-full bg-slate-800 text-white px-6 md:px-8 py-3 md:py-4 rounded-2xl font-black text-xl md:text-2xl shadow-lg hover:bg-slate-700 hover:scale-[1.02] active:scale-95 transition-all">
+                                Start 60s Timer
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="flex-1 flex flex-col items-center justify-center animate-pop w-full px-2">
+                    <div className="w-full max-w-lg flex justify-between items-center mb-6 md:mb-8 px-2">
+                        <div className="bg-white/80 backdrop-blur px-4 md:px-6 py-2 md:py-3 rounded-2xl font-black text-xl md:text-2xl text-slate-700 shadow-sm border border-slate-200">
+                            Score: <span className="text-indigo-600">{score}</span>
+                        </div>
+                        <div className={`px-4 md:px-6 py-2 md:py-3 rounded-2xl font-black text-xl md:text-2xl shadow-sm border border-slate-200 bg-white/80 backdrop-blur ${timeLeft <= 10 ? 'text-rose-600 animate-pulse' : 'text-slate-700'}`}>
+                            <i className="fa-regular fa-clock mr-2"></i> {timeLeft}s
+                        </div>
+                    </div>
+
+                    <div className="glass-panel w-full max-w-md rounded-[2.5rem] md:rounded-[3rem] p-8 md:p-10 flex flex-col items-center shadow-2xl border-t-8 border-t-cyan-400">
+                        <div className="font-mono text-5xl md:text-7xl font-black text-slate-800 text-right w-full pr-8 border-b-4 border-slate-800 pb-2 md:pb-4 mb-6 tracking-widest relative">
+                            <span className="absolute left-4 bottom-4 text-4xl md:text-5xl text-slate-400"><i className="fa-solid fa-xmark"></i></span>
+                            <div>{problem?.top}</div>
+                            <div>{problem?.bot}</div>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="w-full">
+                            <input 
+                                ref={inputRef}
+                                type="number" 
+                                value={userAns}
+                                onChange={e => setUserAns(e.target.value)}
+                                className="w-full bg-slate-100 border-2 border-slate-300 rounded-2xl px-4 md:px-6 py-3 md:py-4 text-4xl md:text-5xl font-mono font-black text-center focus:outline-none focus:border-cyan-500 focus:bg-white transition-colors text-emerald-600 shadow-inner placeholder-slate-300"
+                                placeholder="?"
+                                autoFocus
+                            />
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+
+        // 4. Word Problems Component
+        const WordProblemsTab = () => {
+            const [selected, setSelected] = useState(0);
+            const [userAns, setUserAns] = useState('');
+            const [feedback, setFeedback] = useState(null);
+
+            const prob = wordProblems[selected];
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (parseInt(userAns) === prob.ans) {
+                    setFeedback({ success: true, msg: "Spot on! Great math skills." });
+                } else {
+                    setFeedback({ success: false, msg: "Not quite. Check your calculation again!" });
+                }
+            };
+
+            const nextProb = () => {
+                setSelected((selected + 1) % wordProblems.length);
+                setUserAns('');
+                setFeedback(null);
+            };
+
+            return (
+                <div className="flex-1 flex flex-col items-center justify-center animate-pop w-full px-2">
+                    <div className="glass-panel w-full max-w-2xl rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-12 shadow-2xl relative">
+                        
+                        <div className="flex gap-2 mb-6 md:mb-8 overflow-x-auto no-scrollbar pb-1">
+                            {wordProblems.map((p, i) => (
+                                <button 
+                                    key={i} 
+                                    onClick={() => { setSelected(i); setUserAns(''); setFeedback(null); }}
+                                    className={`flex-1 min-w-[100px] py-2 md:py-3 rounded-xl font-bold text-xs md:text-sm transition-all ${selected === i ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                                >
+                                    Problem {i + 1}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="bg-white rounded-2xl p-5 md:p-8 shadow-inner border border-slate-100 mb-6 md:mb-8 min-h-[140px] flex flex-col justify-center">
+                            <h3 className="text-lg md:text-2xl font-bold text-slate-700 leading-relaxed"><i className="fa-solid fa-quote-left text-slate-300 text-2xl md:text-3xl mr-3"></i>{prob.text}</h3>
+                            {prob.note && <p className="text-rose-500 font-bold mt-4 text-xs md:text-sm"><i className="fa-solid fa-lightbulb mr-2 text-amber-400"></i>{prob.note}</p>}
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-3 md:gap-4 items-stretch">
+                            <div className="relative flex-1">
+                                <div className="absolute inset-y-0 left-0 pl-4 md:pl-5 flex items-center pointer-events-none">
+                                    <i className="fa-solid fa-calculator text-slate-400 text-xl md:text-2xl"></i>
+                                </div>
+                                <input 
+                                    type="number" 
+                                    value={userAns}
+                                    onChange={e => setUserAns(e.target.value)}
+                                    className="w-full bg-slate-50 border-2 border-slate-300 rounded-xl md:rounded-2xl pl-12 md:pl-14 pr-6 py-3 md:py-4 text-xl md:text-2xl font-black text-slate-800 font-sans focus:outline-none focus:border-indigo-500 focus:bg-white transition-all shadow-inner placeholder-slate-300"
+                                    placeholder="Type answer here..."
+                                    required
+                                />
+                            </div>
+                            <button type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-white font-black text-lg md:text-xl px-8 py-3 md:py-4 rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-all shrink-0">
+                                Check
+                            </button>
+                        </form>
+
+                        {feedback && (
+                            <div className={`mt-5 p-4 rounded-2xl font-bold text-sm md:text-lg flex items-center gap-3 md:gap-4 ${feedback.success ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-rose-100 text-rose-800 border border-rose-300'} animate-pop`}>
+                                <i className={`fa-solid text-xl md:text-2xl ${feedback.success ? 'fa-circle-check text-emerald-500' : 'fa-circle-xmark text-rose-500'}`}></i>
+                                <span className="flex-1">{feedback.msg}</span>
+                                {feedback.success && (
+                                    <button onClick={nextProb} className="bg-white/50 hover:bg-white px-3 py-1.5 md:px-4 md:py-2 rounded-xl transition-colors text-xs md:text-base whitespace-nowrap">Next <i className="fa-solid fa-arrow-right ml-1"></i></button>
+                                )}
+                            </div>
+                        )}
+
+                    </div>
+                </div>
+            );
+        };
+
+        // Custom Animated Floating Node Component 
+        const AnimNode = ({ show, val, x, y, hl, fade, delay=0, size='text-4xl md:text-5xl', z='z-10', arcPath=false }) => {
+            let baseClass = `absolute font-mono font-black transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-2xl ${z} `;
+            
+            if (val !== '×') {
+                baseClass += ' min-w-[2.5rem] md:min-w-[3rem] py-1 ';
+            }
+
+            let transitionStyle = "all 800ms cubic-bezier(0.34,1.56,0.64,1)";
+            if (arcPath) {
+                transitionStyle = "top 800ms cubic-bezier(0.1, 0.8, 0.3, 1), left 800ms cubic-bezier(0.7, 0, 0.8, 0.3), transform 800ms cubic-bezier(0.34,1.56,0.64,1), opacity 800ms ease, background-color 800ms ease, color 800ms ease, box-shadow 800ms ease";
+            }
+
+            if (!show) baseClass += ` opacity-0 scale-50 pointer-events-none `;
+            else if (fade) baseClass += ` opacity-0 scale-110 pointer-events-none `;
+            else baseClass += ` opacity-100 scale-100 `;
+
+            if (hl === 'cyan') baseClass += ` text-cyan-600 bg-cyan-50 ring-[3px] ring-cyan-400 shadow-lg scale-110 z-30 `;
+            else if (hl === 'indigo') baseClass += ` text-indigo-600 bg-indigo-50 ring-[3px] ring-indigo-400 shadow-lg scale-110 z-30 `;
+            else if (hl === 'amber') baseClass += ` text-amber-600 bg-amber-50 ring-[3px] ring-amber-400 shadow-lg scale-110 z-30 `;
+            else if (hl === 'rose') baseClass += ` text-rose-600 bg-rose-50 ring-[3px] ring-rose-400 shadow-lg scale-110 z-30 `;
+            else if (hl === 'emerald') baseClass += ` text-emerald-600 bg-emerald-50 ring-[3px] ring-emerald-400 shadow-lg scale-110 z-30 `;
+            else baseClass += ` text-slate-700 `;
+
+            return (
+                <div className={baseClass + ' ' + size} style={{ 
+                    left: `${x}%`, 
+                    top: `${y}%`, 
+                    transition: transitionStyle,
+                    transitionDelay: `${delay}ms` 
+                }}>
+                    {val}
+                </div>
+            );
+        };
+
+        // 5. Visual Algorithm Component (Dynamic up to 4x1 digit)
+        const VisualAlgorithmTab = () => {
+            const [topVal, setTopVal] = useState(34);
+            const [botVal, setBotVal] = useState(6);
+            const [isReady, setIsReady] = useState(false);
+            const [stepIndex, setStepIndex] = useState(0);
+
+            const handleTopChange = (e) => { 
+                let val = parseInt(e.target.value);
+                if (isNaN(val)) val = '';
+                else if (val > 9999) val = 9999;
+                setTopVal(val); 
+                setIsReady(false); setStepIndex(0); 
+            };
+            const handleBotChange = (e) => { 
+                let val = parseInt(e.target.value);
+                if (isNaN(val)) val = '';
+                else if (val > 9) val = 9;
+                setBotVal(val); 
+                setIsReady(false); setStepIndex(0); 
+            };
+
+            const handleExplore = (e) => {
+                e.preventDefault();
+                if (topVal < 10 || topVal > 9999 || botVal < 2 || botVal > 9) {
+                    alert("Please enter a number between 10-9999 on top, and 2-9 on the bottom.");
+                    return;
+                }
+                setIsReady(true);
+                setStepIndex(0);
+            };
+
+            const resetLab = () => {
+                setIsReady(false);
+                setStepIndex(0);
+            };
+
+            // Dynamic Sequence Generation
+            const digits = String(topVal || 0).split('').reverse().map(Number);
+            const colData = [];
+            let carry = 0;
+            for(let i=0; i<digits.length; i++) {
+                const prod = digits[i] * botVal;
+                const total = prod + carry;
+                colData.push({
+                    prodOnes: prod % 10,
+                    prodTens: Math.floor(prod / 10),
+                    carryIn: carry,
+                    totOnes: total % 10,
+                    totTens: Math.floor(total / 10),
+                    isLast: i === digits.length - 1,
+                    prod: prod,
+                    total: total
+                });
+                carry = Math.floor(total / 10);
+            }
+
+            const seq = [{ phase: 'start', msg: "Ready? Let's multiply the ones column first.", btnText: "Start: Multiply Ones", btnColor: "bg-cyan-500 hover:bg-cyan-400 shadow-cyan-500/30" }];
+            const colNames = ['ones', 'tens', 'hundreds', 'thousands', 'ten thousands'];
+            
+            for(let i=0; i<digits.length; i++) {
+                const cd = colData[i];
+                let btnText = "";
+                let btnColor = "";
+                
+                // Determine next button for calc step
+                if (cd.carryIn > 0) {
+                    btnText = "Add Regrouped";
+                    btnColor = "bg-rose-500 hover:bg-rose-400 shadow-rose-500/30";
+                } else if (cd.totTens > 0 && !cd.isLast) {
+                    btnText = "Regroup Tens";
+                    btnColor = "bg-amber-500 hover:bg-amber-400 shadow-amber-500/30";
+                } else if (!cd.isLast) {
+                    btnText = `Next: Multiply ${colNames[i+1]}`;
+                    btnColor = "bg-indigo-500 hover:bg-indigo-400 shadow-indigo-500/30";
+                } else {
+                    btnText = "Finish";
+                    btnColor = "bg-emerald-500 hover:bg-emerald-400 shadow-emerald-500/30";
+                }
+                
+                seq.push({
+                    phase: 'calc', col: i,
+                    msg: `${i+1}. Multiply ${colNames[i]}: ${digits[i]} × ${botVal} = ${cd.prod}`,
+                    btnText, btnColor
+                });
+                
+                if (cd.carryIn > 0) {
+                    // Determine next button for add_carry step
+                    if (cd.totTens > 0 && !cd.isLast) {
+                        btnText = "Regroup Tens";
+                        btnColor = "bg-amber-500 hover:bg-amber-400 shadow-amber-500/30";
+                    } else if (!cd.isLast) {
+                        btnText = `Next: Multiply ${colNames[i+1]}`;
+                        btnColor = "bg-indigo-500 hover:bg-indigo-400 shadow-indigo-500/30";
+                    } else {
+                        btnText = "Finish";
+                        btnColor = "bg-emerald-500 hover:bg-emerald-400 shadow-emerald-500/30";
+                    }
+                    
+                    seq.push({
+                        phase: 'add_carry', col: i,
+                        msg: `Add regrouped: ${cd.prod} + ${cd.carryIn} = ${cd.total}`,
+                        btnText, btnColor
+                    });
+                }
+                
+                if (cd.totTens > 0 && !cd.isLast) {
+                    seq.push({
+                        phase: 'regroup', col: i,
+                        msg: `Regroup the ${cd.totTens} to the top of the next column.`,
+                        btnText: `Multiply ${colNames[i+1]}`,
+                        btnColor: "bg-cyan-500 hover:bg-cyan-400 shadow-cyan-500/30"
+                    });
+                }
+            }
+            seq.push({ phase: 'done', msg: `Done! ${topVal} × ${botVal} = ${topVal * botVal}`, btnText: "Reset / Try Another", btnColor: "bg-slate-800 hover:bg-slate-700 shadow-slate-800/30" });
+
+            const goNext = () => { if (stepIndex < seq.length - 1) setStepIndex(stepIndex + 1); };
+            const currentStep = seq[stepIndex] || seq[0];
+
+            // Render Nodes Logic
+            const getStepIdx = (p, c) => seq.findIndex(s => s.phase === p && s.col === c);
+            
+            // Layout constraints to fit up to 5 result digits comfortably
+            const C_COL = (c) => 82 - c * 16;
+            const R_CRY = 25, R_TOP = 48, R_BOT = 68, R_ANS = 88;
+
+            const renderNodes = () => {
+                const nodes = [];
+                const maxCol = Math.max(colData.length, digits.length);
+                
+                // Operator 'x'
+                nodes.push(<AnimNode key="op" show={true} val="×" x={C_COL(maxCol)} y={R_BOT} size="text-3xl md:text-4xl text-slate-400" z="z-0" />);
+                
+                // Top Digits
+                digits.forEach((d, i) => {
+                    const cIdx = getStepIdx('calc', i);
+                    nodes.push(<AnimNode key={`top-${i}`} show={true} val={d} x={C_COL(i)} y={R_TOP} hl={(stepIndex === cIdx || (stepIndex === 0 && i === 0)) ? 'cyan' : ''} />);
+                });
+                
+                // Bottom Digit
+                nodes.push(<AnimNode key="bot" show={true} val={botVal} x={C_COL(0)} y={R_BOT} hl={(stepIndex > 0 && seq[stepIndex]?.phase === 'calc') ? 'cyan' : ''} />);
+                
+                // Per Column Dynamic Nodes
+                colData.forEach((cd, i) => {
+                    const cIdx = getStepIdx('calc', i);
+                    const aIdx = getStepIdx('add_carry', i);
+                    const rIdx = getStepIdx('regroup', i);
+                    const nextCIdx = getStepIdx('calc', i+1);
+                    const nextAIdx = getStepIdx('add_carry', i+1);
+
+                    // 1. Main Ones Digit
+                    let showOnes = stepIndex >= cIdx;
+                    let valOnes = (stepIndex === cIdx && aIdx !== -1) ? cd.prodOnes : cd.totOnes;
+                    let hlOnes = '';
+                    if (stepIndex === cIdx) hlOnes = 'cyan';
+                    else if (stepIndex === aIdx) hlOnes = 'rose';
+                    else if (stepIndex === seq.length - 1) hlOnes = 'emerald';
+
+                    nodes.push(<AnimNode key={`ans-ones-${i}`} show={showOnes} val={valOnes} x={C_COL(i)} y={R_ANS} hl={hlOnes} />);
+
+                    // 2. Main Tens Digit
+                    let showTens = false;
+                    let valTens = 0;
+                    let hlTens = '';
+
+                    if (stepIndex === cIdx && cd.prodTens > 0) {
+                        showTens = true; valTens = cd.prodTens; hlTens = 'cyan';
+                    } else if (stepIndex === aIdx && cd.totTens > 0) {
+                        showTens = true; valTens = cd.totTens; hlTens = 'rose';
+                    } else if (cd.isLast && stepIndex >= (aIdx !== -1 ? aIdx : cIdx) && cd.totTens > 0) {
+                        showTens = true; valTens = cd.totTens; hlTens = (stepIndex === seq.length - 1) ? 'emerald' : '';
+                    }
+
+                    if (showTens) {
+                        nodes.push(<AnimNode key={`ans-tens-${i}`} show={showTens} val={valTens} x={C_COL(i+1)} y={R_ANS} hl={hlTens} />);
+                    }
+
+                    // 3. Flying Carry Node (for col i, providing carry to col i+1)
+                    if (!cd.isLast && cd.totTens > 0) {
+                        const preRIdx = aIdx !== -1 ? aIdx : cIdx;
+                        const dropIdx = nextAIdx !== -1 ? nextAIdx : nextCIdx;
+                        
+                        let showCarry = stepIndex >= preRIdx && stepIndex <= dropIdx;
+                        let fadeCarry = stepIndex === dropIdx;
+                        let carryY = (stepIndex >= rIdx && stepIndex < dropIdx) ? R_CRY : R_ANS;
+                        let isArcing = stepIndex === rIdx;
+
+                        nodes.push(
+                            <AnimNode 
+                                key={`carry-${i}`} 
+                                show={showCarry} 
+                                fade={fadeCarry} 
+                                val={cd.totTens} 
+                                x={C_COL(i+1)} 
+                                y={carryY} 
+                                hl={fadeCarry ? 'rose' : 'amber'} 
+                                size='text-2xl md:text-3xl' 
+                                arcPath={isArcing} 
+                            />
+                        );
+                    }
+                });
+
+                return nodes;
+            };
+
+            return (
+                <div className="flex-1 flex flex-col items-center min-h-0 w-full animate-pop relative px-2">
+                    
+                    {/* Control Bar */}
+                    <div className="glass-panel w-full max-w-4xl rounded-2xl p-3 md:p-4 flex flex-col md:flex-row justify-between items-center z-20 shrink-0 mb-4 shadow-md border-t-4 border-t-indigo-500 gap-3">
+                        <div className="flex items-center gap-3 w-full md:w-auto">
+                            <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xl shadow-inner shrink-0">
+                                <i className="fa-solid fa-wand-magic-sparkles"></i>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h2 className="font-black text-slate-800 leading-tight truncate">Visual Algorithm</h2>
+                                <p className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest truncate">Interactive Standard Method</p>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleExplore} className="flex items-center gap-2 md:gap-3 w-full md:w-auto shrink-0">
+                            <input 
+                                type="number" value={topVal} onChange={handleTopChange} 
+                                className="w-20 md:w-24 bg-slate-100 border-2 border-slate-200 rounded-xl px-2 py-2 text-lg md:text-xl font-black text-center focus:outline-none focus:border-indigo-500 focus:bg-white transition-all text-indigo-600"
+                                placeholder="34" 
+                            />
+                            <span className="text-slate-400 font-black text-lg md:text-xl"><i className="fa-solid fa-xmark"></i></span>
+                            <input 
+                                type="number" value={botVal} onChange={handleBotChange} 
+                                className="w-14 md:w-20 bg-slate-100 border-2 border-slate-200 rounded-xl px-2 py-2 text-lg md:text-xl font-black text-center focus:outline-none focus:border-indigo-500 focus:bg-white transition-all text-emerald-600"
+                                placeholder="6" 
+                            />
+                            <button type="submit" className="ml-1 md:ml-2 bg-indigo-600 hover:bg-indigo-500 text-white px-3 md:px-4 py-2.5 rounded-xl text-sm md:text-base font-black shadow-lg hover:shadow-xl transition-all shrink-0">
+                                {isReady ? 'Restart' : 'Animate'}
+                            </button>
+                        </form>
+                    </div>
+
+                    {isReady ? (
+                        <div className="flex-1 flex flex-col gap-4 min-h-0 w-full max-w-lg mx-auto animate-pop pb-4">
+                            
+                            {/* The Animation Board */}
+                            <div className="flex-1 glass-panel rounded-3xl p-6 flex flex-col shadow-xl border-4 border-white/50 relative overflow-hidden bg-math-grid min-h-[300px]">
+                                <div className="absolute h-1.5 bg-slate-800 rounded-full w-[70%] left-[15%] top-[72.5%] z-0"></div>
+                                {renderNodes()}
+                            </div>
+
+                            {/* Prompts and Advance Button */}
+                            <div className="glass-panel w-full rounded-3xl p-5 md:p-6 shadow-xl border-t-4 border-t-white flex flex-col items-center text-center gap-4">
+                                <h3 className="text-lg md:text-xl font-black text-slate-700 leading-snug min-h-[3.5rem] flex items-center justify-center w-full">
+                                    {currentStep.msg}
+                                </h3>
+                                <button 
+                                    onClick={stepIndex === seq.length - 1 ? resetLab : goNext}
+                                    className={`${currentStep.btnColor} text-white px-6 py-3 rounded-2xl font-black text-lg md:text-xl shadow-lg hover:-translate-y-1 active:scale-95 transition-all w-full max-w-sm flex items-center justify-center gap-2`}
+                                >
+                                    {currentStep.btnText} {stepIndex !== seq.length - 1 && <i className="fa-solid fa-arrow-right"></i>}
+                                </button>
+                            </div>
+                            
+                        </div>
+                    ) : (
+                        <div className="flex-1 flex items-center justify-center animate-pop w-full px-2">
+                            <div className="text-center bg-white/50 backdrop-blur-sm p-8 md:p-10 rounded-3xl border-2 border-slate-200 border-dashed max-w-lg">
+                                <div className="text-5xl md:text-6xl text-indigo-200 mb-6 animate-float"><i className="fa-solid fa-wand-magic-sparkles"></i></div>
+                                <h3 className="text-2xl md:text-3xl font-black text-slate-700 mb-3">Awaiting Problem</h3>
+                                <p className="text-slate-500 font-bold text-sm md:text-lg">Enter your multiplication problem in the top bar to visualize the standard algorithm in action. Works up to 4 digits!</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+
+        // Main App Container
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('animator');
+
+            const tabs = [
+                { id: 'animator', label: 'Visual Algorithm', icon: 'fa-wand-magic-sparkles' },
+                { id: 'learn', label: 'Learn', icon: 'fa-chalkboard-user' },
+                { id: 'practice', label: 'Guided Practice', icon: 'fa-pencil' },
+                { id: 'game', label: 'Dash Game', icon: 'fa-bolt' },
+                { id: 'word', label: 'Word Problems', icon: 'fa-book-open' }
+            ];
+
+            return (
+                <div className="flex flex-col md:flex-row h-full w-full max-w-7xl mx-auto relative z-10 gap-3 md:gap-6 p-2 md:p-4 pt-0">
+                    
+                    {/* Sidebar / Header */}
+                    <header className="flex flex-col shrink-0 gap-3 md:gap-4 w-full md:w-56 lg:w-64">
+                        
+                        <div className="bg-white/80 backdrop-blur rounded-[2rem] p-3 md:p-5 shadow-sm border border-slate-200 flex flex-row md:flex-col items-center md:items-start gap-3 md:gap-4">
+                            <a href="apps_hub.html" className="w-10 h-10 md:w-12 md:h-12 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-500 hover:text-cyan-600 hover:bg-slate-50 shadow-sm transition-all shrink-0 group" title="Back to Hub">
+                                <i className="fa-solid fa-arrow-left group-hover:-translate-x-1 transition-transform text-sm md:text-base"></i>
+                            </a>
+                            <div className="flex-1 min-w-0">
+                                <h1 className="text-lg md:text-2xl font-black text-slate-800 leading-tight whitespace-normal break-words">Multiplication Master</h1>
+                                <p className="text-slate-500 font-bold text-[9px] md:text-[11px] lg:text-xs uppercase tracking-widest mt-1 truncate">Standard Algorithm</p>
+                            </div>
+                        </div>
+
+                        {/* Navigation Tabs */}
+                        <div className="bg-white/80 backdrop-blur rounded-2xl md:rounded-[2rem] shadow-sm border border-slate-200 p-1.5 md:p-2 flex flex-row md:flex-col overflow-x-auto no-scrollbar gap-1 md:gap-2">
+                            {tabs.map(tab => (
+                                <button 
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex-1 md:w-full px-3 md:px-5 py-2 md:py-3 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm flex items-center justify-center md:justify-start gap-2.5 transition-all whitespace-nowrap
+                                        ${activeTab === tab.id ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
+                                >
+                                    <i className={`fa-solid ${tab.icon} w-4 text-center`}></i> <span className="hidden sm:inline md:inline">{tab.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </header>
+
+                    {/* Main Content Area */}
+                    <main className="flex-1 w-full min-w-0 flex flex-col min-h-0 relative bg-white/40 md:bg-transparent rounded-[2rem] md:rounded-none">
+                        {activeTab === 'animator' && <VisualAlgorithmTab />}
+                        {activeTab === 'learn' && <LearnTab />}
+                        {activeTab === 'practice' && <PracticeTab />}
+                        {activeTab === 'game' && <GameTab />}
+                        {activeTab === 'word' && <WordProblemsTab />}
+                    </main>
+
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
