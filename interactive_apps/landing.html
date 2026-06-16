@@ -88,6 +88,7 @@
             const [activeSubject, setActiveSubject] = useState(null);
             const [appsData, setAppsData] = useState({});
             const [isAdding, setIsAdding] = useState(false);
+            const [appToDelete, setAppToDelete] = useState(null); // Custom modal state for deletion
             const [newTitle, setNewTitle] = useState('');
             const [newUrl, setNewUrl] = useState('');
             const [isLoading, setIsLoading] = useState(true);
@@ -123,16 +124,20 @@
                 setNewUrl('');
             };
 
-            const handleDeleteApp = async (appIdToDelete) => {
-                if (!window.confirm("Are you sure you want to delete this app link?")) return;
-                
+            const confirmDeleteApp = (appId) => {
+                setAppToDelete(appId);
+            };
+
+            const executeDeleteApp = async () => {
+                if (!appToDelete) return;
                 const currentSubjectApps = appsData[activeSubject.id] || [];
                 const updatedApps = {
                     ...appsData,
-                    [activeSubject.id]: currentSubjectApps.filter(app => app.id !== appIdToDelete)
+                    [activeSubject.id]: currentSubjectApps.filter(app => app.id !== appToDelete)
                 };
 
                 await setDoc(doc(db, 'webapps', 'directory'), updatedApps);
+                setAppToDelete(null);
             };
 
             if (isLoading) {
@@ -219,9 +224,12 @@
                                         </div>
                                     ) : (
                                         appsData[activeSubject.id].map(app => (
-                                            <div key={app.id} className="group flex flex-col bg-slate-50 rounded-2xl border border-slate-200 hover:border-cyan-300 hover:shadow-lg transition-all overflow-hidden relative">
+                                            /* Entire card wrapped in an anchor tag to make it launchable anywhere */
+                                            <a href={app.url} target="_blank" key={app.id} className="group flex flex-col bg-slate-50 rounded-2xl border border-slate-200 hover:border-cyan-300 hover:shadow-lg transition-all overflow-hidden relative cursor-pointer">
+                                                
+                                                {/* Delete button absolutely positioned with higher z-index to catch click events */}
                                                 <div className="absolute top-3 right-3 z-20">
-                                                    <button onClick={() => handleDeleteApp(app.id)} className="w-8 h-8 bg-white text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg shadow-sm border border-slate-200 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center" title="Delete App">
+                                                    <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); confirmDeleteApp(app.id); }} className="w-8 h-8 bg-white text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg shadow-sm border border-slate-200 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center" title="Delete App">
                                                         <i className="fa-solid fa-trash-can text-sm"></i>
                                                     </button>
                                                 </div>
@@ -231,11 +239,11 @@
                                                         <i className={`fa-solid ${activeSubject.icon} text-xl`}></i>
                                                     </div>
                                                     <h3 className="text-xl font-bold text-slate-800 mb-2 leading-tight pr-8">{app.title}</h3>
-                                                    <a href={app.url} target="_blank" className="mt-auto pt-4 flex items-center text-cyan-600 font-bold group-hover:text-cyan-500 transition-colors">
+                                                    <div className="mt-auto pt-4 flex items-center text-cyan-600 font-bold group-hover:text-cyan-500 transition-colors">
                                                         Launch App <i className="fa-solid fa-arrow-up-right-from-square ml-2 text-sm"></i>
-                                                    </a>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            </a>
                                         ))
                                     )}
                                 </div>
@@ -243,6 +251,7 @@
                         )}
                     </main>
 
+                    {}
                     {/* Add App Modal */}
                     {isAdding && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
@@ -290,6 +299,27 @@
                                         </button>
                                     </div>
                                 </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Custom Confirm Delete Modal (Replaces window.confirm) */}
+                    {appToDelete && (
+                        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+                            <div className="bg-white rounded-3xl shadow-xl w-full max-w-sm overflow-hidden flex flex-col border border-slate-200 p-6 text-center">
+                                <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center text-rose-500 mx-auto mb-4">
+                                    <i className="fa-solid fa-triangle-exclamation text-3xl"></i>
+                                </div>
+                                <h3 className="text-xl font-black text-slate-800 mb-2">Delete App?</h3>
+                                <p className="text-slate-500 font-medium mb-6">Are you sure you want to remove this app link? This action cannot be undone.</p>
+                                <div className="flex gap-3">
+                                    <button onClick={() => setAppToDelete(null)} className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors">
+                                        Cancel
+                                    </button>
+                                    <button onClick={executeDeleteApp} className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl shadow-md transition-colors">
+                                        Delete
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
