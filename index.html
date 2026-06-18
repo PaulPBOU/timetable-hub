@@ -975,12 +975,12 @@
                 return [
                     { id: 'b4_t', type: 'lesson', time: '9:00am - 10:00am', subject: 'History', topic: '', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
                     { id: 'b5_t', type: 'lesson', time: '10:00am - 11:00am', subject: 'Maths', topic: '', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
-                    { id: 'br1', type: 'break', time: '11:00am - 11:30am', topic: 'Break 1', icon: 'mug-hot' },
+                    { id: 'br1', type: 'break', time: '11:00am - 11:30am', topic: 'Break 1', icon: 'mug-hot', isDuty: false },
                     { id: 'b0_t', type: 'lesson', time: '11:30am - 11:50am', subject: 'English - Spelling', topic: '', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
                     { id: 'b1_t', type: 'lesson', time: '11:50am - 12:30pm', subject: 'English - Shared Reading', topic: '', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
                     { id: 'b2_t', type: 'lesson', time: '12:30pm - 12:40pm', subject: 'English - Daily Write', topic: '', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
                     { id: 'b3_t', type: 'lesson', time: '12:40pm - 1:30pm', subject: 'English - Writing', topic: '', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
-                    { id: 'br2', type: 'break', time: '1:30pm - 2:00pm', topic: 'Break 2', icon: 'apple-whole' },
+                    { id: 'br2', type: 'break', time: '1:30pm - 2:00pm', topic: 'Break 2', icon: 'apple-whole', isDuty: false },
                     { id: 'b6', type: 'lesson', time: '2:00pm - 2:30pm', subject: 'Whole School', topic: 'Assembly', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
                     { id: 'b7', type: 'lesson', time: '2:30pm - 3:00pm', subject: 'End of Day', topic: 'Wrap Up', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
                 ];
@@ -990,10 +990,10 @@
                 { id: 'b1', type: 'lesson', time: '9:20am - 10:00am', subject: 'English - Shared Reading', topic: '', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
                 { id: 'b2', type: 'lesson', time: '10:00am - 10:10am', subject: 'English - Daily Write', topic: '', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
                 { id: 'b3', type: 'lesson', time: '10:10am - 10:50am', subject: 'English - Writing', topic: '', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
-                { id: 'br1', type: 'break', time: '11:00am - 11:30am', topic: 'Break 1', icon: 'mug-hot' },
+                { id: 'br1', type: 'break', time: '11:00am - 11:30am', topic: 'Break 1', icon: 'mug-hot', isDuty: false },
                 { id: 'b4', type: 'lesson', time: '11:30am - 12:30pm', subject: 'History', topic: '', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
                 { id: 'b5', type: 'lesson', time: '12:30pm - 1:30pm', subject: 'Maths', topic: '', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
-                { id: 'br2', type: 'break', time: '1:30pm - 2:00pm', topic: 'Break 2', icon: 'apple-whole' },
+                { id: 'br2', type: 'break', time: '1:30pm - 2:00pm', topic: 'Break 2', icon: 'apple-whole', isDuty: false },
                 { id: 'b6', type: 'lesson', time: '2:00pm - 2:30pm', subject: 'Whole School', topic: 'Assembly', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
                 { id: 'b7', type: 'lesson', time: '2:30pm - 3:00pm', subject: 'End of Day', topic: 'Wrap Up', unitOutlineLink: '', slidesLink: '', printLink: [], lessonPlanLink: '' },
             ];
@@ -1356,6 +1356,25 @@
             showToast(newState ? `Marked ${day} as Covered` : `Removed Cover for ${day}`);
         };
 
+        window.toggleDuty = (day, idx) => {
+            const data = window.appState.weekData[day];
+            if (!data || !data[idx]) return;
+
+            data[idx].isDuty = !data[idx].isDuty;
+            
+            window.appState.weekData[day] = data;
+
+            setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { 
+                days: { ...window.appState.weekData, [day]: data } 
+            }, { merge: true });
+
+            if (window.appState.view === 'day') renderDayBlocks();
+            if (window.appState.view === 'week') renderWeekGrid();
+            if (window.appState.view === 'start-day') renderStartDay();
+            
+            showToast(data[idx].isDuty ? `${data[idx].topic} marked as Duty` : `Duty removed for ${data[idx].topic}`);
+        };
+
         const getTheme = (sub, topic) => {
             if(!sub) sub = '';
             if(!topic) topic = '';
@@ -1466,14 +1485,15 @@
 
             data.forEach((block, idx) => {
                 if (block.type === 'break') {
+                    const isDuty = block.isDuty;
                     scheduleContainer.innerHTML += `
-                        <div class="relative flex items-center justify-center w-full py-0 -my-1">
+                        <div class="relative flex items-center justify-center w-full py-0 -my-1 cursor-pointer group hover:scale-[1.02] transition-transform" onclick="toggleDuty('${window.appState.day}', ${idx})">
                             <div class="absolute inset-0 flex items-center">
-                                <div class="w-full border-t border-dashed border-amber-400/60 dark:border-amber-600/50"></div>
+                                <div class="w-full border-t border-dashed ${isDuty ? 'border-amber-500' : 'border-amber-400/60 dark:border-amber-600/50'}"></div>
                             </div>
-                            <div class="relative flex items-center gap-2 bg-slate-50 dark:bg-slate-900 px-3 text-[10px] md:text-xs font-black uppercase tracking-widest text-amber-600 dark:text-amber-500">
-                                <i class="fa-solid fa-${block.icon}"></i>
-                                <span>${block.topic}</span>
+                            <div class="relative flex items-center gap-2 px-3 py-1 text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${isDuty ? 'bg-amber-500 text-white rounded-full shadow-md border border-amber-400' : 'bg-slate-50 dark:bg-slate-900 text-amber-600 dark:text-amber-500'}">
+                                <i class="fa-solid ${isDuty ? 'fa-user-shield' : 'fa-' + block.icon}"></i>
+                                <span>${block.topic} ${isDuty ? 'DUTY' : ''}</span>
                             </div>
                         </div>`;
                 } else {
@@ -1558,14 +1578,15 @@
                     bodyHTML += `<div class="space-y-2.5">`;
                     data.forEach((block, idx) => {
                         if(block.type === 'break') {
+                            const isDuty = block.isDuty;
                             bodyHTML += `
-                            <div class="relative flex items-center justify-center py-2.5 my-1.5 group w-full">
+                            <div class="relative flex items-center justify-center py-2.5 my-1.5 group w-full cursor-pointer" onclick="toggleDuty('${day}', ${idx})">
                                 <div class="absolute inset-0 flex items-center px-2">
-                                    <div class="w-full border-t border-dashed border-amber-300/60 dark:border-amber-700/60"></div>
+                                    <div class="w-full border-t border-dashed ${isDuty ? 'border-amber-500' : 'border-amber-300/60 dark:border-amber-700/60'}"></div>
                                 </div>
-                                <div class="relative flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800/80 text-[8.5px] font-black uppercase tracking-widest text-amber-500 shadow-sm transition-transform duration-300 group-hover:scale-105 group-hover:bg-amber-50 dark:group-hover:bg-amber-900/30">
-                                    <i class="fa-solid fa-${block.icon}"></i>
-                                    <span>${block.topic}</span>
+                                <div class="relative flex items-center gap-1.5 px-3 py-1 rounded-full text-[8.5px] font-black uppercase tracking-widest shadow-sm transition-all duration-300 ${isDuty ? 'bg-amber-500 text-white border-2 border-amber-400 scale-105' : 'bg-slate-50 dark:bg-slate-900 border border-amber-200 dark:border-amber-800/80 text-amber-500 group-hover:scale-105 group-hover:bg-amber-50 dark:group-hover:bg-amber-900/30'}">
+                                    <i class="fa-solid ${isDuty ? 'fa-user-shield' : 'fa-' + block.icon}"></i>
+                                    <span>${block.topic} ${isDuty ? 'DUTY' : ''}</span>
                                 </div>
                             </div>`;
                         } else {
@@ -1834,13 +1855,14 @@
 
             data.forEach((block, idx) => {
                 if(block.type === 'break') {
+                    const isDuty = block.isDuty;
                     html += `
-                    <div class="flex items-center justify-center gap-4 my-2 opacity-80 relative z-10">
-                        <div class="h-px bg-amber-200 dark:bg-amber-800/50 flex-1"></div>
-                        <div class="px-5 py-2 rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 text-[10px] md:text-xs font-black tracking-widest uppercase border border-amber-200 dark:border-amber-800/50 shadow-sm flex items-center">
-                            <i class="fa-solid fa-${block.icon} mr-2 text-sm"></i> ${block.topic} (${block.time})
+                    <div class="flex items-center justify-center gap-4 my-2 opacity-80 relative z-10 cursor-pointer group" onclick="toggleDuty('${window.appState.day}', ${idx})">
+                        <div class="h-px ${isDuty ? 'bg-amber-400 dark:bg-amber-500' : 'bg-amber-200 dark:bg-amber-800/50'} flex-1 transition-colors"></div>
+                        <div class="px-5 py-2 rounded-full text-[10px] md:text-xs font-black tracking-widest uppercase shadow-sm flex items-center transition-all duration-300 ${isDuty ? 'bg-amber-500 text-white border-2 border-amber-400 scale-105 shadow-amber-500/40' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-900/40'}">
+                            <i class="fa-solid ${isDuty ? 'fa-user-shield animate-pulse' : 'fa-' + block.icon} mr-2 text-sm"></i> ${block.topic} ${isDuty ? '(DUTY)' : ''} (${block.time})
                         </div>
-                        <div class="h-px bg-amber-200 dark:bg-amber-800/50 flex-1"></div>
+                        <div class="h-px ${isDuty ? 'bg-amber-400 dark:bg-amber-500' : 'bg-amber-200 dark:bg-amber-800/50'} flex-1 transition-colors"></div>
                     </div>`;
                 } else {
                     const theme = getTheme(block.subject, block.topic);
