@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operation Exodus - Space PBL</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(-45deg, #0f172a, #312e81, #4c1d95, #1e1b4b);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating background orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.6;
+        }
+        .orb-1 { width: 400px; height: 400px; background: #c026d3; top: -10%; left: -10%; animation: float 10s ease-in-out infinite; }
+        .orb-2 { width: 500px; height: 500px; background: #2563eb; bottom: -20%; right: -10%; animation: float 12s ease-in-out infinite reverse; }
+        .orb-3 { width: 300px; height: 300px; background: #059669; top: 40%; left: 40%; animation: float 15s ease-in-out infinite; opacity: 0.4; }
+
+        @keyframes float {
+            0% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-30px) scale(1.05); }
+            100% { transform: translateY(0) scale(1); }
+        }
+
+        /* Glassmorphism Utilities */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 0 20px rgba(255,255,255,0.02);
+        }
+
+        .glass-button {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-button:hover, .glass-button.active {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .text-glow {
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+        
+        .text-gradient {
+            background: linear-gradient(to right, #38bdf8, #c026d3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Content section toggling */
+        .tab-content { display: none; animation: fadeIn 0.5s ease; }
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
+        /* Editability Styling - Highlights editable areas on hover */
+        [contenteditable="true"] {
+            outline: none;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        [contenteditable="true"]:hover, [contenteditable="true"]:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
+            cursor: text;
+        }
+
+        /* Step Counters */
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-weight: 800;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        /* --- PLANET DATABASE ANIMATIONS & STYLES --- */
+        .planet-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            scroll-snap-align: center;
+            border: 1px solid transparent;
+        }
+        .planet-card:hover {
+            transform: scale(1.05) translateX(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        .planet-card:hover .planet-thumb {
+            transform: rotate(15deg) scale(1.1);
+        }
+        .planet-card.selected {
+            transform: scale(1.08) translateX(10px);
+            background: rgba(56, 189, 248, 0.1);
+            border-color: rgba(56, 189, 248, 0.5);
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
+        }
+        .planet-thumb {
+            transition: transform 0.8s ease;
+            border-radius: 50%;
+            box-shadow: inset -8px -8px 12px rgba(0,0,0,0.8), 0 0 10px rgba(255,255,255,0.1);
+        }
+        
+        .planet-hud-sphere {
+            border-radius: 50%;
+            box-shadow: inset -25px -25px 40px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.3);
+            animation: slowSpin 60s linear infinite;
+        }
+        
+        @keyframes slowSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes hudFloat {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-hud-float {
+            animation: hudFloat 6s ease-in-out infinite;
+        }
+        
+        .data-card {
+            transition: all 0.3s ease;
+        }
+        .data-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Elements -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="min-h-screen flex flex-col p-4 md:p-8 max-w-7xl mx-auto">
+        
+        <!-- Header / Navigation -->
+        <header class="glass rounded-3xl p-4 mb-8 flex flex-col md:flex-row items-center justify-between sticky top-4 z-50">
+            <div class="flex items-center gap-3 mb-4 md:mb-0 px-4">
+                <span class="text-3xl" contenteditable="true">🚀</span>
+                <div>
+                    <h1 class="text-2xl font-black tracking-wider text-glow"><span contenteditable="true">OPERATION</span> <span class="text-gradient" contenteditable="true">EXODUS</span></h1>
+                    <p class="text-xs text-slate-300 font-semibold tracking-widest uppercase" contenteditable="true">Stage 3 Space Academy</p>
+                </div>
+            </div>
+            <nav class="flex flex-wrap justify-center gap-2">
+                <!-- Text inside spans are editable to avoid breaking button clicks -->
+                <button onclick="switchTab('sec1')" id="btn-sec1" class="glass-button active px-4 py-2 rounded-full text-sm font-semibold"><span contenteditable="true">1. Briefing</span></button>
+                <button onclick="switchTab('sec2')" id="btn-sec2" class="glass-button px-4 py-2 rounded-full text-sm font-semibold"><span contenteditable="true">2. Mission Specs</span></button>
+                <button onclick="switchTab('sec3')" id="btn-sec3" class="glass-button px-4 py-2 rounded-full text-sm font-semibold"><span contenteditable="true">3. Activities</span></button>
+                <button onclick="switchTab('sec4')" id="btn-sec4" class="glass-button px-4 py-2 rounded-full text-sm font-semibold"><span contenteditable="true">4. Data Logs</span></button>
+                <button onclick="switchTab('sec5')" id="btn-sec5" class="glass-button px-4 py-2 rounded-full text-sm font-semibold text-emerald-300 border-emerald-500/30"><span contenteditable="true">5. Teacher Info</span></button>
+                <button onclick="switchTab('sec6')" id="btn-sec6" class="glass-button px-4 py-2 rounded-full text-sm font-semibold text-purple-300 border-purple-500/30"><span contenteditable="true">Part B: Essay</span></button>
+            </nav>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 glass rounded-3xl p-6 md:p-12 overflow-hidden relative">
+            
+            <!-- SECTION 1: THE HOOK -->
+            <div id="content-sec1" class="tab-content active">
+                <div class="max-w-4xl mx-auto text-center">
+                    <span class="inline-block px-4 py-1 rounded-full glass mb-6 text-cyan-300 font-bold uppercase tracking-widest text-sm border-cyan-500/30" contenteditable="true">Emergency Transmission</span>
+                    <h1 class="text-5xl md:text-7xl font-black mb-8 leading-tight"><span contenteditable="true">Earth is failing.</span><br><span class="text-gradient" contenteditable="true">We must relocate.</span></h1>
+                    
+                    <div class="glass-panel p-8 rounded-2xl text-left mb-10 border-l-4 border-l-rose-500">
+                        <h2 class="text-2xl font-bold text-rose-400 mb-4 flex items-center gap-2">
+                            <svg class="w-8 h-8 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            <span contenteditable="true">THE CRISIS</span>
+                        </h2>
+                        <p class="text-lg text-slate-200 leading-relaxed mb-4" contenteditable="true">Attention Junior Scientists. Due to severe global overheating, extreme pollution, and rapid overpopulation, our home planet is quickly becoming uninhabitable. The Global Space Agency has activated <strong>Operation Exodus</strong>.</p>
+                        <p class="text-lg text-slate-200 leading-relaxed" contenteditable="true">We cannot stay here. We must look to the stars to survive. We need to find a new planet in our solar system to call home, design a way to transport humans there safely, and figure out how to survive on its alien surface.</p>
+                    </div>
+
+                    <div class="glass-panel p-8 rounded-2xl text-left">
+                        <h2 class="text-2xl font-bold text-cyan-400 mb-4" contenteditable="true">Your Challenge</h2>
+                        <p class="text-lg text-slate-200 leading-relaxed mb-6" contenteditable="true">As lead aerospace engineers and planetary scientists, your mission is to answer this driving question:</p>
+                        
+                        <div class="p-6 rounded-xl bg-gradient-to-r from-cyan-900/50 to-blue-900/50 border border-cyan-500/30 shadow-lg transform rotate-1">
+                            <p class="text-xl md:text-2xl font-black text-center text-white italic" contenteditable="true">"Which planet in our solar system can we relocate to, and how will we design the spacecraft and planetary systems to ensure human survival?"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: ASSESSMENT TASK -->
+            <div id="content-sec2" class="tab-content">
+                <div class="max-w-4xl mx-auto">
+                    <h2 class="text-4xl font-black mb-2 text-glow" contenteditable="true">Mission Specs</h2>
+                    <p class="text-slate-300 mb-10 text-lg" contenteditable="true">Your assessment requirements and success criteria.</p>
+
+                    <div class="grid md:grid-cols-2 gap-8 mb-10">
+                        <div class="glass-panel p-8 rounded-2xl">
+                            <h3 class="text-xl font-bold text-cyan-400 mb-4 border-b border-cyan-500/30 pb-2" contenteditable="true">What you need to do</h3>
+                            <p class="text-slate-200 mb-4" contenteditable="true">To successfully complete Operation Exodus, you will complete three training activities. This will culminate in a final project showcase where you will present to the Global Space Agency (your classmates!).</p>
+                            <p class="text-slate-200" contenteditable="true">You will present your planetary research, your spacecraft blueprint, and a physical 3D model of your chosen planet.</p>
+                        </div>
+
+                        <div class="glass-panel p-8 rounded-2xl">
+                            <h3 class="text-xl font-bold text-emerald-400 mb-4 border-b border-emerald-500/30 pb-2" contenteditable="true">Learning Outcomes</h3>
+                            <ul class="space-y-3 text-slate-200">
+                                <li class="flex items-start gap-2"><span class="text-emerald-400">★</span> <span contenteditable="true">You can research and compare the environmental conditions of different planets in our solar system.</span></li>
+                                <li class="flex items-start gap-2"><span class="text-emerald-400">★</span> <span contenteditable="true">You can design and draw a blueprint for a spacecraft that meets human biological needs.</span></li>
+                                <li class="flex items-start gap-2"><span class="text-emerald-400">★</span> <span contenteditable="true">You can select and use sustainable, recycled materials to produce a 3D model.</span></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-8 rounded-2xl border-l-4 border-l-fuchsia-500 mb-8">
+                        <h3 class="text-2xl font-bold text-fuchsia-400 mb-6" contenteditable="true">Success Criteria Checklist</h3>
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div class="glass p-4 rounded-xl flex gap-3 items-start">
+                                <div class="step-number bg-fuchsia-500/20 text-fuchsia-300" contenteditable="true">1</div>
+                                <div>
+                                    <strong class="block text-white mb-1" contenteditable="true">Investigate</strong>
+                                    <p class="text-sm text-slate-300" contenteditable="true">I have researched the planets and created a digital poster justifying my choice for our new home.</p>
+                                </div>
+                            </div>
+                            <div class="glass p-4 rounded-xl flex gap-3 items-start">
+                                <div class="step-number bg-fuchsia-500/20 text-fuchsia-300" contenteditable="true">2</div>
+                                <div>
+                                    <strong class="block text-white mb-1" contenteditable="true">Generate</strong>
+                                    <p class="text-sm text-slate-300" contenteditable="true">I have drawn a detailed blueprint of my transport spacecraft, labelling survival technologies.</p>
+                                </div>
+                            </div>
+                            <div class="glass p-4 rounded-xl flex gap-3 items-start">
+                                <div class="step-number bg-fuchsia-500/20 text-fuchsia-300" contenteditable="true">3</div>
+                                <div>
+                                    <strong class="block text-white mb-1" contenteditable="true">Produce</strong>
+                                    <p class="text-sm text-slate-300" contenteditable="true">I have built a 3D model of my planet using only sustainable/recycled materials.</p>
+                                </div>
+                            </div>
+                            <div class="glass p-4 rounded-xl flex gap-3 items-start">
+                                <div class="step-number bg-fuchsia-500/20 text-fuchsia-300" contenteditable="true">4</div>
+                                <div>
+                                    <strong class="block text-white mb-1" contenteditable="true">Evaluate</strong>
+                                    <p class="text-sm text-slate-300" contenteditable="true">I have written a reflection on why my recycled materials were effective for this model.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: SUSTAINED INQUIRY (DETAILED ACTIVITIES) -->
+            <div id="content-sec3" class="tab-content">
+                <div class="max-w-5xl mx-auto">
+                    <h2 class="text-4xl font-black mb-2 text-glow" contenteditable="true">The 3 Missions</h2>
+                    <p class="text-slate-300 mb-10 text-lg" contenteditable="true">Follow the Design Process to solve the relocation challenge. Detailed instructions below.</p>
+
+                    <div class="space-y-12">
+                        
+                        <!-- Activity 1 -->
+                        <div class="glass-panel p-8 md:p-10 rounded-3xl relative overflow-hidden group border border-cyan-500/30">
+                            <div class="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                            
+                            <div class="relative z-10">
+                                <div class="flex items-center gap-4 mb-6">
+                                    <div class="w-16 h-16 rounded-2xl bg-cyan-500/20 flex items-center justify-center border border-cyan-400/30 shrink-0">
+                                        <svg class="w-8 h-8 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                    </div>
+                                    <div>
+                                        <span class="inline-block px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold uppercase tracking-wider mb-1" contenteditable="true">Identifying & Defining</span>
+                                        <h3 class="text-3xl font-black text-white" contenteditable="true">Mission 1: Researching our New Home</h3>
+                                    </div>
+                                </div>
+                                
+                                <p class="text-slate-200 mb-6 text-lg leading-relaxed" contenteditable="true">We need to know where we are going! Because Earth is failing, you must select the most viable planet (or moon) in our solar system to relocate humanity. You will research planetary conditions and create a persuasive digital poster pitching your idea.</p>
+                                
+                                <div class="grid md:grid-cols-3 gap-6 mb-6">
+                                    <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700/50">
+                                        <div class="step-number bg-cyan-500 text-slate-900 mb-3" contenteditable="true">1</div>
+                                        <h4 class="font-bold text-white mb-2" contenteditable="true">Data Gathering</h4>
+                                        <p class="text-sm text-slate-300" contenteditable="true">Using your laptops, research the planets. You must record data on: <strong>Temperature, Atmosphere (is there oxygen?), Gravity, and Water presence.</strong> Use trusted sites like NASA Kids' Club.</p>
+                                        <div class="mt-4 pt-4 border-t border-cyan-500/30 text-center">
+                                            <p class="text-xs text-slate-400 uppercase tracking-widest mb-2" contenteditable="true">Official G.S.A Resources</p>
+                                            <button onclick="openDatabase()" class="w-full py-2 px-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-lg shadow-lg shadow-cyan-500/30 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 text-sm">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                                <span>Planet Database</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700/50">
+                                        <div class="step-number bg-cyan-500 text-slate-900 mb-3" contenteditable="true">2</div>
+                                        <h4 class="font-bold text-white mb-2" contenteditable="true">Invent Solutions</h4>
+                                        <p class="text-sm text-slate-300" contenteditable="true">No planet is perfect. Brainstorm <em>inventive</em> scientific solutions for your chosen planet's problems. (e.g. Venus is too hot? Design floating cloud-cities! Mars is dry? Giant ice-melting mirrors!).</p>
+                                    </div>
+                                    <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700/50">
+                                        <div class="step-number bg-cyan-500 text-slate-900 mb-3" contenteditable="true">3</div>
+                                        <h4 class="font-bold text-white mb-2" contenteditable="true">The Digital Pitch</h4>
+                                        <p class="text-sm text-slate-300" contenteditable="true">Open Canva or PowerPoint. Create a highly visual, persuasive "Destination Poster". Include your planetary facts, your inventive survival solutions, and bold graphics to convince the Agency.</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-cyan-900/30 p-4 rounded-xl border-l-4 border-cyan-400 flex items-start gap-4">
+                                    <span class="text-2xl" contenteditable="true">💡</span>
+                                    <div>
+                                        <strong class="text-cyan-300 block mb-1" contenteditable="true">Commander's Hint</strong>
+                                        <p class="text-sm text-slate-300" contenteditable="true">Your poster isn't just a list of facts. It's an advertisement! Use persuasive language like "Experience the endless energy of Titan's methane lakes!"</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Activity 2 -->
+                        <div class="glass-panel p-8 md:p-10 rounded-3xl relative overflow-hidden group border border-blue-500/30">
+                            <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                            
+                            <div class="relative z-10">
+                                <div class="flex items-center gap-4 mb-6">
+                                    <div class="w-16 h-16 rounded-2xl bg-blue-500/20 flex items-center justify-center border border-blue-400/30 shrink-0">
+                                        <svg class="w-8 h-8 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    </div>
+                                    <div>
+                                        <span class="inline-block px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold uppercase tracking-wider mb-1" contenteditable="true">Researching & Planning</span>
+                                        <h3 class="text-3xl font-black text-white" contenteditable="true">Mission 2: Designing the Ark</h3>
+                                    </div>
+                                </div>
+                                
+                                <p class="text-slate-200 mb-6 text-lg leading-relaxed" contenteditable="true">Now that we have a destination, how do we get humanity there safely? Space travel takes months or even years. You must design the transport spacecraft that will keep humans alive in the vacuum of space.</p>
+                                
+                                <div class="grid md:grid-cols-3 gap-6 mb-6">
+                                    <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700/50">
+                                        <div class="step-number bg-blue-50 text-slate-900 mb-3" contenteditable="true">1</div>
+                                        <h4 class="font-bold text-white mb-2" contenteditable="true">Biological Needs</h4>
+                                        <p class="text-sm text-slate-300" contenteditable="true">In your science journals, list everything humans need for a 2-year journey: Oxygen generation, food/hydroponics, water recycling, artificial gravity (to stop bone loss), and radiation shielding.</p>
+                                    </div>
+                                    <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700/50">
+                                        <div class="step-number bg-blue-500 text-slate-900 mb-3" contenteditable="true">2</div>
+                                        <h4 class="font-bold text-white mb-2" contenteditable="true">Draft the Blueprint</h4>
+                                        <p class="text-sm text-slate-300" contenteditable="true">Using A3 grid paper, rulers, and pencils, draw a detailed, scaled cross-section (inside view) of your spacecraft. Allocate zones: Engine room, sleeping quarters, bridge, and farming bays.</p>
+                                    </div>
+                                    <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700/50">
+                                        <div class="step-number bg-blue-500 text-slate-900 mb-3" contenteditable="true">3</div>
+                                        <h4 class="font-bold text-white mb-2" contenteditable="true">Label & Justify</h4>
+                                        <p class="text-sm text-slate-300" contenteditable="true">Draw arrows to the technologies in your ship and label them. On the back of the paper, write a 100-word paragraph justifying why your layout keeps the crew safe and sane.</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-blue-900/30 p-4 rounded-xl border-l-4 border-blue-400 flex items-start gap-4">
+                                    <span class="text-2xl" contenteditable="true">📐</span>
+                                    <div>
+                                        <strong class="text-blue-300 block mb-1" contenteditable="true">Commander's Hint</strong>
+                                        <p class="text-sm text-slate-300" contenteditable="true">Think about shape! Many spaceships use rotating circular rings to create artificial gravity. Check out designs from movies or real NASA concepts for inspiration before you draw.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Activity 3 -->
+                        <div class="glass-panel p-8 md:p-10 rounded-3xl relative overflow-hidden group border border-emerald-500/30">
+                            <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                            
+                            <div class="relative z-10">
+                                <div class="flex items-center gap-4 mb-6">
+                                    <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 flex items-center justify-center border border-emerald-400/30 shrink-0">
+                                        <svg class="w-8 h-8 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                    </div>
+                                    <div>
+                                        <span class="inline-block px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold uppercase tracking-wider mb-1" contenteditable="true">Producing & Implementing</span>
+                                        <h3 class="text-3xl font-black text-white" contenteditable="true">Mission 3: Building the New Planet</h3>
+                                    </div>
+                                </div>
+                                
+                                <p class="text-slate-200 mb-6 text-lg leading-relaxed" contenteditable="true">Earth is dying from waste and pollution, so our new society must be built entirely on sustainability. Your final task is to physically construct a 3D model of your chosen planet and human colony.</p>
+                                
+                                <div class="grid md:grid-cols-3 gap-6 mb-6">
+                                    <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700/50">
+                                        <div class="step-number bg-emerald-500 text-slate-900 mb-3" contenteditable="true">1</div>
+                                        <h4 class="font-bold text-white mb-2" contenteditable="true">Material Scavenging</h4>
+                                        <p class="text-sm text-slate-300" contenteditable="true">You may <strong>NOT</strong> buy new plastics. You must scavenge sustainable/recycled materials from home and school: Cardboard, egg cartons, plastic bottles, newspaper, and foil.</p>
+                                    </div>
+                                    <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700/50">
+                                        <div class="step-number bg-emerald-500 text-slate-900 mb-3" contenteditable="true">2</div>
+                                        <h4 class="font-bold text-white mb-2" contenteditable="true">Construct the Surface</h4>
+                                        <p class="text-sm text-slate-300" contenteditable="true">Use papier-mâché over balloons to create the planet globe, or use a flat cardboard base. Shape the geographical features you researched in Mission 1 (craters, mountains, ice caps).</p>
+                                    </div>
+                                    <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700/50">
+                                        <div class="step-number bg-emerald-500 text-slate-900 mb-3" contenteditable="true">3</div>
+                                        <h4 class="font-bold text-white mb-2" contenteditable="true">Deploy the Colony</h4>
+                                        <p class="text-sm text-slate-300" contenteditable="true">Integrate your human colony into the landscape. Glue clear plastic cups for biodomes. Use foil for solar arrays. Place it in the safest geographical zone (e.g. inside a crater for wind protection).</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-emerald-900/30 p-4 rounded-xl border-l-4 border-emerald-400 flex items-start gap-4">
+                                    <span class="text-2xl" contenteditable="true">♻️</span>
+                                    <div>
+                                        <strong class="text-emerald-300 block mb-1" contenteditable="true">Commander's Hint</strong>
+                                        <p class="text-sm text-slate-300" contenteditable="true">Be prepared to evaluate your work! During the final Expo, you will be asked to explain *why* your recycled materials were an effective choice for representing your high-tech colony.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: WORK SAMPLES -->
+            <div id="content-sec4" class="tab-content">
+                <div class="max-w-5xl mx-auto">
+                    <h2 class="text-4xl font-black mb-2 text-glow" contenteditable="true">Data Logs (Work Samples)</h2>
+                    <p class="text-slate-300 mb-8 text-lg" contenteditable="true">Mock "above satisfactory" student submissions.</p>
+
+                    <div class="grid lg:grid-cols-3 gap-6">
+                        
+                        <!-- Sample 1 -->
+                        <div class="glass-panel rounded-2xl flex flex-col overflow-hidden">
+                            <div class="bg-slate-800/80 p-4 border-b border-white/10">
+                                <h4 class="font-bold text-cyan-300" contenteditable="true">Canva Pitch Poster</h4>
+                                <p class="text-xs text-slate-400 mt-1" contenteditable="true">Activity 1 • Formative • ST3-10ES-S</p>
+                            </div>
+                            <div class="p-6 flex-1 flex flex-col">
+                                <div class="w-full aspect-[4/3] rounded-xl overflow-hidden mb-4 border border-white/10 relative group">
+                                    <img src="https://placehold.co/600x450/1e293b/38bdf8?text=Destination:+TITAN\n(Digital+Poster)" alt="Mock Poster" class="w-full h-full object-cover">
+                                </div>
+                                <p class="text-sm text-slate-300 italic mb-4 flex-1" contenteditable="true">"Titan has lakes of liquid methane! We will build special refineries to turn this methane into endless rocket fuel and energy for our heated biodomes!"</p>
+                                <div class="bg-cyan-900/30 p-3 rounded-lg border border-cyan-500/20">
+                                    <p class="text-xs text-cyan-200"><strong contenteditable="true">Teacher Comment:</strong> <span contenteditable="true">Excellent scientific research showing deep understanding of Titan's environment. The inventive solution is highly creative.</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sample 2 -->
+                        <div class="glass-panel rounded-2xl flex flex-col overflow-hidden">
+                            <div class="bg-slate-800/80 p-4 border-b border-white/10">
+                                <h4 class="font-bold text-blue-300" contenteditable="true">Spacecraft Blueprint</h4>
+                                <p class="text-xs text-slate-400 mt-1" contenteditable="true">Activity 2 • Formative • ST3-5WT</p>
+                            </div>
+                            <div class="p-6 flex-1 flex flex-col">
+                                <div class="w-full aspect-[4/3] rounded-xl overflow-hidden mb-4 border border-white/10 relative">
+                                    <img src="https://placehold.co/600x450/1e293b/60a5fa?text=The+Ark+Genesis\n(Hand+Drawn+Blueprint)" alt="Mock Blueprint" class="w-full h-full object-cover">
+                                </div>
+                                <p class="text-sm text-slate-300 italic mb-4 flex-1" contenteditable="true">Labels point to a rotating outer ring ("Centrifuge for artificial Earth gravity") and large green sections ("Algae tanks for oxygen generation").</p>
+                                <div class="bg-blue-900/30 p-3 rounded-lg border border-blue-500/20">
+                                    <p class="text-xs text-blue-200"><strong contenteditable="true">Teacher Comment:</strong> <span contenteditable="true">Great application of design thinking. You have clearly anticipated the physical needs of humans during long space travel.</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sample 3 -->
+                        <div class="glass-panel rounded-2xl flex flex-col overflow-hidden">
+                            <div class="bg-slate-800/80 p-4 border-b border-white/10">
+                                <h4 class="font-bold text-emerald-300" contenteditable="true">3D Recycled Planet</h4>
+                                <p class="text-xs text-slate-400 mt-1" contenteditable="true">Activity 3 • Summative • ST3-5WT</p>
+                            </div>
+                            <div class="p-6 flex-1 flex flex-col">
+                                <div class="w-full aspect-[4/3] rounded-xl overflow-hidden mb-4 border border-white/10 relative">
+                                    <img src="https://placehold.co/600x450/1e293b/34d399?text=Mars+Model\n(Recycled+Materials)" alt="Mock 3D Model" class="w-full h-full object-cover">
+                                </div>
+                                <p class="text-sm text-slate-300 italic mb-4 flex-1" contenteditable="true">A papier-mâché balloon painted rusty red. Egg cartons create crater textures. Clear plastic cups are glued as human colony domes.</p>
+                                <div class="bg-emerald-900/30 p-3 rounded-lg border border-emerald-500/20">
+                                    <p class="text-xs text-emerald-200"><strong contenteditable="true">Teacher Comment:</strong> <span contenteditable="true">A fantastic physical prototype. You successfully used sustainable materials to represent both the planetary features and your engineered habitat.</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 5: TEACHER INFO -->
+            <div id="content-sec5" class="tab-content">
+                <div class="max-w-4xl mx-auto">
+                    <h2 class="text-4xl font-black mb-2 text-glow text-emerald-300" contenteditable="true">Teacher Background Information</h2>
+                    <p class="text-slate-300 mb-8 text-lg" contenteditable="true">Curriculum mapping and theoretical frameworks.</p>
+
+                    <div class="grid sm:grid-cols-3 gap-4 mb-8">
+                        <div class="glass p-5 rounded-2xl text-center">
+                            <p class="text-xs text-slate-400 uppercase tracking-wider mb-1" contenteditable="true">Target Audience</p>
+                            <p class="font-bold text-white text-lg" contenteditable="true">Stage 3 (Yrs 5-6)</p>
+                        </div>
+                        <div class="glass p-5 rounded-2xl text-center">
+                            <p class="text-xs text-slate-400 uppercase tracking-wider mb-1" contenteditable="true">Syllabus</p>
+                            <p class="font-bold text-white text-lg" contenteditable="true">NSW NESA Sci & Tech</p>
+                        </div>
+                        <div class="glass p-5 rounded-2xl text-center">
+                            <p class="text-xs text-slate-400 uppercase tracking-wider mb-1" contenteditable="true">Strand</p>
+                            <p class="font-bold text-white text-lg" contenteditable="true">Earth and Space</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6 mb-10">
+                        <div class="glass-panel p-6 rounded-2xl border-l-4 border-l-cyan-500">
+                            <h4 class="text-sm font-black text-cyan-400 uppercase tracking-wider mb-2" contenteditable="true">Knowledge and Understanding</h4>
+                            <p class="text-white font-medium mb-3" contenteditable="true"><em>Investigates regular events in the solar system and geological events on the Earth's surface (ST3-10ES-S).</em></p>
+                            <div class="bg-cyan-900/20 p-4 rounded-xl border border-cyan-500/20">
+                                <p class="text-sm text-slate-300"><strong class="text-cyan-300" contenteditable="true">Task-Specific Elaboration:</strong> <span contenteditable="true">Researching and comparing the environmental conditions of different planets in our solar system to determine their viability for human relocation, and proposing scientific solutions to overcome extreme planetary conditions.</span></p>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel p-6 rounded-2xl border-l-4 border-l-emerald-500">
+                            <h4 class="text-sm font-black text-emerald-400 uppercase tracking-wider mb-2" contenteditable="true">Processes and Production Skills</h4>
+                            <p class="text-white font-medium mb-3" contenteditable="true"><em>Plans and implements a design process, selecting a range of tools, equipment, materials and techniques to produce solutions (ST3-5WT).</em></p>
+                            <div class="bg-emerald-900/20 p-4 rounded-xl border border-emerald-500/20">
+                                <p class="text-sm text-slate-300"><strong class="text-emerald-300" contenteditable="true">Task-Specific Elaboration:</strong> <span contenteditable="true">Utilising the design process to ideate spacecraft transport blueprints and producing a physical 3D model of a new planetary colony using sustainable, recycled materials to solve a real-world crisis scenario.</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-2xl font-bold text-white mb-4" contenteditable="true">Theoretical Underpinnings</h3>
+                    <div class="glass p-6 rounded-2xl text-slate-200 leading-relaxed space-y-4">
+                        <p contenteditable="true">This PBL sequence is scaffolded using <strong>Bloom's Taxonomy</strong>. Students begin at the <em>understanding</em> level (researching planetary facts in Activity 1), move to <em>analysing</em> (determining spacecraft needs in Activity 2), and culminate in <em>creating</em> (building the 3D model in Activity 3).</p>
+                        <p contenteditable="true">The task intentionally caters to <strong>Gardner's Multiple Intelligences</strong>. The digital pitch appeals to linguistic and visual-spatial learners, the spacecraft blueprint engages logical-mathematical intelligence, and the physical construction of the recycled planet strongly activates bodily-kinesthetic intelligence.</p>
+                        <p contenteditable="true">Assessment practices are multifaceted. Activities 1 and 2 serve as <strong>Assessment FOR Learning</strong>, allowing teachers to check misconceptions about space before the final build. The final 3D model acts as <strong>Assessment OF Learning</strong>, while the student reflection embedded in the success criteria ensures <strong>Assessment AS Learning</strong>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 6: PART B (ESSAY) -->
+            <div id="content-sec6" class="tab-content">
+                <div class="max-w-4xl mx-auto">
+                    <h2 class="text-4xl font-black mb-2 text-glow text-purple-300" contenteditable="true">Critical Reflection</h2>
+                    <p class="text-slate-300 mb-8 text-lg" contenteditable="true">Part B: Academic synthesis of pedagogical choices.</p>
+
+                    <div class="glass-panel p-8 rounded-3xl text-slate-200 leading-loose space-y-6">
+                        <p contenteditable="true">The "Operation Exodus" task positions Stage 3 students within an urgent, authentic real-world scenario—the ecological collapse of Earth—to drive engagement with the Earth and Space syllabus. This sequence is heavily underpinned by Project-Based Learning (PBL) pedagogies. By framing the unit around a complex challenge (relocating humanity), the task adheres to the Buck Institute for Education’s (2024) Gold Standard PBL framework, which emphasizes a driving question, sustained inquiry, and a public product. Providing students with an apocalyptic but scientifically grounded scenario fosters high levels of authenticity and student agency, elements which Thomas (2000) identifies as critical for deep cognitive engagement in PBL.</p>
+                        
+                        <p contenteditable="true">To navigate this sustained inquiry, the sequence explicitly employs the Design Thinking process, closely mirroring the <em>Design and Production skills</em> within the NESA (2017) Science and Technology K-6 Syllabus. In Activity 1 (Identifying and defining), students empathise with the plight of climate refugees and research planetary conditions. This transitions into the ideation and planning phase (Activity 2), where cognitive scaffolding aids students in designing spacecraft blueprints that address human biological needs in a vacuum. Finally, Activity 3 (Producing and implementing) requires students to prototype their chosen planet using sustainable materials. As Bower (2017) notes, this iterative prototyping phase is vital in technology education, as it allows students to physically manipulate variables and solve problems in real-time.</p>
+
+                        <p contenteditable="true">The integration of digital technologies, such as utilizing Canva for the planetary pitch in Activity 1, is justified through the Meaningful Learning Framework (Howland, Jonassen, & Marra, 2012). Here, technology is not used for passive consumption, but as an active, constructive tool for students to articulate their inventive scientific solutions. This represents the 'Modification' level of the SAMR model (Puentedura, 2006), as the digital format allows for the seamless integration of multimodal scientific data.</p>
+
+                        <p contenteditable="true">Finally, the task embeds Assessment <em>as</em> Learning by requiring students to reflect upon the efficacy of their recycled material choices. This metacognitive step ensures students actively evaluate their own design processes, solidifying their understanding of how sustainable design technologies can address complex scientific challenges.</p>
+
+                        <div class="mt-8 pt-8 border-t border-white/10">
+                            <h4 class="font-bold text-white mb-4 text-xl" contenteditable="true">References</h4>
+                            <ul class="space-y-3 text-sm text-slate-400 pl-0 list-none">
+                                <li class="pl-4 -indent-4" contenteditable="true">Bower, M. (2017). <em>Design of technology-enhanced learning: Integrating research and practice.</em> Emerald Publishing.</li>
+                                <li class="pl-4 -indent-4" contenteditable="true">Buck Institute for Education (BIE). (2024). <em>What is PBL?</em> PBLWorks. https://www.pblworks.org/</li>
+                                <li class="pl-4 -indent-4" contenteditable="true">Howland, J. L., Jonassen, D. H., & Marra, R. M. (2012). <em>Meaningful learning with technology</em> (4th ed.). Pearson.</li>
+                                <li class="pl-4 -indent-4" contenteditable="true">NSW Education Standards Authority [NESA]. (2017). <em>Science and Technology K-6 Syllabus.</em> https://educationstandards.nsw.edu.au/</li>
+                                <li class="pl-4 -indent-4" contenteditable="true">Puentedura, R. R. (2006). <em>Transformation, technology, and education.</em> http://hippasus.com/</li>
+                                <li class="pl-4 -indent-4" contenteditable="true">Thomas, J. W. (2000). <em>A review of research on project-based learning.</em> Autodesk Foundation.</li>
+                            </ul>
+                        </div>
+                        
+                        <p class="text-right text-xs text-purple-300 italic mt-4" contenteditable="true">Word count: 379 words (excluding references).</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- PLANET DATABASE MODAL (UPGRADED) -->
+    <div id="databaseModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-950/90 backdrop-blur-xl opacity-0 transition-opacity duration-500 p-4">
+        <div class="glass-panel w-full max-w-[1400px] h-[95vh] md:h-[85vh] rounded-[2.5rem] flex flex-col relative border border-cyan-500/30 overflow-hidden shadow-[0_0_80px_rgba(6,182,212,0.15)]">
+            
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-white/10 flex justify-between items-center bg-black/40 backdrop-blur-md z-20">
+                <h3 class="text-2xl font-black text-cyan-400 flex items-center gap-3 tracking-widest">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    G.S.A PLANETARY ARCHIVE
+                </h3>
+                <button onclick="closeDatabase()" class="text-slate-400 hover:text-white transition-all transform hover:rotate-90 p-3 bg-white/5 rounded-full hover:bg-rose-500/20 border border-transparent hover:border-rose-500/50">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+                <!-- Decorative background elements inside modal -->
+                <div class="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-cyan-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+                <div class="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-800/20 rounded-full blur-[120px] pointer-events-none"></div>
+
+                <!-- Carousel Container (Sidebar) -->
+                <div class="md:w-[320px] shrink-0 border-b md:border-b-0 md:border-r border-white/10 p-6 bg-black/20 overflow-y-auto hidden-scrollbar z-10">
+                    <p class="text-xs text-cyan-500 uppercase tracking-[0.2em] mb-6 font-bold flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span> Select Target
+                    </p>
+                    <div id="planetCarousel" class="flex md:flex-col gap-4 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory pb-4 md:pb-0">
+                        <!-- Planets injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Planet Details HUD -->
+                <div id="hudScrollContainer" class="flex-1 p-6 md:p-12 overflow-y-auto z-10">
+                    <div id="planetDetails" class="w-full max-w-4xl mx-auto transition-all duration-500 transform translate-y-0 opacity-100 flex flex-col items-center pb-8">
+                        <!-- Details injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Navigation
+        function switchTab(tabId) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            const buttons = document.querySelectorAll('.glass-button');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+            });
+
+            document.getElementById('content-' + tabId).classList.add('active');
+            
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.add('active');
+            activeBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.25)';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Planet Database Logic (Matched precisely to your 7 provided images)
+        const planets = [
+            { 
+                id: 0, 
+                name: "Mercury", 
+                type: "Terrestrial Planet",
+                temp: "-173°C to 427°C", 
+                atmosphere: "Extremely thin Exosphere. Mostly oxygen, sodium, hydrogen.", 
+                gravity: "3.7 m/s² (38% of Earth)", 
+                water: "Ice hidden in deep, permanently shadowed craters.", 
+                hazard: "Extreme temperature swings and intense solar radiation.", 
+                fact: "A year on Mercury is just 88 Earth days, but a single solar day lasts 176 Earth days!",
+                rating: 12,
+                colorHex: "#a8a29e",
+                glow: "rgba(168, 162, 158, 0.6)",
+                image: "https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/EDTE%2FMercury.jpg?alt=media&token=5f70b244-8922-4aa8-8f59-a5d25ba6a7a0" 
+            },
+            { 
+                id: 1, 
+                name: "Venus", 
+                type: "Terrestrial Planet",
+                temp: "462°C (Constant)", 
+                atmosphere: "Crushingly thick, toxic carbon dioxide with sulfuric acid clouds.", 
+                gravity: "8.87 m/s² (90% of Earth)", 
+                water: "None. Far too hot for liquid water.", 
+                hazard: "Melts lead. Crushing atmospheric pressure.", 
+                fact: "Venus spins backwards compared to most other planets, meaning the sun rises in the west!",
+                rating: 5,
+                colorHex: "#d97706",
+                glow: "rgba(217, 119, 6, 0.6)",
+                image: "https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/EDTE%2FVenus.jpg?alt=media&token=8c01e10e-ea2d-41a8-a7b8-6813c3f8588b" 
+            },
+            { 
+                id: 2, 
+                name: "Mars", 
+                type: "Terrestrial Planet",
+                temp: "-153°C to 20°C", 
+                atmosphere: "Very thin, mostly carbon dioxide. Not breathable.", 
+                gravity: "3.72 m/s² (38% of Earth)", 
+                water: "Frozen in polar ice caps and underground permafrost.", 
+                hazard: "High radiation, intense global dust storms.", 
+                fact: "Mars is home to Olympus Mons, a volcano three times taller than Mount Everest!",
+                rating: 45,
+                colorHex: "#ef4444",
+                glow: "rgba(239, 68, 68, 0.6)",
+                image: "https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/EDTE%2FMars.jpg?alt=media&token=bae580a5-7c5e-4a9e-827f-f44d4bd9c0b0" 
+            },
+            { 
+                id: 3, 
+                name: "Jupiter", 
+                type: "Gas Giant",
+                temp: "-110°C (Cloud tops)", 
+                atmosphere: "Thick hydrogen and helium. Highly turbulent.", 
+                gravity: "24.79 m/s² (2.5x Earth)", 
+                water: "Trace amounts in cloud vapor. No liquid surface.", 
+                hazard: "No solid surface to land on. Extreme crushing storms.", 
+                fact: "Jupiter's Great Red Spot is a giant storm that has been raging for hundreds of years!",
+                rating: 8,
+                colorHex: "#b45309",
+                glow: "rgba(180, 83, 9, 0.6)",
+                image: "https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/EDTE%2FJupiter.jpg?alt=media&token=291ac457-ced0-4c98-80f3-a12c73068f82" 
+            },
+            { 
+                id: 4, 
+                name: "Saturn", 
+                type: "Gas Giant",
+                temp: "-140°C (Cloud tops)", 
+                atmosphere: "Hydrogen and helium gas giant.", 
+                gravity: "10.44 m/s² (Similar to Earth)", 
+                water: "Ice exists in its massive ring system, but none on the planet.", 
+                hazard: "No solid surface. High velocity winds up to 1,800 km/h.", 
+                fact: "Saturn is the only planet in our solar system that is less dense than water. It could float in a giant bathtub!",
+                rating: 10,
+                colorHex: "#eab308",
+                glow: "rgba(234, 179, 8, 0.6)",
+                image: "https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/EDTE%2FSaturn.jpg?alt=media&token=3d52fc05-1789-463e-92e0-f0c8b411f378" 
+            },
+            { 
+                id: 5, 
+                name: "Uranus", 
+                type: "Ice Giant",
+                temp: "-195°C", 
+                atmosphere: "Hydrogen, helium, and methane.", 
+                gravity: "8.69 m/s² (88% of Earth)", 
+                water: "An icy slush mantle of water, ammonia, and methane.", 
+                hazard: "Extreme cold, no true solid surface.", 
+                fact: "Uranus rotates on its side! It looks like a ball rolling around the Sun.",
+                rating: 12,
+                colorHex: "#06b6d4",
+                glow: "rgba(6, 182, 212, 0.6)",
+                image: "https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/EDTE%2FUranus.jpg?alt=media&token=1b3b7698-8062-4944-bd5e-3b6b88b14b73" 
+            },
+            { 
+                id: 6, 
+                name: "Neptune", 
+                type: "Ice Giant",
+                temp: "-200°C", 
+                atmosphere: "Hydrogen, helium, methane. Highly active weather.", 
+                gravity: "11.15 m/s² (114% of Earth)", 
+                water: "Hot, dense fluid of 'icy' materials under the atmosphere.", 
+                hazard: "Supersonic winds (2,000 km/h) and extreme cold.", 
+                fact: "Neptune is the windiest planet in our solar system, with winds breaking the sound barrier!",
+                rating: 9,
+                colorHex: "#3b82f6",
+                glow: "rgba(59, 130, 246, 0.6)",
+                image: "https://firebasestorage.googleapis.com/v0/b/paul-s-2026.firebasestorage.app/o/EDTE%2FNeptune.jpg?alt=media&token=e3eea8ba-548a-4a91-b8f7-77eb67f01c47" 
+            }
+        ];
+
+        let currentPlanetId = 2; // Default to Mars
+
+        function initCarousel() {
+            const container = document.getElementById('planetCarousel');
+            container.innerHTML = ''; 
+            
+            planets.forEach(p => {
+                const card = document.createElement('div');
+                card.className = `planet-card p-3 md:p-4 rounded-2xl flex md:flex-row flex-col items-center gap-4 shrink-0 min-w-[120px] md:min-w-0 ${p.id === currentPlanetId ? 'selected' : ''}`;
+                card.onclick = () => selectPlanet(p.id);
+                
+                // Using background-image with inset shadow creates a perfect 3D sphere from a flat image
+                card.innerHTML = `
+                    <div class="w-14 h-14 md:w-16 md:h-16 shrink-0 planet-thumb relative">
+                        <div class="absolute inset-0 rounded-full" style="background-image: url('${p.image}'); background-size: cover; background-position: center; box-shadow: inset -5px -5px 12px rgba(0,0,0,0.9), inset 0 0 5px rgba(255,255,255,0.4);"></div>
+                    </div>
+                    <div class="text-center md:text-left">
+                        <p class="font-black text-white text-sm md:text-lg tracking-wide uppercase">${p.name}</p>
+                        <p class="text-[10px] text-cyan-400 font-bold hidden md:block tracking-widest">${p.type}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function selectPlanet(id) {
+            currentPlanetId = id;
+            initCarousel(); 
+            
+            const detailsPanel = document.getElementById('planetDetails');
+            const scrollContainer = document.getElementById('hudScrollContainer');
+            
+            detailsPanel.classList.add('opacity-0', 'scale-95');
+            
+            setTimeout(() => {
+                // Reset scroll position to top
+                if (scrollContainer) {
+                    scrollContainer.scrollTop = 0;
+                }
+
+                const p = planets.find(planet => planet.id === id);
+                detailsPanel.innerHTML = `
+                    <div class="flex flex-col lg:flex-row items-center gap-10 mb-8 w-full">
+                        
+                        <!-- 3D Animated Planet HUD -->
+                        <div class="relative w-56 h-56 lg:w-72 lg:h-72 shrink-0 animate-hud-float">
+                            <div class="absolute inset-0 rounded-full planet-hud-sphere" style="background-image: url('${p.image}'); background-size: cover; background-position: center; box-shadow: inset -30px -30px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.3), 0 0 60px ${p.glow};"></div>
+                            
+                            <!-- Scanner Overlay Effect -->
+                            <div class="absolute inset-0 rounded-full border border-white/20 scale-110 pointer-events-none"></div>
+                            <div class="absolute top-1/2 left-[-10%] right-[-10%] h-[1px] bg-cyan-400/50 pointer-events-none"></div>
+                            <div class="absolute left-1/2 top-[-10%] bottom-[-10%] w-[1px] bg-cyan-400/50 pointer-events-none"></div>
+                        </div>
+                        
+                        <div class="text-center lg:text-left flex-1 w-full">
+                            <div class="flex flex-col mb-4">
+                                <h2 class="text-5xl lg:text-7xl font-black text-white uppercase tracking-wider text-glow" style="text-shadow: 0 0 30px ${p.glow}">${p.name}</h2>
+                                <span class="text-cyan-400 font-bold tracking-[0.3em] uppercase text-sm mt-2">${p.type}</span>
+                            </div>
+                            
+                            <div class="glass p-5 rounded-xl border border-white/10 mb-6 text-left relative overflow-hidden">
+                                <div class="absolute left-0 top-0 bottom-0 w-1" style="background-color: ${p.colorHex}"></div>
+                                <p class="text-slate-200 italic text-sm md:text-base pl-2"><strong class="text-white not-italic font-bold">GSA Fact File:</strong> "${p.fact}"</p>
+                            </div>
+                            
+                            <!-- Habitability Rating Bar -->
+                            <div class="w-full bg-black/40 p-4 rounded-xl border border-white/5">
+                                <div class="flex justify-between text-xs mb-2 font-bold tracking-widest uppercase">
+                                    <span class="text-slate-400">Habitability Rating</span>
+                                    <span class="text-white">${p.rating}/100</span>
+                                </div>
+                                <div class="h-3 w-full bg-slate-900 rounded-full overflow-hidden shadow-inner">
+                                    <div class="h-full rounded-full transition-all duration-1000 ease-out" style="width: 0%; background: linear-gradient(90deg, #f43f5e, ${p.colorHex}, #10b981);" id="ratingBar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                        <div class="data-card bg-black/40 border border-white/5 p-5 rounded-2xl border-l-4" style="border-left-color: ${p.colorHex}">
+                            <p class="text-[10px] text-slate-400 uppercase tracking-widest mb-1 font-bold flex items-center gap-2"><span class="text-lg">🌡️</span> Surface Temperature</p>
+                            <p class="text-white font-medium text-lg">${p.temp}</p>
+                        </div>
+                        <div class="data-card bg-black/40 border border-white/5 p-5 rounded-2xl border-l-4" style="border-left-color: ${p.colorHex}">
+                            <p class="text-[10px] text-slate-400 uppercase tracking-widest mb-1 font-bold flex items-center gap-2"><span class="text-lg">☁️</span> Atmosphere</p>
+                            <p class="text-white text-sm">${p.atmosphere}</p>
+                        </div>
+                        <div class="data-card bg-black/40 border border-white/5 p-5 rounded-2xl border-l-4" style="border-left-color: ${p.colorHex}">
+                            <p class="text-[10px] text-slate-400 uppercase tracking-widest mb-1 font-bold flex items-center gap-2"><span class="text-lg">⚖️</span> Gravity</p>
+                            <p class="text-white font-medium">${p.gravity}</p>
+                        </div>
+                        <div class="data-card bg-black/40 border border-cyan-500/30 p-5 rounded-2xl border-l-4 border-l-cyan-400">
+                            <p class="text-[10px] text-cyan-400 uppercase tracking-widest mb-1 font-bold flex items-center gap-2"><span class="text-lg">💧</span> Water Presence</p>
+                            <p class="text-cyan-50 text-sm">${p.water}</p>
+                        </div>
+                        <div class="data-card bg-rose-950/30 border border-rose-500/30 p-5 rounded-2xl md:col-span-2 border-l-4 border-l-rose-500">
+                            <p class="text-[10px] text-rose-400 uppercase tracking-widest mb-1 font-bold flex items-center gap-2"><span class="text-lg">⚠️</span> Primary Hazard for Humans</p>
+                            <p class="text-rose-100">${p.hazard}</p>
+                        </div>
+                    </div>
+                `;
+                detailsPanel.classList.remove('opacity-0', 'scale-95');
+                
+                // Animate the progress bar after render
+                setTimeout(() => {
+                    document.getElementById('ratingBar').style.width = p.rating + '%';
+                }, 100);
+                
+            }, 300);
+        }
+
+        function openDatabase() {
+            const modal = document.getElementById('databaseModal');
+            modal.classList.remove('hidden');
+            // Trigger reflow for transition
+            void modal.offsetWidth;
+            modal.classList.add('opacity-100');
+            modal.classList.remove('opacity-0');
+            
+            initCarousel();
+            selectPlanet(currentPlanetId);
+        }
+
+        function closeDatabase() {
+            const modal = document.getElementById('databaseModal');
+            modal.classList.remove('opacity-100');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 500);
+        }
+    </script>
+</body>
+</html>
