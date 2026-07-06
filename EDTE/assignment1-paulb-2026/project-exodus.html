@@ -45,6 +45,31 @@
             100% { transform: translateY(0) scale(1); }
         }
 
+        /* Landing Page Specific Animations */
+        @keyframes textShine {
+            to { background-position: 200% center; }
+        }
+        @keyframes titlePulseGlow {
+            0%, 100% { filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.4)) drop-shadow(0 0 40px rgba(217, 70, 239, 0.4)); }
+            50% { filter: drop-shadow(0 0 40px rgba(6, 182, 212, 0.8)) drop-shadow(0 0 80px rgba(217, 70, 239, 0.8)); }
+        }
+        .landing-title {
+            background-size: 200% auto;
+            animation: textShine 5s linear infinite, titlePulseGlow 4s ease-in-out infinite;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .fade-in-up { animation: fadeInUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        .delay-200 { animation-delay: 0.2s; opacity: 0; }
+        .delay-400 { animation-delay: 0.4s; opacity: 0; }
+        .delay-600 { animation-delay: 0.6s; opacity: 0; }
+        
+        .landing-bg {
+            background: radial-gradient(circle at center, #1e1b4b 0%, #020617 100%);
+        }
+
         /* Glassmorphism Utilities */
         .glass {
             background: rgba(255, 255, 255, 0.05);
@@ -234,9 +259,75 @@
             position: relative;
             transform: scale(1);
         }
+
+        /* Checklist Custom Checkboxes */
+        .custom-checkbox {
+            appearance: none;
+            background-color: rgba(30, 41, 59, 0.8);
+            margin: 0;
+            font: inherit;
+            color: currentColor;
+            width: 1.15em;
+            height: 1.15em;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 0.25em;
+            display: grid;
+            place-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .custom-checkbox::before {
+            content: "";
+            width: 0.65em;
+            height: 0.65em;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em white;
+            background-color: white;
+            transform-origin: center;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+
+        .custom-checkbox:checked {
+            background-color: #d946ef; /* fuchsia-500 */
+            border-color: #d946ef;
+        }
+
+        .custom-checkbox:checked::before {
+            transform: scale(1);
+        }
     </style>
 </head>
 <body>
+
+    <!-- ENTRY LANDING PAGE -->
+    <div id="landingPage" class="fixed inset-0 z-[200] landing-bg flex flex-col items-center justify-center transition-all duration-1000 overflow-hidden">
+        <!-- Floating ambient elements for landing page -->
+        <div class="absolute w-[800px] h-[800px] bg-fuchsia-600/20 rounded-full blur-[120px] top-[-20%] right-[-10%] animate-pulse mix-blend-screen pointer-events-none"></div>
+        <div class="absolute w-[600px] h-[600px] bg-cyan-600/20 rounded-full blur-[100px] bottom-[-10%] left-[-10%] animate-pulse mix-blend-screen pointer-events-none" style="animation-delay: 2s;"></div>
+        
+        <div class="z-10 flex flex-col items-center text-center px-4 w-full max-w-5xl">
+            <p class="text-xl md:text-3xl text-cyan-400 tracking-[0.4em] font-black uppercase mb-6 fade-in-up">Stage 3 Science</p>
+            
+            <h1 class="text-6xl md:text-[8rem] leading-none font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 via-cyan-300 to-emerald-300 mb-8 landing-title fade-in-up delay-200">
+                Planets in Our<br>Solar System
+            </h1>
+            
+            <p class="text-2xl md:text-4xl text-fuchsia-300 font-semibold tracking-widest mb-20 fade-in-up delay-400 drop-shadow-lg">
+                (Earth and Space)
+            </p>
+            
+            <button onclick="enterApp()" class="fade-in-up delay-600 group relative px-16 py-6 font-black text-2xl md:text-3xl tracking-[0.3em] text-white bg-transparent overflow-hidden rounded-full transition-transform hover:scale-110 active:scale-95 shadow-[0_0_40px_rgba(6,182,212,0.4)] hover:shadow-[0_0_80px_rgba(217,70,239,0.6)]">
+                <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-fuchsia-600 via-blue-600 to-cyan-600 opacity-80 group-hover:opacity-100 transition-opacity duration-300"></span>
+                <span class="absolute inset-0 w-full h-full rounded-full border-2 border-white/50 group-hover:border-white animate-pulse"></span>
+                <span class="relative z-10 flex items-center gap-4">
+                    ENTER
+                    <svg class="w-8 h-8 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </span>
+            </button>
+        </div>
+    </div>
 
     <!-- Background Elements -->
     <div class="orb orb-1"></div>
@@ -307,47 +398,192 @@
 
                         <div class="glass-panel p-8 rounded-2xl">
                             <h3 class="text-xl font-bold text-emerald-400 mb-4 border-b border-emerald-500/30 pb-2" contenteditable="true">Learning Outcomes</h3>
-                            <ul class="space-y-3 text-slate-200">
-                                <li class="flex items-start gap-2"><span class="text-emerald-400">★</span> <span contenteditable="true">You can research and compare the environmental conditions of different planets in our solar system.</span></li>
-                                <li class="flex items-start gap-2"><span class="text-emerald-400">★</span> <span contenteditable="true">You can design and draw a blueprint for a spacecraft that meets human biological needs.</span></li>
-                                <li class="flex items-start gap-2"><span class="text-emerald-400">★</span> <span contenteditable="true">You can select and use sustainable, recycled materials to produce a 3D model.</span></li>
+                            <ul class="space-y-4 text-slate-200">
+                                <li class="flex items-start gap-2"><span class="text-emerald-400 font-bold">★</span> <span contenteditable="true" class="leading-relaxed"><strong>I can investigate</strong> and compare the environmental conditions of different planets and moons in our solar system.</span></li>
+                                <li class="flex items-start gap-2"><span class="text-emerald-400 font-bold">★</span> <span contenteditable="true" class="leading-relaxed"><strong>I can design and generate</strong> a blueprint for a transport spacecraft that supports human survival and biological needs.</span></li>
+                                <li class="flex items-start gap-2"><span class="text-emerald-400 font-bold">★</span> <span contenteditable="true" class="leading-relaxed"><strong>I can select and evaluate</strong> sustainable, recycled materials to produce a 3D model of a planetary colony.</span></li>
                             </ul>
                         </div>
                     </div>
 
-                    <div class="glass-panel p-8 rounded-2xl border-l-4 border-l-fuchsia-500 mb-8">
+                    <div class="glass-panel p-6 md:p-8 rounded-2xl border-l-4 border-l-fuchsia-500 mb-8">
                         <h3 class="text-2xl font-bold text-fuchsia-400 mb-6" contenteditable="true">Success Criteria Checklist</h3>
-                        <div class="grid sm:grid-cols-2 gap-4">
-                            <div class="glass p-4 rounded-xl flex gap-3 items-start">
-                                <div class="step-number bg-fuchsia-500/20 text-fuchsia-300" contenteditable="true">1</div>
-                                <div>
-                                    <strong class="block text-white mb-1" contenteditable="true">Investigate</strong>
-                                    <p class="text-sm text-slate-300" contenteditable="true">I have researched the planets and created a digital poster justifying my choice for our new home.</p>
+                        <p class="text-slate-300 text-sm mb-6" contenteditable="true">Use these checklists to make sure you have completed all your mission objectives for the final showcase.</p>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            
+                            <!-- Checklist Item 1 -->
+                            <div class="glass p-5 rounded-xl flex flex-col gap-3">
+                                <div class="flex items-center gap-3 border-b border-white/10 pb-3">
+                                    <div class="step-number bg-fuchsia-500/20 text-fuchsia-300" contenteditable="true">1</div>
+                                    <strong class="text-white text-lg tracking-wider uppercase" contenteditable="true">Investigate</strong>
+                                </div>
+                                <p class="text-sm text-fuchsia-200 font-medium" contenteditable="true">I have researched the planets and created a digital poster justifying my choice for our new home.</p>
+                                <div class="mt-2 space-y-3">
+                                    <label class="flex items-start gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="custom-checkbox mt-0.5 shrink-0">
+                                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors" contenteditable="true">Information about the planet's <strong>atmosphere</strong> and surface temperature.</span>
+                                    </label>
+                                    <label class="flex items-start gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="custom-checkbox mt-0.5 shrink-0">
+                                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors" contenteditable="true">Details about gravity and the presence of liquid water or ice.</span>
+                                    </label>
+                                    <label class="flex items-start gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="custom-checkbox mt-0.5 shrink-0">
+                                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors" contenteditable="true">Identification of extreme <strong>environmental hazards</strong> for humans.</span>
+                                    </label>
+                                    <label class="flex items-start gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="custom-checkbox mt-0.5 shrink-0">
+                                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors" contenteditable="true">Inventive scientific solutions to survive these hazards.</span>
+                                    </label>
+                                    <label class="flex items-start gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="custom-checkbox mt-0.5 shrink-0">
+                                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors" contenteditable="true">Bold graphics and persuasive language to pitch the relocation.</span>
+                                    </label>
                                 </div>
                             </div>
-                            <div class="glass p-4 rounded-xl flex gap-3 items-start">
-                                <div class="step-number bg-fuchsia-500/20 text-fuchsia-300" contenteditable="true">2</div>
-                                <div>
-                                    <strong class="block text-white mb-1" contenteditable="true">Generate</strong>
-                                    <p class="text-sm text-slate-300" contenteditable="true">I have drawn a detailed blueprint of my transport spacecraft, labelling survival technologies.</p>
+
+                            <!-- Checklist Item 2 -->
+                            <div class="glass p-5 rounded-xl flex flex-col gap-3">
+                                <div class="flex items-center gap-3 border-b border-white/10 pb-3">
+                                    <div class="step-number bg-fuchsia-500/20 text-fuchsia-300" contenteditable="true">2</div>
+                                    <strong class="text-white text-lg tracking-wider uppercase" contenteditable="true">Generate</strong>
+                                </div>
+                                <p class="text-sm text-fuchsia-200 font-medium" contenteditable="true">I have drawn a detailed blueprint of my transport spacecraft, labelling survival technologies.</p>
+                                <div class="mt-2 space-y-3">
+                                    <label class="flex items-start gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="custom-checkbox mt-0.5 shrink-0">
+                                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors" contenteditable="true">A clear cross-section view of the spacecraft's interior.</span>
+                                    </label>
+                                    <label class="flex items-start gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="custom-checkbox mt-0.5 shrink-0">
+                                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors" contenteditable="true">Dedicated zones for living and sustainable food production (hydroponics).</span>
+                                    </label>
+                                    <label class="flex items-start gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="custom-checkbox mt-0.5 shrink-0">
+                                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors" contenteditable="true">Life support systems for oxygen generation and water recycling.</span>
+                                    </label>
+                                    <label class="flex items-start gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="custom-checkbox mt-0.5 shrink-0">
+                                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors" contenteditable="true">Technologies designed to counter zero-gravity and radiation.</span>
+                                    </label>
+                                    <label class="flex items-start gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="custom-checkbox mt-0.5 shrink-0">
+                                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors" contenteditable="true">Labels explaining how each technology supports survival.</span>
+                                    </label>
                                 </div>
                             </div>
-                            <div class="glass p-4 rounded-xl flex gap-3 items-start">
-                                <div class="step-number bg-fuchsia-500/20 text-fuchsia-300" contenteditable="true">3</div>
-                                <div>
-                                    <strong class="block text-white mb-1" contenteditable="true">Produce</strong>
-                                    <p class="text-sm text-slate-300" contenteditable="true">I have built a 3D model of my planet using only sustainable/recycled materials.</p>
+
+                            <!-- Checklist Item 3 -->
+                            <div class="glass p-5 rounded-xl flex flex-col gap-3">
+                                <div class="flex items-center gap-3 border-b border-white/10 pb-3">
+                                    <div class="step-number bg-fuchsia-500/20 text-fuchsia-300" contenteditable="true">3</div>
+                                    <strong class="text-white text-lg tracking-wider uppercase" contenteditable="true">Produce</strong>
+                                </div>
+                                <p class="text-sm text-fuchsia-200 font-medium" contenteditable="true">I have built a 3D model of my planet using only sustainable/recycled materials.</p>
+                                <div class="mt-2 space-y-3">
+                                    <label class="flex items-start gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="custom-checkbox mt-0.5 shrink-0">
+                                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors" contenteditable="true">Constructed using exclusively scavenged, recycled, or <strong>sustainable</strong> materials.</span>
+                                    </label>
+                                    <label class="flex items-start gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="custom-checkbox mt-0.5 shrink-0">
+                                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors" contenteditable="true">Physical representation of the planet's <strong>geological features</strong>.</span>
+                                    </label>
+                                    <label class="flex items-start gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="custom-checkbox mt-0.5 shrink-0">
+                                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors" contenteditable="true">A structural model of the engineered human colony (e.g., biodomes).</span>
+                                    </label>
+                                    <label class="flex items-start gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="custom-checkbox mt-0.5 shrink-0">
+                                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors" contenteditable="true">Colony placement justified by the planet's geographical zones.</span>
+                                    </label>
                                 </div>
                             </div>
-                            <div class="glass p-4 rounded-xl flex gap-3 items-start">
-                                <div class="step-number bg-fuchsia-500/20 text-fuchsia-300" contenteditable="true">4</div>
-                                <div>
-                                    <strong class="block text-white mb-1" contenteditable="true">Evaluate</strong>
-                                    <p class="text-sm text-slate-300" contenteditable="true">I have written a reflection on why my recycled materials were effective for this model.</p>
+
+                            <!-- Checklist Item 4 -->
+                            <div class="glass p-5 rounded-xl flex flex-col gap-3">
+                                <div class="flex items-center gap-3 border-b border-white/10 pb-3">
+                                    <div class="step-number bg-fuchsia-500/20 text-fuchsia-300" contenteditable="true">4</div>
+                                    <strong class="text-white text-lg tracking-wider uppercase" contenteditable="true">Evaluate</strong>
                                 </div>
+                                <p class="text-sm text-fuchsia-200 font-medium" contenteditable="true">I have written a reflection on why my recycled materials were effective for this model.</p>
+                                <div class="mt-2 space-y-3">
+                                    <label class="flex items-start gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="custom-checkbox mt-0.5 shrink-0">
+                                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors" contenteditable="true">An explanation of why specific recycled materials were chosen for the model.</span>
+                                    </label>
+                                    <label class="flex items-start gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="custom-checkbox mt-0.5 shrink-0">
+                                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors" contenteditable="true">A reflection on how well the spacecraft meets human <strong>biological needs</strong>.</span>
+                                    </label>
+                                    <label class="flex items-start gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="custom-checkbox mt-0.5 shrink-0">
+                                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors" contenteditable="true">An evaluation of the new planet's suitability compared to Earth.</span>
+                                    </label>
+                                    <label class="flex items-start gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="custom-checkbox mt-0.5 shrink-0">
+                                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors" contenteditable="true">Ideas on how the design or model could be improved in the future.</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- NEW: Mission Control Research Links Section -->
+                    <div class="glass-panel p-6 md:p-8 rounded-2xl border-l-4 border-l-yellow-500 mt-8 mb-8">
+                        <h3 class="text-2xl font-bold text-yellow-400 mb-4 flex items-center gap-3" contenteditable="true">
+                            <span class="text-3xl">🛰️</span> Mission Control: Research Links
+                        </h3>
+                        <p class="text-slate-200 mb-6 text-lg" contenteditable="true">Use these verified Global Space Agency archives to begin your planetary investigations.</p>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 items-start">
+                            <ul class="space-y-4">
+                                <li>
+                                    <a href="https://spaceplace.nasa.gov/menu/solar-system/" target="_blank" class="flex items-center gap-4 p-4 rounded-xl bg-slate-900/50 border border-slate-700/50 hover:bg-slate-800 hover:border-yellow-500/50 transition-all group shadow-md">
+                                        <div class="w-12 h-12 rounded-full bg-blue-900/50 flex items-center justify-center border border-blue-500/30 group-hover:scale-110 transition-transform">
+                                            <span class="text-2xl">🚀</span>
+                                        </div>
+                                        <div>
+                                            <strong class="block text-white text-base">NASA Space Place</strong>
+                                            <span class="text-sm text-slate-400">Explore the solar system</span>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://kids.nationalgeographic.com/space" target="_blank" class="flex items-center gap-4 p-4 rounded-xl bg-slate-900/50 border border-slate-700/50 hover:bg-slate-800 hover:border-yellow-500/50 transition-all group shadow-md">
+                                        <div class="w-12 h-12 rounded-full bg-yellow-900/50 flex items-center justify-center border border-yellow-500/30 group-hover:scale-110 transition-transform">
+                                            <span class="text-2xl">📸</span>
+                                        </div>
+                                        <div>
+                                            <strong class="block text-white text-base">Nat Geo Kids - Space</strong>
+                                            <span class="text-sm text-slate-400">Discover planetary facts and photos</span>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://www.esa.int/kids/en/learn/Our_Universe/Planets_and_moons" target="_blank" class="flex items-center gap-4 p-4 rounded-xl bg-slate-900/50 border border-slate-700/50 hover:bg-slate-800 hover:border-yellow-500/50 transition-all group shadow-md">
+                                        <div class="w-12 h-12 rounded-full bg-cyan-900/50 flex items-center justify-center border border-cyan-500/30 group-hover:scale-110 transition-transform">
+                                            <span class="text-2xl">🌍</span>
+                                        </div>
+                                        <div>
+                                            <strong class="block text-white text-base">ESA Kids Archive</strong>
+                                            <span class="text-sm text-slate-400">Learn about our universe</span>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                            
+                            <div class="w-full flex flex-col gap-3">
+                                <div class="w-full aspect-video rounded-xl overflow-hidden border border-white/10 shadow-lg bg-black">
+                                    <iframe src="https://www.youtube.com/embed/e8YzKyot4Pc" title="YouTube video player" class="w-full h-full" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                                </div>
+                                <p class="text-xs text-center text-slate-400 uppercase tracking-widest font-bold" contenteditable="true">Orientation Video: The Planets</p>
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
 
@@ -712,7 +948,7 @@
         </main>
     </div>
 
-    <!-- NEW: WELCOME MODAL (Triggers on load) -->
+    <!-- NEW: WELCOME MODAL (Triggers via Entry page or Nav) -->
     <div id="welcomeModal" class="fixed inset-0 z-[110] hidden items-center justify-center bg-slate-950/95 backdrop-blur-xl opacity-0 transition-opacity duration-500 p-4">
         <div class="glass-panel w-full max-w-4xl rounded-[2rem] flex flex-col relative border border-cyan-500/30 overflow-hidden shadow-[0_0_80px_rgba(6,182,212,0.15)] p-6 md:p-8 items-center text-center">
             <h2 class="text-3xl md:text-5xl font-black text-cyan-300 mb-6 tracking-widest uppercase text-glow" contenteditable="true">INCOMING TRANSMISSION</h2>
@@ -1321,7 +1557,12 @@
             activeBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.25)';
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            // If activities tab is clicked, show the intro popup
+            // If Introduction tab is clicked, show the intro popup
+            if (tabId === 'sec1') {
+                openModal('welcomeModal');
+            }
+
+            // If activities tab is clicked, show the activities intro popup
             if (tabId === 'sec3') {
                 openModal('activitiesIntroModal');
             }
@@ -1460,14 +1701,25 @@
             });
         }
         
-        // --- ADDED: Auto-trigger Welcome Modal on Load ---
+        // --- Auto-trigger on Load ---
         window.addEventListener('load', () => {
             preloadAllImages();
-            // Slight delay to ensure smooth transition after page load
-            setTimeout(() => {
-                openModal('welcomeModal');
-            }, 300);
+            // The landing page is naturally visible on load. We don't trigger the welcomeModal here anymore.
+            // The user must click "ENTER" to proceed.
         });
+
+        // Function triggered by the ENTER button on the landing page
+        function enterApp() {
+            const landingPage = document.getElementById('landingPage');
+            // Trigger smooth fade out
+            landingPage.classList.add('opacity-0');
+            
+            // Wait for transition, then hide entirely and open the intro video
+            setTimeout(() => {
+                landingPage.classList.add('hidden');
+                openModal('welcomeModal');
+            }, 1000); // 1000ms duration matches transition-all duration-1000
+        }
 
         let currentPlanetId = 2; // Default to Mars
 
@@ -1571,7 +1823,7 @@
 
         // --- Pitch Presentation Logic ---
         let currentPitchSlide = 0;
-        const totalPitchSlides = 6; // Updated to 6 slides
+        const totalPitchSlides = 6;
 
         function updatePitchSlides() {
             for (let i = 0; i < totalPitchSlides; i++) {
@@ -1600,13 +1852,11 @@
         }
 
         // --- Generic Modal Handling ---
-        // By toggling 'hidden' and 'flex', we ensure the modal acts as a flexbox container, perfectly centering its items.
         function openModal(modalId) {
             const modal = document.getElementById(modalId);
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             
-            // Reinitialize the DB carousel if opening the database modal
             if (modalId === 'databaseModal') {
                 initCarousel();
                 selectPlanet(currentPlanetId);
@@ -1617,18 +1867,15 @@
                 updatePitchSlides();
             }
 
-            // --- IFRAME AUTOPLAY HANDLING ---
-            // If the modal has a video iframe with a 'data-src', put it into 'src' so it autoplays
+            // IFRAME AUTOPLAY HANDLING
             const iframe = modal.querySelector('iframe');
             if (iframe && iframe.dataset.src) {
                 iframe.src = iframe.dataset.src;
             }
 
-            // --- SCROLL LOCK ---
-            // Prevents the background webpage from scrolling when a popup is open
+            // SCROLL LOCK
             document.body.style.overflow = 'hidden';
             
-            // Trigger reflow for animation
             void modal.offsetWidth; 
             
             modal.classList.add('opacity-100');
@@ -1640,11 +1887,10 @@
             modal.classList.remove('opacity-100');
             modal.classList.add('opacity-0');
             
-            // --- RESTORE SCROLLING ---
+            // RESTORE SCROLLING
             document.body.style.overflow = '';
 
-            // --- STOP VIDEO ---
-            // Clear the iframe src immediately to stop audio from playing in the background
+            // STOP VIDEO
             const iframe = modal.querySelector('iframe');
             if (iframe) {
                 iframe.src = '';
@@ -1653,25 +1899,21 @@
             setTimeout(() => {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
-            }, 500); // Wait for fade transition
+            }, 500); 
         }
 
         // --- Research Tabs Navigation ---
         function switchResearchTab(tabId) {
-            // Hide all contents
             document.querySelectorAll('.research-tab-content').forEach(el => {
                 el.classList.add('hidden');
             });
-            // Reset all buttons
             document.querySelectorAll('.research-tab-btn').forEach(el => {
                 el.classList.remove('bg-blue-500/30', 'border-blue-400');
                 el.classList.add('border-transparent', 'hover:bg-blue-500/10');
             });
             
-            // Show active content
             document.getElementById(tabId).classList.remove('hidden');
             
-            // Highlight active button
             const activeBtn = document.getElementById('btn-' + tabId);
             activeBtn.classList.remove('border-transparent', 'hover:bg-blue-500/10');
             activeBtn.classList.add('bg-blue-500/30', 'border-blue-400');
