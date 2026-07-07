@@ -45,16 +45,18 @@
         }
 /*///////////////////////////////MANUAL////////////////////////////////////////*/
 
-/* --- SHOOTING STARS --- */
+/* --- SHOOTING STARS (UPGRADED) --- */
         .shooting-star {
             position: absolute;
-            width: 150px;
-            height: 2px;
-            /* Fades from transparent to the cyan color used in your titles */
-            background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 1));
+            width: 250px; /* Made the tail longer */
+            height: 3px;  /* Made the tail thicker */
+            /* Uses CSS variables so we can give each star a unique color */
+            background: linear-gradient(90deg, transparent, var(--star-color));
             opacity: 0;
             z-index: 5;
             animation: shooting 5s linear infinite;
+            /* Adds an overall glowing aura to the tail itself */
+            filter: drop-shadow(0 0 10px var(--star-color)); 
         }
         
         /* The bright glowing 'head' of the comet */
@@ -62,39 +64,50 @@
             content: '';
             position: absolute;
             right: 0;
-            top: -1px;
-            width: 4px;
-            height: 4px;
+            top: -1.5px; /* Centers the larger head on the tail */
+            width: 6px;  /* Larger head */
+            height: 6px; /* Larger head */
             background: #ffffff;
             border-radius: 50%;
-            box-shadow: 0 0 15px 4px rgba(6, 182, 212, 0.8), 0 0 30px rgba(217, 70, 239, 0.6);
+            /* Massive 3-layer glow: White core -> Primary Color -> Secondary Color */
+            box-shadow: 0 0 10px 4px #ffffff, 
+                        0 0 30px 12px var(--star-color), 
+                        0 0 50px 20px var(--glow-color);
         }
 
         @keyframes shooting {
-            0% {
-                transform: rotate(35deg) translateX(-200px);
-                opacity: 0;
-            }
-            5% {
-                opacity: 1;
-            }
-            20% {
-                /* Shoots across the screen, then hides for the rest of the animation cycle */
-                transform: rotate(35deg) translateX(120vw);
-                opacity: 0;
-            }
-            100% {
-                transform: rotate(35deg) translateX(120vw);
-                opacity: 0;
-            }
+            0% { transform: rotate(35deg) translateX(-200px); opacity: 0; }
+            5% { opacity: 1; }
+            20% { transform: rotate(35deg) translateX(120vw); opacity: 0; }
+            100% { transform: rotate(35deg) translateX(120vw); opacity: 0; }
         }
 
-        /* Adjusting positions, delays, and speeds so they look random and natural */
-        .star-1 { top: 5%; left: 10%; animation-delay: 0s; animation-duration: 6s; }
-        .star-2 { top: -10%; left: 40%; animation-delay: 2.5s; animation-duration: 5s; }
-        .star-3 { top: 30%; left: -10%; animation-delay: 1.2s; animation-duration: 7s; }
-        .star-4 { top: -20%; left: 70%; animation-delay: 4s; animation-duration: 5.5s; }
-        .star-5 { top: 50%; left: -20%; animation-delay: 3s; animation-duration: 6.5s; }
+        /* Assigning individual colors, delays, and speeds to each star */
+        .star-1 { 
+            top: 5%; left: 10%; animation-delay: 0s; animation-duration: 6s; 
+            --star-color: rgba(6, 182, 212, 1);  /* Cyan */
+            --glow-color: rgba(37, 99, 235, 0.8); /* Blue */
+        }
+        .star-2 { 
+            top: -10%; left: 40%; animation-delay: 2.5s; animation-duration: 5s; 
+            --star-color: rgba(217, 70, 239, 1); /* Fuchsia */
+            --glow-color: rgba(168, 85, 247, 0.8); /* Purple */
+        }
+        .star-3 { 
+            top: 30%; left: -10%; animation-delay: 1.2s; animation-duration: 7s; 
+            --star-color: rgba(16, 185, 129, 1); /* Emerald */
+            --glow-color: rgba(6, 182, 212, 0.8); /* Cyan */
+        }
+        .star-4 { 
+            top: -20%; left: 70%; animation-delay: 4s; animation-duration: 5.5s; 
+            --star-color: rgba(234, 179, 8, 1);  /* Yellow */
+            --glow-color: rgba(244, 63, 94, 0.8); /* Rose */
+        }
+        .star-5 { 
+            top: 50%; left: -20%; animation-delay: 3s; animation-duration: 6.5s; 
+            --star-color: rgba(244, 63, 94, 1);  /* Rose */
+            --glow-color: rgba(217, 70, 239, 0.8); /* Fuchsia */
+        }
 
 /*///////////////////////////////MANUAL////////////////////////////////////////*/
 
