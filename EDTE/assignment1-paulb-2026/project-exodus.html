@@ -75,51 +75,26 @@
                         0 0 50px 20px var(--glow-color);
         }
 
-        @keyframes shooting {
-            0% { transform: rotate(35deg) translateX(-200px); opacity: 0; }
-            5% { opacity: 1; }
-            20% { transform: rotate(35deg) translateX(120vw); opacity: 0; }
-            100% { transform: rotate(35deg) translateX(120vw); opacity: 0; }
+       @keyframes shooting {
+            0% { transform: rotate(35deg) translateX(-300px); opacity: 0; }
+            10% { opacity: 1; }
+            30% { transform: rotate(35deg) translateX(150vw); opacity: 0; }
+            100% { transform: rotate(35deg) translateX(150vw); opacity: 0; }
         }
 
-        /* Assigning individual colors, delays, and speeds to each star */
-        .star-1 { 
-            top: 5%; left: 10%; animation-delay: 0s; animation-duration: 6s; 
-            --star-color: rgba(6, 182, 212, 1);  /* Cyan */
-            --glow-color: rgba(37, 99, 235, 0.8); /* Blue */
-        }
-        .star-2 { 
-            top: -10%; left: 40%; animation-delay: 2.5s; animation-duration: 5s; 
-            --star-color: rgba(217, 70, 239, 1); /* Fuchsia */
-            --glow-color: rgba(168, 85, 247, 0.8); /* Purple */
-        }
-        .star-3 { 
-            top: 30%; left: -10%; animation-delay: 1.2s; animation-duration: 7s; 
-            --star-color: rgba(16, 185, 129, 1); /* Emerald */
-            --glow-color: rgba(6, 182, 212, 0.8); /* Cyan */
-        }
-        .star-4 { 
-            top: -20%; left: 70%; animation-delay: 4s; animation-duration: 5.5s; 
-            --star-color: rgba(234, 179, 8, 1);  /* Yellow */
-            --glow-color: rgba(244, 63, 94, 0.8); /* Rose */
-        }
-        .star-5 { 
-            top: 50%; left: -20%; animation-delay: 3s; animation-duration: 6.5s; 
-            --star-color: rgba(244, 63, 94, 1);  /* Rose */
-            --glow-color: rgba(217, 70, 239, 0.8); /* Fuchsia */
-        }
-        .star-6
-        { 
-            top: 60%; left: 60%; animation-delay: 1.2s; animation-duration: 7s; 
-            --star-color: rgb(233, 241, 6); 
-            --glow-color: rgb(212, 102, 6); 
-        }
-        .star-7
-        { 
-            top: 50%; left: 50%; animation-delay: 1.2s; animation-duration: 7s; 
-            --star-color: rgb(0, 200, 255); 
-            --glow-color: rgb(6, 61, 212); 
-        }
+       /* Assigning individual colors, tightly staggered delays, and faster speeds */
+        .star-1 { top: 5%; left: 10%; animation-delay: 0s; animation-duration: 3s; --star-color: rgba(6, 182, 212, 1); --glow-color: rgba(37, 99, 235, 0.8); }
+        .star-2 { top: -10%; left: 40%; animation-delay: 0.4s; animation-duration: 2.5s; --star-color: rgba(217, 70, 239, 1); --glow-color: rgba(168, 85, 247, 0.8); }
+        .star-3 { top: 30%; left: -10%; animation-delay: 0.8s; animation-duration: 3.5s; --star-color: rgba(16, 185, 129, 1); --glow-color: rgba(6, 182, 212, 0.8); }
+        .star-4 { top: -20%; left: 70%; animation-delay: 1.2s; animation-duration: 2.8s; --star-color: rgba(234, 179, 8, 1); --glow-color: rgba(244, 63, 94, 0.8); }
+        .star-5 { top: 50%; left: -20%; animation-delay: 1.6s; animation-duration: 3.2s; --star-color: rgba(244, 63, 94, 1); --glow-color: rgba(217, 70, 239, 0.8); }
+        .star-6 { top: 60%; left: 60%; animation-delay: 2.0s; animation-duration: 2.6s; --star-color: rgb(233, 241, 6); --glow-color: rgb(212, 102, 6); }
+        .star-7 { top: 20%; left: 50%; animation-delay: 2.4s; animation-duration: 3.8s; --star-color: rgb(0, 200, 255); --glow-color: rgb(6, 61, 212); }
+        .star-8 { top: 80%; left: 10%; animation-delay: 0.2s; animation-duration: 3.1s; --star-color: rgba(168, 85, 247, 1); --glow-color: rgba(217, 70, 239, 0.8); }
+        .star-9 { top: -5%; left: 80%; animation-delay: 0.6s; animation-duration: 2.9s; --star-color: rgba(52, 211, 153, 1); --glow-color: rgba(16, 185, 129, 0.8); }
+        .star-10 { top: 40%; left: 80%; animation-delay: 1.0s; animation-duration: 2.4s; --star-color: rgba(251, 146, 60, 1); --glow-color: rgba(239, 68, 68, 0.8); }
+        .star-11 { top: 15%; left: -20%; animation-delay: 1.4s; animation-duration: 3.6s; --star-color: rgba(255, 255, 255, 1); --glow-color: rgba(148, 163, 184, 0.8); }
+        .star-12 { top: 75%; left: 40%; animation-delay: 1.8s; animation-duration: 2.7s; --star-color: rgba(6, 182, 212, 1); --glow-color: rgba(16, 185, 129, 0.8); }
 
 /*       ///////////////////////////////MANUAL////////////////////////////////////////     */
 
@@ -414,6 +389,11 @@
         <div class="shooting-star star-5"></div>
         <div class="shooting-star star-6"></div>
         <div class="shooting-star star-7"></div>
+        <div class="shooting-star star-8"></div>
+        <div class="shooting-star star-9"></div>
+        <div class="shooting-star star-10"></div>
+        <div class="shooting-star star-11"></div>
+        <div class="shooting-star star-12"></div>
 
         <div class="absolute w-[800px] h-[800px] bg-fuchsia-600/20 rounded-full blur-[120px] top-[-20%] right-[-10%] animate-pulse mix-blend-screen pointer-events-none"></div>
   <!-- -----------------------------------MANUAL--------------------------------         -->  
