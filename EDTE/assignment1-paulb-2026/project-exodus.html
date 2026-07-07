@@ -45,14 +45,15 @@
         }
 /*     ///////////////////////////////MANUAL////////////////////////////////////////       */
 
-/* --- NEWS TICKER ANIMATION --- */
+
+        /* --- NEWS TICKER ANIMATION (SEAMLESS LOOP) --- */
         @keyframes tickerScroll {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-150%); }
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
         .animate-ticker {
-            display: inline-block;
-            white-space: nowrap;
+            display: flex;
+            width: max-content;
             animation: tickerScroll 40s linear infinite;
         }
 
@@ -499,7 +500,12 @@
                                     </div>
                                     <div class="overflow-hidden w-full ml-3 relative mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent)">
                                         <div class="animate-ticker text-slate-300 font-semibold tracking-wide">
-                                            🌍 GLOBAL SPACE AGENCY APPROVES LUNAR OUTPOST FUNDING... 🚀 MARS COLONY TIMELINE PUSHED BACK BY ONE DECADE... 🪐 TITAN EXPLORATION PROBES REPORT NEW ATMOSPHERIC DATA... ☄️ MICROMETEOROID SHOWER EXPECTED NEAR ISS...
+                                            <span class="pr-8">
+                                                🌍 GLOBAL SPACE AGENCY APPROVES LUNAR OUTPOST FUNDING... 🚀 MARS COLONY TIMELINE PUSHED BACK BY ONE DECADE... 🪐 TITAN EXPLORATION PROBES REPORT NEW ATMOSPHERIC DATA... ☄️ MICROMETEOROID SHOWER EXPECTED NEAR ISS...
+                                            </span>
+                                            <span class="pr-8">
+                                                🌍 GLOBAL SPACE AGENCY APPROVES LUNAR OUTPOST FUNDING... 🚀 MARS COLONY TIMELINE PUSHED BACK BY ONE DECADE... 🪐 TITAN EXPLORATION PROBES REPORT NEW ATMOSPHERIC DATA... ☄️ MICROMETEOROID SHOWER EXPECTED NEAR ISS...
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
