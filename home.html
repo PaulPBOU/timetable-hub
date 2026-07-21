@@ -399,9 +399,17 @@
 
                     const absoluteLink = `https://paulpbou.github.io/timetable-hub/#Term%203/Week%20${w + 1}/${dayNames[d]}`;
                     
+                    const cellDate = new Date(2026, 6, 20 + (w * 7) + d);
+                    const dateStr = cellDate.getDate() + ' ' + cellDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                    
                     cell.innerHTML += `
                         <div class="absolute inset-0 bg-transparent pointer-events-none z-0"></div>
                         
+                        <!-- Date Indicator -->
+                        <div class="absolute bottom-0.5 right-1 md:bottom-1 md:right-1.5 z-[25] pointer-events-none text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-800/30 dark:text-white/30 drop-shadow-sm">
+                            ${dateStr}
+                        </div>
+
                         <!-- Top Left: Jump to day link -->
                         <a href="${absoluteLink}" title="Go to ${dayNames[d]} timetable" target="_blank" class="absolute top-0.5 left-0.5 w-4 h-4 md:w-5 md:h-5 rounded bg-indigo-500/10 text-indigo-500 dark:bg-indigo-500/20 dark:text-indigo-400 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-indigo-500 hover:text-white dark:hover:bg-indigo-500 dark:hover:text-white z-20 cursor-pointer shadow-sm">
                             <i class="fa-solid fa-arrow-up-right-from-square text-[8px] md:text-[9px]"></i>
