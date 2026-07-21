@@ -97,7 +97,7 @@
     <!-- Main App Container -->
     <div class="relative w-full max-w-7xl h-full z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 rounded-2xl md:rounded-[2rem] shadow-2xl p-3 md:p-5 flex flex-col overflow-hidden min-h-0 transition-colors duration-300">
 
-        <header id="app-header" class="hidden flex-row justify-between items-center shrink-0 mb-2 pb-2 md:mb-3 md:pb-2.5 border-b border-slate-200 dark:border-slate-700/70 w-full gap-2 md:gap-4 transition-all duration-300 relative">
+        <header id="app-header" class="hidden flex-row justify-between items-center shrink-0 mb-2 pb-2 md:mb-3 md:pb-2.5 border-b border-slate-200 dark:border-slate-700/70 w-full gap-2 md:gap-4 transition-all duration-300 relative z-[60]">
             <div class="flex flex-row items-baseline justify-start shrink-0 gap-2 md:gap-3">
                 <h1 id="header-title" class="text-xl md:text-3xl font-black text-slate-800 dark:text-white tracking-tight leading-none">Title</h1>
                 <div class="flex items-center gap-1.5">
@@ -270,8 +270,8 @@
     <!-- Lesson Detail Modal -->
     <div id="modal-lesson-detail" class="hidden fixed inset-0 z-[110] items-center justify-center p-4 bg-slate-900/95 backdrop-blur-sm" onclick="closeModals()">
         <div class="w-full max-w-3xl max-h-[90vh] overflow-y-auto custom-scrollbar relative rounded-2xl md:rounded-[1.5rem]" onclick="event.stopPropagation()">
-            <button onclick="closeModals()" class="absolute top-4 right-4 z-50 w-8 h-8 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 transition-colors shadow-sm border border-slate-200 dark:border-slate-700"><i class="fa-solid fa-xmark"></i></button>
-            <div id="lesson-detail-container" class="mt-10 md:mt-0"></div>
+            <button onclick="closeModals()" class="absolute top-4 right-4 z-[70] w-8 h-8 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 transition-colors shadow-sm border border-slate-200 dark:border-slate-700"><i class="fa-solid fa-xmark"></i></button>
+            <div id="lesson-detail-container" class="mt-10 md:mt-0 relative"></div>
         </div>
     </div>
 
@@ -573,7 +573,7 @@
             const dropdown = btn.nextElementSibling;
             const isHidden = dropdown.classList.contains('hidden');
             
-            document.querySelectorAll('.print-dropdown, .copy-dropdown').forEach(d => {
+            document.querySelectorAll('.copy-dropdown, .print-dropdown').forEach(d => {
                 d.classList.add('hidden');
                 d.classList.remove('flex');
             });
@@ -585,7 +585,7 @@
         };
 
         document.addEventListener('click', () => {
-            document.querySelectorAll('.print-dropdown, .copy-dropdown').forEach(d => {
+            document.querySelectorAll('.copy-dropdown, .print-dropdown').forEach(d => {
                 d.classList.add('hidden');
                 d.classList.remove('flex');
             });
@@ -755,6 +755,7 @@
                 
                 if (window.appState.view === 'week') renderWeekGrid();
                 if (window.appState.view === 'day') renderDayBlocks();
+                if (window.appState.view === 'start-day') renderStartDay();
                 window.updateTodoUI(); 
             });
         };
@@ -1260,30 +1261,6 @@
             }
         };
 
-        window.deleteLesson = (day, idx, btn) => {
-            if (btn.dataset.confirmed === "true") {
-                const data = [...window.appState.weekData[day]];
-                data.splice(idx, 1);
-                window.appState.weekData[day] = data;
-                setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: window.appState.weekData }, { merge: true });
-                if (window.appState.view === 'day') renderDayBlocks();
-                if (window.appState.view === 'week') renderWeekGrid();
-                showToast("Lesson deleted successfully.");
-            } else {
-                btn.dataset.confirmed = "true";
-                const originalHTML = btn.innerHTML;
-                btn.innerHTML = '<i class="fa-solid fa-check"></i>';
-                btn.classList.add('bg-rose-200', 'dark:bg-rose-700', 'text-rose-700', 'dark:text-rose-200');
-                setTimeout(() => {
-                    if (btn && btn.dataset) {
-                        btn.dataset.confirmed = "false";
-                        btn.innerHTML = originalHTML;
-                        btn.classList.remove('bg-rose-200', 'dark:bg-rose-700', 'text-rose-700', 'dark:text-rose-200');
-                    }
-                }, 3000);
-            }
-        };
-
         window.copyPreviousDayToEmpty = async (day) => {
             const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday'];
             const curIdx = days.indexOf(day);
@@ -1372,6 +1349,14 @@
                     bar: 'bg-stripes-rff opacity-60 dark:opacity-40', iconColor: 'text-slate-400 dark:text-slate-500', badgeBg: 'bg-slate-100/50 dark:bg-slate-800/50', badgeText: 'text-slate-500 dark:text-slate-400', badgeBorder: 'border-slate-200/50 dark:border-slate-700/50', weekCardBorder: 'border-l-[4px] border-l-slate-300 dark:border-l-slate-600', icon: lowerSub.includes('science') ? 'fa-flask' : (lowerSub.includes('pdh') ? 'fa-heart-pulse' : 'fa-person-chalkboard'), cardExtra: 'bg-card-stripes-rff', basicColor: 'slate'
                 };
             }
+            
+            // Highlighted subject rules tailored exactly to screenshot
+            if (lowerSub.startsWith('geography')) return { bar: 'bg-emerald-400 dark:bg-emerald-500/60', iconColor: 'text-emerald-500/80 dark:text-emerald-400/80', badgeBg: 'bg-emerald-50 dark:bg-emerald-900/30', badgeText: 'text-emerald-700 dark:text-emerald-300', badgeBorder: 'border-emerald-200/70 dark:border-emerald-700/50', weekCardBorder: 'border-l-[4px] border-l-emerald-400 dark:border-l-emerald-600', icon: 'fa-earth-americas', cardExtra: '', basicColor: 'emerald' };
+            if (lowerSub.startsWith('assembly')) return { bar: 'bg-fuchsia-400 dark:bg-fuchsia-500/60', iconColor: 'text-fuchsia-500/80 dark:text-fuchsia-400/80', badgeBg: 'bg-fuchsia-50 dark:bg-fuchsia-900/30', badgeText: 'text-fuchsia-700 dark:text-fuchsia-300', badgeBorder: 'border-fuchsia-200/70 dark:border-fuchsia-700/50', weekCardBorder: 'border-l-[4px] border-l-fuchsia-400 dark:border-l-fuchsia-600', icon: 'fa-bullhorn', cardExtra: '', basicColor: 'fuchsia' };
+            if (lowerSub.startsWith('scripture')) return { bar: 'bg-violet-400 dark:bg-violet-500/60', iconColor: 'text-violet-500/80 dark:text-violet-400/80', badgeBg: 'bg-violet-50 dark:bg-violet-900/30', badgeText: 'text-violet-700 dark:text-violet-300', badgeBorder: 'border-violet-200/70 dark:border-violet-700/50', weekCardBorder: 'border-l-[4px] border-l-violet-400 dark:border-l-violet-600', icon: 'fa-dove', cardExtra: '', basicColor: 'violet' };
+            if (lowerSub.startsWith('leadership')) return { bar: 'bg-blue-400 dark:bg-blue-500/60', iconColor: 'text-blue-500/80 dark:text-blue-400/80', badgeBg: 'bg-blue-50 dark:bg-blue-900/30', badgeText: 'text-blue-700 dark:text-blue-300', badgeBorder: 'border-blue-200/70 dark:border-blue-700/50', weekCardBorder: 'border-l-[4px] border-l-blue-400 dark:border-l-blue-600', icon: 'fa-crown', cardExtra: '', basicColor: 'blue' };
+
+            // Standard rules
             if (lowerSub.includes('spelling') || lowerTopic.includes('spelling')) return { bar: 'bg-teal-400 dark:bg-teal-500/60', iconColor: 'text-teal-500/80 dark:text-teal-400/80', badgeBg: 'bg-teal-50 dark:bg-teal-900/30', badgeText: 'text-teal-700 dark:text-teal-300', badgeBorder: 'border-teal-200/70 dark:border-teal-700/50', weekCardBorder: 'border-l-[4px] border-l-teal-400 dark:border-l-teal-600', icon: 'fa-spell-check', cardExtra: '', basicColor: 'teal' };
             if (lowerSub.includes('shared reading') || lowerTopic.includes('shared reading')) return { bar: 'bg-cyan-300 dark:bg-cyan-500/40', iconColor: 'text-cyan-400/80 dark:text-cyan-500/70', badgeBg: 'bg-cyan-50/70 dark:bg-cyan-900/20', badgeText: 'text-cyan-600 dark:text-cyan-400', badgeBorder: 'border-cyan-100/70 dark:border-cyan-800/50', weekCardBorder: 'border-l-[4px] border-l-cyan-400 dark:border-l-cyan-600', icon: 'fa-book-open-reader', cardExtra: '', basicColor: 'cyan' };
             if (lowerSub.includes('daily write') || lowerTopic.includes('daily write')) return { bar: 'bg-blue-300 dark:bg-blue-500/40', iconColor: 'text-blue-400/80 dark:text-blue-500/70', badgeBg: 'bg-blue-50/70 dark:bg-blue-900/20', badgeText: 'text-blue-600 dark:text-blue-400', badgeBorder: 'border-blue-100/70 dark:border-blue-800/50', weekCardBorder: 'border-l-[4px] border-l-blue-400 dark:border-l-blue-600', icon: 'fa-pen-nib', cardExtra: '', basicColor: 'blue' };
@@ -1383,6 +1368,103 @@
             if (lowerSub.startsWith('sport') || lowerSub === 'pe' || lowerSub === 'p.e') return { bar: 'bg-amber-300 dark:bg-amber-500/40', iconColor: 'text-amber-400/80 dark:text-amber-500/70', badgeBg: 'bg-amber-50/70 dark:bg-amber-900/20', badgeText: 'text-amber-600 dark:text-amber-400', badgeBorder: 'border-amber-100/70 dark:border-amber-800/50', weekCardBorder: 'border-l-[4px] border-l-amber-400 dark:border-l-amber-600', icon: 'fa-basketball', cardExtra: '', basicColor: 'amber' };
             
             return { bar: 'bg-slate-300 dark:bg-slate-500/40', iconColor: 'text-slate-400/80 dark:text-slate-500/70', badgeBg: 'bg-slate-50/70 dark:bg-slate-800/50', badgeText: 'text-slate-600 dark:text-slate-400', badgeBorder: 'border-slate-200/70 dark:border-slate-700/50', weekCardBorder: 'border-l-[4px] border-l-slate-300 dark:border-l-slate-600', icon: 'fa-chalkboard', cardExtra: '', basicColor: 'slate' };
+        };
+
+        const renderStartDay = () => {
+            const scheduleContainer = document.getElementById('start-day-schedule');
+            if(!scheduleContainer) return;
+            scheduleContainer.innerHTML = '';
+            
+            const now = new Date();
+            const leftDayName = document.getElementById('left-day-name');
+            const leftDateText = document.getElementById('left-date-text');
+            if (leftDayName) leftDayName.innerText = window.appState.day;
+            if (leftDateText) leftDateText.innerText = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`;
+
+            const todoWrapper = document.getElementById('start-day-todos-wrapper');
+            const todoContainer = document.getElementById('start-day-todos');
+            const todos = window.appState.todosData[window.appState.day] || [];
+            
+            if (todoWrapper && todoContainer) {
+                if (todos.length > 0) {
+                    todoContainer.innerHTML = todos.map((todo, idx) => `
+                        <label class="flex items-start gap-2.5 cursor-pointer group bg-slate-100/60 dark:bg-slate-800/40 hover:bg-slate-200/60 dark:hover:bg-slate-800/70 p-2 md:p-2.5 rounded-xl border border-slate-200/50 dark:border-slate-700/40 shadow-sm transition-all w-full">
+                            <input type="checkbox" ${todo.done ? 'checked' : ''} onchange="toggleTodo(${idx}, this.checked)" class="w-3.5 h-3.5 mt-[3px] rounded text-cyan-600 focus:ring-cyan-500 bg-white border-slate-300 dark:bg-slate-700 dark:border-slate-600 accent-cyan-500 shrink-0 cursor-pointer transition-transform group-active:scale-90 opacity-80 group-hover:opacity-100">
+                            <span class="text-[11px] md:text-xs font-semibold leading-snug flex-1 ${todo.done ? 'line-through text-slate-400 dark:text-slate-500 opacity-60' : 'text-slate-700 dark:text-slate-200'} transition-all duration-300">${todo.text}</span>
+                        </label>
+                    `).join('');
+                    todoWrapper.classList.remove('hidden'); todoWrapper.classList.add('flex');
+                } else {
+                    todoWrapper.classList.add('hidden'); todoWrapper.classList.remove('flex');
+                }
+            }
+
+            const data = window.appState.weekData[window.appState.day] || [];
+            
+            if (data.length === 0) {
+                scheduleContainer.className = "flex-1 h-full flex flex-col w-full min-w-[300px] mx-auto pt-[3px]";
+                scheduleContainer.innerHTML = `
+                    <div class="flex-1 flex flex-col items-center justify-center p-12 text-center rounded-[2.5rem] bg-slate-100 dark:bg-slate-800/50 shadow-sm border border-slate-200 dark:border-slate-800">
+                        <i class="fa-solid fa-ghost text-6xl text-slate-300 dark:text-slate-600 mb-4"></i>
+                        <h3 class="text-slate-500 dark:text-slate-400 font-black text-3xl">No schedule populated</h3>
+                    </div>`;
+                return;
+            }
+
+            if (data.length === 1 && data[0].type === 'cancelled') {
+                scheduleContainer.className = "flex-1 h-full flex flex-col w-full min-w-[300px] mx-auto pt-[3px]";
+                scheduleContainer.innerHTML = `
+                    <div class="flex-1 flex flex-col items-center justify-center p-12 md:p-16 text-center rounded-[3rem] bg-stripes-red border-2 border-rose-200 dark:border-rose-900/50 shadow-lg">
+                        <i class="fa-solid fa-face-smile-wink text-7xl text-rose-400 dark:text-rose-500 mb-6 drop-shadow-sm"></i>
+                        <h3 class="text-rose-700 dark:text-rose-300 font-black text-4xl md:text-5xl uppercase tracking-wider mb-2">No School Today!</h3>
+                        <p class="text-rose-600 dark:text-rose-400 text-2xl font-bold bg-white/50 dark:bg-slate-900/50 px-6 py-2 rounded-full border border-rose-200 dark:border-rose-800/50 mt-4">${data[0].note || 'Enjoy your day off!'}</p>
+                    </div>`;
+                return;
+            }
+            
+            scheduleContainer.className = "flex flex-col gap-1.5 md:gap-2 h-full min-h-0 w-fit pb-2 md:pb-4 overflow-y-auto custom-scrollbar pr-2 md:pr-4 mx-auto pt-[3px]";
+
+            data.forEach((block, idx) => {
+                if (block.type === 'break') {
+                    const isDuty = block.isDuty;
+                    scheduleContainer.innerHTML += `
+                        <div class="relative flex items-center justify-center w-full py-0 -my-1 cursor-pointer group hover:scale-[1.02] transition-transform" onclick="toggleDuty('${window.appState.day}', ${idx})">
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="w-full border-t border-dashed ${isDuty ? 'border-amber-500' : 'border-amber-400/60 dark:border-amber-600/50'}"></div>
+                            </div>
+                            <div class="relative flex items-center gap-2 px-3 py-1 text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${isDuty ? 'bg-amber-500 text-white rounded-full shadow-md border border-amber-400' : 'bg-slate-50 dark:bg-slate-900 text-amber-600 dark:text-amber-500'}">
+                                <i class="fa-solid ${isDuty ? 'fa-user-shield' : 'fa-' + block.icon}"></i>
+                                <span>${block.topic} ${isDuty ? 'DUTY' : ''}</span>
+                            </div>
+                        </div>`;
+                } else {
+                    const theme = getTheme(block.subject, block.topic);
+                    const startTime = block.time.split(' - ')[0] || block.time;
+
+                    scheduleContainer.innerHTML += `
+                        <div onclick="openLessonDetail(${idx})" class="cursor-pointer flex-1 min-h-[3rem] md:min-h-[3.5rem] bg-white dark:bg-slate-800 ${theme.cardExtra} rounded-xl md:rounded-2xl px-3 md:px-4 py-1.5 md:py-2 flex flex-col justify-center shadow-sm hover:shadow-md border border-slate-200/60 dark:border-slate-700/50 transition-all hover:scale-[1.01] relative overflow-hidden group">
+                            <div class="absolute left-0 top-0 bottom-0 w-1.5 md:w-2 ${theme.bar}"></div>
+                            <div class="absolute -right-2 -bottom-2 md:-bottom-4 text-[4rem] md:text-[5rem] opacity-[0.03] dark:opacity-[0.05] transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-12 ${theme.iconColor} pointer-events-none">
+                                <i class="fa-solid ${theme.icon}"></i>
+                            </div>
+                            <div class="flex items-center gap-2 md:gap-3 w-full relative z-10 pr-2">
+                                <div class="w-14 md:w-20 shrink-0 flex justify-center">
+                                    <span class="${theme.badgeBg} ${theme.badgeText} border ${theme.badgeBorder} px-1.5 md:px-2 py-0.5 md:py-1 rounded-full text-[9px] md:text-[10px] font-bold tracking-wide shadow-sm flex items-center justify-center whitespace-nowrap">
+                                        <i class="fa-regular fa-clock mr-1 opacity-70 hidden sm:inline-block"></i> ${startTime}
+                                    </span>
+                                </div>
+                                <div class="w-8 h-8 md:w-10 md:h-10 rounded-[0.6rem] md:rounded-xl ${theme.badgeBg} border ${theme.badgeBorder} flex items-center justify-center shadow-inner ${theme.iconColor} shrink-0">
+                                    <i class="fa-solid ${theme.icon} text-sm md:text-lg"></i>
+                                </div>
+                                <div class="flex flex-col justify-center flex-1 min-w-0">
+                                    <h3 class="text-sm md:text-xl font-black text-slate-800 dark:text-white leading-none drop-shadow-sm whitespace-nowrap">${block.subject}</h3>
+                                    ${block.topic ? `<p class="text-slate-500 dark:text-slate-400 text-[9px] md:text-[11px] font-semibold whitespace-nowrap mt-0">${block.topic}</p>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
         };
 
         const renderWeekGrid = () => {
@@ -1850,7 +1932,7 @@
                 return;
             }
 
-            const commonSubjects = ['English - Writing', 'English - Spelling', 'English - Shared Reading', 'Maths', 'History', 'Science', 'Geography', 'PDHPE', 'Creative Arts', 'Sport', 'RFF'];
+            const commonSubjects = ['English - Writing', 'English - Spelling', 'English - Shared Reading', 'Maths', 'History', 'Science', 'Geography', 'PDHPE', 'Creative Arts', 'Sport', 'RFF', 'Assembly', 'Scripture - Year 5', 'LEADERSHIP'];
             const subjectChipsHTML = commonSubjects.map(sub => `<button onclick="setPopulatePresetSubject('${sub}')" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-cyan-50 dark:hover:bg-cyan-900/30 text-slate-600 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 border border-slate-200 dark:border-slate-700 hover:border-cyan-300 dark:hover:border-cyan-700 transition-colors text-[10px] md:text-xs font-bold shadow-sm whitespace-nowrap">${sub}</button>`).join('');
 
             // Identify Next Block
