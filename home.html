@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Term 3 Calendar | Professional Edition</title>
+    <title>Term 3 Calendar | Ambient Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Didact+Gothic&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Using Inter for UI, Outfit for Headers, creating a very modern feel -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -16,18 +17,16 @@
             theme: {
                 extend: {
                     fontFamily: { 
-                        montserrat: ['Montserrat', 'sans-serif'],
-                        didact: ['Didact Gothic', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif'],
                         outfit: ['Outfit', 'sans-serif'], 
-                        sans: ['system-ui', 'sans-serif']
                     },
                     gridTemplateColumns: {
-                        'term': '3rem repeat(5, minmax(0, 1fr))',
+                        'term': '3rem repeat(5, minmax(0, 1fr))', /* Slightly tighter week column */
                     },
                     colors: {
-                        zinc: {
-                            950: '#09090b',
-                        }
+                        background: 'rgb(var(--color-background) / <alpha-value>)',
+                        surface: 'rgb(var(--color-surface) / <alpha-value>)',
+                        border: 'rgb(var(--color-border) / <alpha-value>)',
                     }
                 }
             }
@@ -35,241 +34,270 @@
     </script>
     
     <style>
-        * {
-            /* Forcing absolute sharp corners universally as requested */
-            border-radius: 0 !important;
+        :root {
+            --color-background: 248 250 252; /* slate-50 */
+            --color-surface: 255 255 255;
+            --color-border: 226 232 240; /* slate-200 */
+        }
+        
+        .dark {
+            --color-background: 9 9 11; /* zinc-950 */
+            --color-surface: 24 24 27; /* zinc-900 */
+            --color-border: 39 39 42; /* zinc-800 */
         }
 
         body { 
-            font-family: 'Didact Gothic', sans-serif; 
-            overflow: hidden; 
+            font-family: 'Inter', sans-serif; 
+            overflow: hidden; /* Strict no scroll on body */
             margin: 0; 
             padding: 0;
             width: 100vw; 
             height: 100vh;
             position: fixed;
             inset: 0;
-            background-color: #ffffff;
+            background-color: rgb(var(--color-background));
+            color: #1a1a1a;
+            transition: background-color 0.5s ease, color 0.5s ease;
         }
 
         .dark body {
-            background-color: #09090b; /* zinc-950 */
+            color: #f4f4f5;
         }
 
-        /* Sleek Grid Background */
-        .bg-architect-grid {
-            background-size: 40px 40px;
-            background-image: linear-gradient(to right, rgba(161, 161, 170, 0.15) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(161, 161, 170, 0.15) 1px, transparent 1px);
+        /* Ambient glowing background effect - Emerald/Teal */
+        .ambient-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
         }
         
-        .dark .bg-architect-grid {
-            background-image: linear-gradient(to right, rgba(63, 63, 70, 0.25) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(63, 63, 70, 0.25) 1px, transparent 1px);
+        .ambient-bg::before, .ambient-bg::after {
+            content: '';
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.4;
+            animation: float 20s infinite ease-in-out alternate;
         }
 
-        /* Ultra-minimal Scrollbar */
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(113, 113, 122, 0.5); }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(161, 161, 170, 0.9); }
-        
+        .ambient-bg::before {
+            top: -200px;
+            left: -200px;
+            background: radial-gradient(circle, rgba(16,185,129,0.15) 0%, rgba(0,0,0,0) 70%);
+        }
+
+        .ambient-bg::after {
+            bottom: -200px;
+            right: -100px;
+            background: radial-gradient(circle, rgba(20,184,166,0.1) 0%, rgba(0,0,0,0) 70%);
+            animation-delay: -10s;
+        }
+
+        .dark .ambient-bg::before { background: radial-gradient(circle, rgba(16,185,129,0.2) 0%, rgba(0,0,0,0) 70%); }
+        .dark .ambient-bg::after { background: radial-gradient(circle, rgba(20,184,166,0.15) 0%, rgba(0,0,0,0) 70%); }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 30px) scale(1.1); }
+        }
+
+        /* Modern Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { 
+            background: rgba(156, 163, 175, 0.3); 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.6); }
+
+        /* Hide scrollbar for internal cells */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
+
+        /* Glassmorphism utilities */
+        .glass {
+            background: rgba(var(--color-surface) / 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(var(--color-border) / 0.5);
+        }
+
+        /* Checkbox animation - Emerald */
         .todo-checkbox:checked + div .check-icon {
             transform: scale(1);
             opacity: 1;
         }
+        .todo-checkbox:checked + div {
+            background-color: #10b981;
+            border-color: #10b981;
+        }
 
-        /* Sleek Hover Underline Animation */
-        .hover-underline {
-            position: relative;
-        }
-        .hover-underline::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            transform: scaleX(0);
-            height: 2px;
-            bottom: 0;
-            left: 0;
-            background-color: currentColor;
-            transform-origin: bottom right;
-            transition: transform 0.25s ease-out;
-        }
-        .hover-underline:hover::after {
-            transform: scaleX(1);
-            transform-origin: bottom left;
-        }
+        /* Hide elements dynamically */
+        .grid-rows-0 { grid-template-rows: 0fr; }
+        .grid-rows-1 { grid-template-rows: 1fr; }
+        
+        /* Smooth inputs */
+        input:focus, textarea:focus { outline: none; }
     </style>
 </head>
-<body class="flex transition-colors duration-300 p-0 md:p-4 gap-0 md:gap-4 bg-architect-grid">
+<body class="p-2 gap-2 flex flex-col md:flex-row transition-colors duration-500">
     
-    <div id="toast-container" class="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none font-montserrat"></div>
+    <div class="ambient-bg"></div>
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none font-sans"></div>
 
-    <aside class="relative z-[60] w-16 hover:w-72 md:w-72 flex flex-col bg-zinc-50 dark:bg-zinc-950 border-r md:border border-zinc-300 dark:border-zinc-800 shadow-2xl transition-all duration-300 overflow-visible shrink-0 group/sidebar">
+    <!-- Redesigned Sidebar: Clean, sharp, card-based aesthetic -->
+    <aside class="relative z-10 w-full md:w-72 flex flex-col glass rounded-2xl shadow-xl overflow-hidden shrink-0 transition-all duration-300 h-auto md:h-full group/sidebar">
         
-        <!-- Sidebar Brand/Top -->
-        <div class="relative p-4 border-b-2 border-zinc-900 dark:border-white shrink-0 overflow-hidden group/brand bg-zinc-900 dark:bg-white text-white dark:text-zinc-900">
-            <div class="flex items-center gap-4 relative z-10">
-                <div class="w-8 h-8 flex items-center justify-center shrink-0 border border-current">
-                    <i class="fa-solid fa-layer-group text-lg"></i>
+        <!-- Header -->
+        <div class="p-4 pb-2 flex justify-between items-center shrink-0 relative z-10">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900 shadow-md">
+                    <i class="fa-solid fa-layer-group text-sm"></i>
                 </div>
-                <div class="opacity-0 group-hover/sidebar:opacity-100 md:opacity-100 transition-opacity whitespace-nowrap min-w-[120px]">
-                    <h1 class="text-xl font-montserrat font-black leading-none uppercase tracking-widest">Term 3</h1>
-                    <p class="text-[10px] font-montserrat font-bold uppercase tracking-[0.3em] mt-1 opacity-70">Workspace</p>
+                <div>
+                    <h1 class="text-lg font-outfit font-bold leading-tight tracking-tight text-slate-900 dark:text-white">Workspace</h1>
+                    <p class="text-[10px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest mt-0.5">Term 3</p>
                 </div>
             </div>
+            
+            <button onclick="toggleTheme()" class="w-8 h-8 rounded-full flex items-center justify-center bg-white/80 dark:bg-black/20 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors shadow-sm border border-slate-200/50 dark:border-white/5" title="Toggle Theme">
+                <i class="fa-solid fa-moon theme-icon-class text-xs transition-transform duration-500"></i>
+            </button>
         </div>
 
-        <!-- Sidebar Content (Scrollable) -->
-        <div class="flex-1 overflow-y-auto custom-scrollbar p-0 flex flex-col relative bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md">
+        <div class="flex-1 overflow-y-auto px-4 pb-3 flex flex-col gap-5 relative z-10 mt-2">
             
-            <!-- Teacher Tools Accordion -->
-            <div class="border-b border-zinc-200 dark:border-zinc-800">
-                <button onclick="toggleAccordion('tools-content', 'tools-chevron')" class="w-full flex items-center p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left group/btn">
-                    <div class="w-6 h-6 flex items-center justify-center text-zinc-900 dark:text-white shrink-0"><i class="fa-solid fa-toolbox text-sm"></i></div>
-                    <span class="text-xs font-montserrat font-bold uppercase tracking-widest text-zinc-900 dark:text-white ml-2 opacity-0 group-hover/sidebar:opacity-100 md:opacity-100 transition-opacity whitespace-nowrap flex-1">Toolkit</span>
-                    <i id="tools-chevron" class="fa-solid fa-chevron-down text-[10px] text-zinc-500 opacity-0 group-hover/sidebar:opacity-100 md:opacity-100 transition-transform duration-300 mr-1"></i>
-                </button>
-                <div id="tools-content" class="grid grid-rows-[0fr] transition-all duration-300 ease-in-out">
+            <!-- Quick Links / Toolkit -> Individual clean floating cards -->
+            <div class="flex flex-col gap-2">
+                <div class="px-1 text-[10px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-wider mb-0.5">Teacher Toolkit</div>
+                
+                <a href="https://online.schoolbytes.education/sbadmin/home" target="_blank" class="group flex items-center gap-3 p-2.5 rounded-xl bg-white/90 dark:bg-black/20 hover:bg-white dark:hover:bg-white/5 transition-all text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/5 shadow-sm hover:shadow-md">
+                    <div class="w-8 h-8 rounded-[10px] bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 shadow-inner border border-sky-100 dark:border-sky-500/20 transition-transform group-hover:scale-105"><i class="fa-solid fa-bullhorn text-[11px]"></i></div>
+                    <span class="flex-1">Daily Update</span>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-slate-400 dark:text-zinc-600 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all"></i>
+                </a>
+                
+                <a href="https://outlook.cloud.microsoft/mail/" target="_blank" class="group flex items-center gap-3 p-2.5 rounded-xl bg-white/90 dark:bg-black/20 hover:bg-white dark:hover:bg-white/5 transition-all text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/5 shadow-sm hover:shadow-md">
+                    <div class="w-8 h-8 rounded-[10px] bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0 shadow-inner border border-violet-100 dark:border-violet-500/20 transition-transform group-hover:scale-105"><i class="fa-solid fa-envelope text-[11px]"></i></div>
+                    <span class="flex-1">Check E-mail</span>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-slate-400 dark:text-zinc-600 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all"></i>
+                </a>
+                
+                <a href="https://online.schoolbytes.education/sbadmin/attendance/roll_call/teacher" target="_blank" class="group flex items-center gap-3 p-2.5 rounded-xl bg-white/90 dark:bg-black/20 hover:bg-white dark:hover:bg-white/5 transition-all text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/5 shadow-sm hover:shadow-md">
+                    <div class="w-8 h-8 rounded-[10px] bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-inner border border-emerald-100 dark:border-emerald-500/20 transition-transform group-hover:scale-105"><i class="fa-solid fa-clipboard-user text-[11px]"></i></div>
+                    <span class="flex-1">Mark The Roll</span>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-slate-400 dark:text-zinc-600 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all"></i>
+                </a>
+            </div>
+
+            <!-- Todos Section -> Solid clean card -->
+            <div class="flex-1 flex flex-col min-h-0 bg-white/90 dark:bg-black/20 rounded-2xl border border-slate-200/80 dark:border-white/5 shadow-sm overflow-hidden">
+                <div class="px-4 py-3 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50/50 dark:bg-white/5 shrink-0">
+                    <span class="text-[10px] font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-emerald-500"></i> Action Items
+                    </span>
+                    <button onclick="toggleTodoInput()" id="show-todo-input-btn" class="w-6 h-6 rounded-lg bg-white dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700/50 hover:border-emerald-500 dark:hover:border-emerald-500 hover:bg-emerald-500 hover:text-white transition-all flex items-center justify-center text-slate-500 dark:text-slate-400 shadow-sm">
+                        <i class="fa-solid fa-plus text-[10px]"></i>
+                    </button>
+                </div>
+
+                <div id="todo-input-container" class="grid grid-rows-[0fr] transition-all duration-300 ease-in-out bg-slate-50/50 dark:bg-black/20 border-b border-transparent shrink-0">
                     <div class="overflow-hidden">
-                        <div class="p-4 pt-0 flex flex-col gap-2">
-                            <a href="https://online.schoolbytes.education/sbadmin/home" target="_blank" class="group/tool w-full p-2 bg-transparent hover:bg-zinc-900 dark:hover:bg-white text-zinc-700 dark:text-zinc-300 hover:text-white dark:hover:text-zinc-900 text-[11px] font-montserrat font-bold border border-zinc-300 dark:border-zinc-700 transition-all flex items-center gap-3 whitespace-nowrap">
-                                <i class="fa-solid fa-bullhorn text-xs w-4 text-center"></i>
-                                <span class="opacity-0 group-hover/sidebar:opacity-100 md:opacity-100 transition-opacity flex-1">Daily Update</span>
-                                <i class="fa-solid fa-arrow-right opacity-0 group-hover/tool:opacity-100 transition-opacity text-[9px]"></i>
-                            </a>
-                            <a href="https://outlook.cloud.microsoft/mail/" target="_blank" class="group/tool w-full p-2 bg-transparent hover:bg-blue-600 text-zinc-700 dark:text-zinc-300 hover:text-white text-[11px] font-montserrat font-bold border border-zinc-300 dark:border-zinc-700 transition-all flex items-center gap-3 whitespace-nowrap">
-                                <i class="fa-solid fa-envelope text-xs w-4 text-center"></i>
-                                <span class="opacity-0 group-hover/sidebar:opacity-100 md:opacity-100 transition-opacity flex-1">Check E-mail</span>
-                                <i class="fa-solid fa-arrow-right opacity-0 group-hover/tool:opacity-100 transition-opacity text-[9px]"></i>
-                            </a>
-                            <a href="https://online.schoolbytes.education/sbadmin/attendance/roll_call/teacher" target="_blank" class="group/tool w-full p-2 bg-transparent hover:bg-emerald-600 text-zinc-700 dark:text-zinc-300 hover:text-white text-[11px] font-montserrat font-bold border border-zinc-300 dark:border-zinc-700 transition-all flex items-center gap-3 whitespace-nowrap">
-                                <i class="fa-solid fa-clipboard-user text-xs w-4 text-center"></i>
-                                <span class="opacity-0 group-hover/sidebar:opacity-100 md:opacity-100 transition-opacity flex-1">Mark The Roll</span>
-                                <i class="fa-solid fa-arrow-right opacity-0 group-hover/tool:opacity-100 transition-opacity text-[9px]"></i>
-                            </a>
+                        <div class="p-2 flex gap-2">
+                            <input type="text" id="new-todo-input" placeholder="What needs to be done?" class="flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700/50 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-slate-400 shadow-inner">
+                            <button onclick="addTodo()" class="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 transition-colors shadow-md shadow-emerald-500/20 shrink-0">
+                                <i class="fa-solid fa-arrow-turn-down -rotate-90 text-[11px]"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Todos Section -->
-            <div class="flex-1 flex flex-col min-h-0 relative">
-                <div class="px-4 py-4 shrink-0 opacity-0 group-hover/sidebar:opacity-100 md:opacity-100 transition-opacity flex justify-between items-center border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 sticky top-0 z-20">
-                    <span class="text-[10px] font-montserrat font-black text-zinc-900 dark:text-white uppercase tracking-[0.2em] flex items-center gap-2"><i class="fa-solid fa-square-check text-cyan-600 dark:text-cyan-400"></i> Action Items</span>
-                    <button onclick="toggleTodoInput()" id="show-todo-input-btn" class="text-[9px] font-montserrat font-bold text-cyan-700 hover:text-white dark:text-cyan-400 dark:hover:text-black bg-cyan-100 hover:bg-cyan-600 dark:bg-cyan-900/30 dark:hover:bg-cyan-400 px-3 py-1.5 transition-colors border border-cyan-300 dark:border-cyan-700 flex items-center gap-1.5 uppercase tracking-wider"><i class="fa-solid fa-plus text-[10px]"></i> Add</button>
-                </div>
-
-                <div id="todo-input-container" class="grid grid-rows-[0fr] transition-all duration-300 ease-in-out opacity-0 px-4 shrink-0 z-10 relative bg-zinc-100 dark:bg-zinc-900">
-                    <div class="overflow-hidden flex relative py-3">
-                        <input type="text" id="new-todo-input" placeholder="Enter task..." class="w-full bg-white dark:bg-zinc-950 border border-zinc-400 dark:border-zinc-600 pl-3 pr-10 py-2.5 text-xs font-didact font-bold text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all placeholder:text-zinc-400 placeholder:font-normal" onkeypress="if(event.key === 'Enter') addTodo()">
-                        <button onclick="addTodo()" class="absolute right-4 top-[calc(50%)] -translate-y-1/2 w-7 h-7 flex items-center justify-center text-white bg-zinc-900 dark:bg-zinc-700 hover:bg-cyan-600 dark:hover:bg-cyan-500 transition-colors"><i class="fa-solid fa-arrow-right text-[10px]"></i></button>
-                    </div>
-                </div>
-
-                <!-- Adjusted gap and padding for higher density -->
-                <div id="sidebar-todos-list" class="px-7 py-5 flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-1.5 min-h-0 opacity-0 group-hover/sidebar:opacity-100 md:opacity-100 transition-opacity relative z-0">
+                <div id="sidebar-todos-list" class="p-2 flex-1 overflow-y-auto flex flex-col gap-0.5 min-h-[100px]">
                     <!-- Injected via JS -->
                 </div>
             </div>
-
         </div>
 
-        <!-- Sidebar Bottom Actions -->
-        <div class="p-4 border-t-2 border-zinc-900 dark:border-white flex flex-col gap-3 shrink-0 relative bg-zinc-100 dark:bg-zinc-900">
-            
-            <!-- Start The Day -->
-            <a href="https://paulpbou.github.io/timetable-hub/index.html#start-day" class="w-full h-12 bg-amber-400 hover:bg-amber-500 text-black flex items-center justify-center transition-all group/start border border-amber-600 overflow-hidden relative shrink-0">
-                <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMCwgMCwgMCwgMC4xKSIvPjwvc3ZnPg==')] opacity-50"></div>
-                <div class="flex items-center justify-center gap-3 relative z-10">
-                    <i class="fa-solid fa-bolt text-sm group-hover/start:scale-125 transition-transform duration-300"></i>
-                    <span class="text-xs font-montserrat font-black opacity-0 group-hover/sidebar:opacity-100 md:opacity-100 transition-opacity whitespace-nowrap tracking-[0.2em] uppercase">Start Day</span>
-                </div>
+        <!-- Sidebar Actions -->
+        <div class="p-4 pt-0 mt-auto flex gap-3 shrink-0 relative z-10">
+            <a href="https://paulpbou.github.io/timetable-hub/index.html#start-day" class="flex-1 py-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-md hover:shadow-lg group border border-slate-800 dark:border-white/20">
+                <i class="fa-solid fa-bolt text-emerald-400 dark:text-emerald-600 group-hover:animate-pulse"></i> Start Day
             </a>
-            
-            <!-- Hub & Theme row -->
-            <div class="flex flex-col group-hover/sidebar:flex-row md:flex-row gap-2 w-full">
-                <!-- Hub Button -->
-                <a href="https://paulpbou.github.io/timetable-hub/index.html" class="h-10 w-10 group-hover/sidebar:flex-1 md:flex-1 flex items-center justify-center text-zinc-900 dark:text-white hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors border border-zinc-400 dark:border-zinc-600 bg-transparent shrink-0 overflow-hidden group/btn">
-                    <i class="fa-solid fa-border-all text-sm shrink-0"></i>
-                    <span class="text-[10px] font-montserrat font-bold uppercase tracking-widest ml-2 hidden group-hover/sidebar:block md:block whitespace-nowrap">Hub</span>
-                </a>
-                
-                <!-- Theme Button -->
-                <button onclick="toggleTheme()" class="h-10 w-10 shrink-0 flex items-center justify-center text-zinc-900 dark:text-white hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors border border-zinc-400 dark:border-zinc-600 bg-transparent group/btn" title="Toggle Theme">
-                    <i class="fa-solid fa-circle-half-stroke theme-icon-class text-sm transition-transform group-hover/btn:rotate-180 duration-500"></i>
-                </button>
-            </div>
-            
+            <a href="https://paulpbou.github.io/timetable-hub/index.html" class="w-11 rounded-xl bg-white/90 dark:bg-black/20 text-slate-600 dark:text-slate-400 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/10 transition-colors border border-slate-200/80 dark:border-white/5 shadow-sm" title="Timetable Hub">
+                <i class="fa-solid fa-border-all text-xs"></i>
+            </a>
         </div>
     </aside>
 
     <!-- Main Term Grid Container -->
-    <main class="relative flex-1 h-full z-10 flex flex-col bg-white dark:bg-zinc-950 border md:border-2 border-zinc-300 dark:border-zinc-800 shadow-2xl p-2 md:p-4 overflow-hidden min-w-0">
+    <main class="relative z-10 flex-1 flex flex-col glass rounded-2xl shadow-xl overflow-hidden min-w-0 h-[calc(100vh-1rem)] md:h-full">
         
-        <!-- Day Headers -->
-        <div class="grid grid-cols-term gap-[2px] shrink-0 mb-[2px] bg-zinc-900 dark:bg-zinc-100 p-[2px]">
-            <div class="bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center py-2 text-[10px] font-montserrat font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.2em]">Wk</div>
-            <div class="bg-white dark:bg-zinc-950 py-2 flex items-center justify-center text-xs md:text-sm font-montserrat font-black text-zinc-900 dark:text-white tracking-widest uppercase border-t-4 border-transparent hover:border-cyan-500 transition-colors">Mon</div>
-            <div class="bg-white dark:bg-zinc-950 py-2 flex items-center justify-center text-xs md:text-sm font-montserrat font-black text-zinc-900 dark:text-white tracking-widest uppercase border-t-4 border-transparent hover:border-emerald-500 transition-colors">Tue</div>
-            <div class="bg-white dark:bg-zinc-950 py-2 flex items-center justify-center text-xs md:text-sm font-montserrat font-black text-zinc-900 dark:text-white tracking-widest uppercase border-t-4 border-transparent hover:border-amber-500 transition-colors">Wed</div>
-            <div class="bg-white dark:bg-zinc-950 py-2 flex items-center justify-center text-xs md:text-sm font-montserrat font-black text-zinc-900 dark:text-white tracking-widest uppercase border-t-4 border-transparent hover:border-rose-500 transition-colors">Thu</div>
-            <div class="bg-white dark:bg-zinc-950 py-2 flex items-center justify-center text-xs md:text-sm font-montserrat font-black text-zinc-900 dark:text-white tracking-widest uppercase border-t-4 border-transparent hover:border-purple-500 transition-colors">Fri</div>
+        <!-- Headers -->
+        <div class="grid grid-cols-term gap-3 shrink-0 border-b border-slate-200/50 dark:border-zinc-800/50 bg-white/50 dark:bg-zinc-900/50">
+            <div class="flex items-center justify-center py-2 border-r border-slate-200/50 dark:border-zinc-800/50">
+                <span class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Wk</span>
+            </div>
+            <!-- Condensed header height -->
+            <div class="py-2 flex items-center justify-center text-xs font-outfit font-bold text-slate-800 dark:text-slate-200">Monday</div>
+            <div class="py-2 flex items-center justify-center text-xs font-outfit font-bold text-slate-800 dark:text-slate-200">Tuesday</div>
+            <div class="py-2 flex items-center justify-center text-xs font-outfit font-bold text-slate-800 dark:text-slate-200">Wednesday</div>
+            <div class="py-2 flex items-center justify-center text-xs font-outfit font-bold text-slate-800 dark:text-slate-200">Thursday</div>
+            <div class="py-2 flex items-center justify-center text-xs font-outfit font-bold text-slate-800 dark:text-slate-200">Friday</div>
         </div>
 
-        <!-- 10 Week Grid Body -->
-        <div class="flex-1 min-h-0 grid grid-rows-10 gap-[2px] w-full bg-zinc-200 dark:bg-zinc-800 border-[2px] border-zinc-200 dark:border-zinc-800" id="term-grid">
-            <!-- Injected via JS to ensure exact fit -->
+        <!-- Grid Body -->
+        <div class="flex-1 overflow-hidden py-3 px-2 custom-scrollbar bg-slate-50/60 dark:bg-[#131315]">
+            <div class="grid grid-rows-10 gap-2 h-full min-h-0" id="term-grid">
+                <!-- Injected via JS -->
+            </div>
         </div>
     </main>
 
     <!-- Add Event Modal -->
-    <div id="modal-add-event" class="hidden fixed inset-0 z-[100] items-center justify-center p-4 bg-zinc-900/80 backdrop-blur-sm transition-opacity">
-        <div class="bg-white dark:bg-zinc-950 border-2 border-zinc-900 dark:border-zinc-100 shadow-[8px_8px_0_rgba(0,0,0,1)] dark:shadow-[8px_8px_0_rgba(255,255,255,1)] w-full max-w-sm flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-            <div class="flex justify-between items-center p-5 border-b-2 border-zinc-900 dark:border-zinc-100 bg-zinc-100 dark:bg-zinc-900">
+    <div id="modal-add-event" class="hidden fixed inset-0 z-[150] items-center justify-center p-4 bg-slate-900/40 dark:bg-black/60 backdrop-blur-md transition-opacity">
+        <div class="bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-zinc-800">
+            <div class="flex justify-between items-center p-6 border-b border-slate-100 dark:border-zinc-800">
                 <div>
-                    <h3 class="text-xl font-montserrat font-black text-zinc-900 dark:text-white uppercase tracking-wider" id="modal-add-title">Week 1 - Mon</h3>
-                    <p class="text-[10px] font-montserrat font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-[0.2em] mt-1">Create Event</p>
+                    <h3 class="text-xl font-outfit font-bold text-slate-900 dark:text-white" id="modal-add-title">Week 1 - Monday</h3>
+                    <p class="text-xs font-medium text-emerald-500 uppercase tracking-wider mt-1">New Event</p>
                 </div>
-                <button onclick="closeModals()" class="text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors w-8 h-8 flex items-center justify-center border border-transparent hover:border-zinc-900 dark:hover:border-white bg-transparent"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <button onclick="closeModals()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <div class="p-5 space-y-5">
-                <div class="space-y-2">
-                    <label class="block text-xs font-montserrat font-bold text-zinc-900 dark:text-zinc-300 uppercase tracking-widest">Title</label>
-                    <input type="text" id="new-event-title" placeholder="e.g. Science Fair" class="w-full bg-transparent border-b-2 border-zinc-300 dark:border-zinc-700 px-0 py-2 text-lg font-didact font-bold text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500 transition-colors placeholder:text-zinc-300 dark:placeholder:text-zinc-700" />
+            <div class="p-6 space-y-6">
+                <div>
+                    <input type="text" id="new-event-title" placeholder="Event Title" class="w-full bg-transparent border-none px-0 py-2 text-2xl font-outfit font-bold text-slate-900 dark:text-white placeholder:text-slate-300 dark:placeholder:text-zinc-600 focus:ring-0" />
                 </div>
                 
-                <div class="space-y-2">
-                    <label class="block text-xs font-montserrat font-bold text-zinc-900 dark:text-zinc-300 uppercase tracking-widest">Notes</label>
-                    <textarea id="new-event-details" placeholder="Add extra info. Start lines with '-' for bullet points." class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 p-3 text-sm font-didact text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500 h-28 custom-scrollbar resize-none transition-colors"></textarea>
+                <div>
+                    <textarea id="new-event-details" placeholder="Add notes, links, or lists (start line with '-')..." class="w-full bg-slate-50 dark:bg-zinc-950/50 rounded-2xl border border-slate-200 dark:border-zinc-800 p-4 text-sm text-slate-700 dark:text-slate-300 h-32 resize-none custom-scrollbar focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"></textarea>
                 </div>
 
-                <div class="flex items-center justify-between pt-2">
-                    <span class="text-xs font-montserrat font-bold text-zinc-900 dark:text-zinc-300 uppercase tracking-widest">Tag:</span>
-                    <div class="flex gap-3" id="color-picker">
-                        <!-- Custom sharp color pickers -->
-                        <button onclick="selectColor('cyan')" class="w-6 h-6 bg-cyan-500 border-2 border-zinc-900 dark:border-white shadow-[2px_2px_0_rgba(0,0,0,1)] dark:shadow-[2px_2px_0_rgba(255,255,255,1)] color-btn transition-transform"></button>
-                        <button onclick="selectColor('emerald')" class="w-6 h-6 bg-emerald-500 border-2 border-transparent hover:border-zinc-400 dark:hover:border-zinc-600 color-btn transition-transform"></button>
-                        <button onclick="selectColor('amber')" class="w-6 h-6 bg-amber-500 border-2 border-transparent hover:border-zinc-400 dark:hover:border-zinc-600 color-btn transition-transform"></button>
-                        <button onclick="selectColor('rose')" class="w-6 h-6 bg-rose-500 border-2 border-transparent hover:border-zinc-400 dark:hover:border-zinc-600 color-btn transition-transform"></button>
-                        <button onclick="selectColor('purple')" class="w-6 h-6 bg-purple-500 border-2 border-transparent hover:border-zinc-400 dark:hover:border-zinc-600 color-btn transition-transform"></button>
+                <div class="flex items-center gap-4 bg-slate-50 dark:bg-zinc-950/50 p-3 rounded-2xl border border-slate-200 dark:border-zinc-800 w-fit">
+                    <span class="text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Color</span>
+                    <div class="flex gap-2" id="color-picker">
+                        <button onclick="selectColor('indigo')" class="w-6 h-6 rounded-full bg-indigo-500 ring-4 ring-indigo-500/20 color-btn transition-all scale-110"></button>
+                        <button onclick="selectColor('emerald')" class="w-6 h-6 rounded-full bg-emerald-500 border-2 border-transparent hover:border-slate-300 dark:hover:border-zinc-600 color-btn transition-all"></button>
+                        <button onclick="selectColor('amber')" class="w-6 h-6 rounded-full bg-amber-500 border-2 border-transparent hover:border-slate-300 dark:hover:border-zinc-600 color-btn transition-all"></button>
+                        <button onclick="selectColor('rose')" class="w-6 h-6 rounded-full bg-rose-500 border-2 border-transparent hover:border-slate-300 dark:hover:border-zinc-600 color-btn transition-all"></button>
+                        <button onclick="selectColor('violet')" class="w-6 h-6 rounded-full bg-violet-500 border-2 border-transparent hover:border-slate-300 dark:hover:border-zinc-600 color-btn transition-all"></button>
                     </div>
                 </div>
             </div>
 
-            <div class="p-5 border-t-2 border-zinc-900 dark:border-zinc-100 bg-white dark:bg-zinc-950">
-                <button onclick="submitNewEvent()" class="w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-cyan-600 dark:hover:bg-cyan-400 font-montserrat font-bold uppercase tracking-widest py-3 text-sm transition-colors flex items-center justify-center border border-transparent"><i class="fa-solid fa-plus mr-2"></i> Save Event</button>
+            <div class="p-6 pt-0 mt-2">
+                <button onclick="submitNewEvent()" class="w-full rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3.5 text-sm transition-all shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2"><i class="fa-solid fa-check"></i> Create Event</button>
             </div>
         </div>
     </div>
 
     <!-- Event Detail & Edit Modal -->
-    <div id="modal-event-detail" class="hidden fixed inset-0 z-[110] items-center justify-center p-4 bg-zinc-900/80 backdrop-blur-sm transition-opacity">
-        <div class="bg-white dark:bg-zinc-950 border-2 border-zinc-900 dark:border-zinc-100 shadow-[8px_8px_0_rgba(0,0,0,1)] dark:shadow-[8px_8px_0_rgba(255,255,255,1)] w-full max-w-sm flex flex-col overflow-hidden animate-in zoom-in-95 duration-200" id="detail-modal-container">
+    <div id="modal-event-detail" class="hidden fixed inset-0 z-[160] items-center justify-center p-4 bg-slate-900/40 dark:bg-black/60 backdrop-blur-md transition-opacity">
+        <div class="bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-zinc-800" id="detail-modal-container">
             <!-- Injected dynamically -->
         </div>
     </div>
@@ -292,6 +320,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // Core Time Logic
         window.getCurrentSchoolTime = () => {
             const now = new Date();
             now.setHours(0, 0, 0, 0);
@@ -315,19 +344,23 @@
 
         window.activeTodoWeek = (window.currentWeekNum >= 1 && window.currentWeekNum <= 10) ? window.currentWeekNum : 1;
         window.activeTodoDay = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].includes(window.currentDayStr) ? window.currentDayStr : 'Monday';
+        
         window.todosData = [];
         let unsubscribeTodos = null;
         window.termEvents = {};
         window.activeCell = { w: 0, d: 0, id: null };
-        window.selectedColor = 'cyan';
-        window.editSelectedColor = 'cyan';
+        
+        window.selectedColor = 'indigo';
+        window.editSelectedColor = 'indigo';
 
         const colorStyles = {
-            'cyan': { badge: 'border border-cyan-500/50 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-900 dark:text-cyan-100', accent: 'bg-cyan-500', modalHeader: 'border-b-[4px] border-cyan-500 bg-zinc-100 dark:bg-zinc-900', modalText: 'text-zinc-900 dark:text-white', titleColor: 'text-cyan-600 dark:text-cyan-400' },
-            'emerald': { badge: 'border border-emerald-500/50 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-900 dark:text-emerald-100', accent: 'bg-emerald-500', modalHeader: 'border-b-[4px] border-emerald-500 bg-zinc-100 dark:bg-zinc-900', modalText: 'text-zinc-900 dark:text-white', titleColor: 'text-emerald-600 dark:text-emerald-400' },
-            'amber': { badge: 'border border-amber-500/50 bg-amber-50 dark:bg-amber-900/20 text-amber-900 dark:text-amber-100', accent: 'bg-amber-500', modalHeader: 'border-b-[4px] border-amber-500 bg-zinc-100 dark:bg-zinc-900', modalText: 'text-zinc-900 dark:text-white', titleColor: 'text-amber-600 dark:text-amber-500' },
-            'rose': { badge: 'border border-rose-500/50 bg-rose-50 dark:bg-rose-900/20 text-rose-900 dark:text-rose-100', accent: 'bg-rose-500', modalHeader: 'border-b-[4px] border-rose-500 bg-zinc-100 dark:bg-zinc-900', modalText: 'text-zinc-900 dark:text-white', titleColor: 'text-rose-600 dark:text-rose-400' },
-            'purple': { badge: 'border border-purple-500/50 bg-purple-50 dark:bg-purple-900/20 text-purple-900 dark:text-purple-100', accent: 'bg-purple-500', modalHeader: 'border-b-[4px] border-purple-500 bg-zinc-100 dark:bg-zinc-900', modalText: 'text-zinc-900 dark:text-white', titleColor: 'text-purple-600 dark:text-purple-400' }
+            'cyan': { base: 'indigo', hex: '#6366f1', pill: 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-500/20', dot: 'bg-indigo-500' },
+            'indigo': { base: 'indigo', hex: '#6366f1', pill: 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-500/20', dot: 'bg-indigo-500' },
+            'emerald': { base: 'emerald', hex: '#10b981', pill: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/20', dot: 'bg-emerald-500' },
+            'amber': { base: 'amber', hex: '#f59e0b', pill: 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-500/20', dot: 'bg-amber-500' },
+            'rose': { base: 'rose', hex: '#f43f5e', pill: 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-500/20', dot: 'bg-rose-500' },
+            'purple': { base: 'violet', hex: '#8b5cf6', pill: 'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-500/20', dot: 'bg-violet-500' },
+            'violet': { base: 'violet', hex: '#8b5cf6', pill: 'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-500/20', dot: 'bg-violet-500' }
         };
 
         const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
@@ -335,50 +368,47 @@
         window.showToast = (msg) => {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            toast.className = 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-4 py-2 border border-zinc-700 dark:border-zinc-300 shadow-[4px_4px_0_rgba(0,0,0,0.5)] dark:shadow-[4px_4px_0_rgba(255,255,255,0.5)] font-bold text-xs uppercase tracking-widest animate-in slide-in-from-bottom-5 fade-in duration-300';
-            toast.innerText = msg;
+            toast.className = 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 py-3 rounded-2xl shadow-xl font-medium text-sm flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300';
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 dark:text-emerald-500"></i> ${msg}`;
             container.appendChild(toast);
             setTimeout(() => {
-                toast.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+                toast.classList.add('opacity-0', '-translate-y-2', 'transition-all', 'duration-500');
                 setTimeout(() => toast.remove(), 500);
             }, 3000);
         };
 
         window.beautifyNote = (rawText) => {
-            if (!rawText) return '<span class="italic text-zinc-400 font-didact">No additional details provided.</span>';
+            if (!rawText) return '<span class="italic text-slate-400 font-sans">No additional details provided.</span>';
             const lines = rawText.split('\n');
-            let html = '<div class="space-y-3 font-didact">';
+            let html = '<div class="space-y-3 font-sans">';
             let inList = false;
 
             lines.forEach(line => {
                 let text = line.trim();
                 if (!text) {
-                    if (inList) { html += '</div>'; inList = false; }
+                    if (inList) { html += '</div></div>'; inList = false; }
                     return;
                 }
 
                 const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)/gi;
                 let formattedText = text.replace(urlRegex, (url) => {
                     let href = url.startsWith('http') ? url : 'https://' + url;
-                    return `<a href="${href}" target="_blank" class="inline-flex items-center gap-1.5 px-2 py-1 mt-1 mb-1 bg-zinc-100 dark:bg-zinc-800 text-cyan-600 dark:text-cyan-400 hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black border border-zinc-300 dark:border-zinc-700 transition-all text-[11px] font-bold shadow-sm cursor-pointer whitespace-nowrap align-middle"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open Link</a>`;
+                    return `<a href="${href}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-zinc-800 text-emerald-600 dark:text-emerald-400 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors text-xs font-medium shadow-sm"><i class="fa-solid fa-link text-[10px]"></i> Link</a>`;
                 });
 
                 if (text.startsWith('-')) {
                     if (!inList) { 
-                        html += '<div class="space-y-2 mt-3 mb-3 bg-zinc-50 dark:bg-zinc-900/50 p-4 border border-zinc-200 dark:border-zinc-800">'; 
+                        html += '<div class="mt-4 mb-4 bg-slate-50/50 dark:bg-zinc-950/30 rounded-2xl p-4 border border-slate-100 dark:border-zinc-800/50"><div class="space-y-3">'; 
                         inList = true; 
                     }
-                    let content = formattedText;
-                    if (content.startsWith('-')) content = content.substring(1).trim();
-                    else if (content.startsWith('<-')) content = content.replace(/<.*?>/, '').substring(1).trim();
-                    
-                    html += `<div class="flex items-start gap-3"><div class="w-1.5 h-1.5 bg-zinc-900 dark:bg-white mt-2 shrink-0"></div><span class="flex-1 text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed">${content}</span></div>`;
+                    let content = formattedText.substring(1).trim();
+                    html += `<div class="flex items-start gap-3"><div class="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-zinc-600 mt-2 shrink-0"></div><span class="flex-1 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">${content}</span></div>`;
                 } else {
-                    if (inList) { html += '</div>'; inList = false; }
-                    html += `<div class="text-sm text-zinc-900 dark:text-zinc-100 leading-relaxed">${formattedText}</div>`;
+                    if (inList) { html += '</div></div>'; inList = false; }
+                    html += `<div class="text-sm text-slate-800 dark:text-slate-200 leading-relaxed">${formattedText}</div>`;
                 }
             });
-            if (inList) html += '</div>';
+            if (inList) html += '</div></div>';
             html += '</div>';
             return html;
         };
@@ -428,15 +458,12 @@
                 const isCurrentWeek = (w + 1) === window.currentWeekNum;
                 const row = document.createElement('div');
                 
-                let rowClasses = "grid grid-cols-term gap-[2px] h-full min-h-0 w-full transition-all duration-300 ";
-                if (isCurrentWeek) {
-                    rowClasses += "ring-2 ring-inset ring-zinc-300 dark:ring-zinc-700 bg-zinc-100 dark:bg-zinc-900/50 ";
-                }
+                let rowClasses = "grid grid-cols-term gap-2.5 h-full min-h-0 w-full group/row ";
                 row.className = rowClasses;
 
                 const weekLabel = document.createElement('div');
-                weekLabel.className = `flex items-center justify-center flex-col border-r border-zinc-200 dark:border-zinc-800 transition-colors ${isCurrentWeek ? 'bg-zinc-900 dark:bg-zinc-100' : 'bg-zinc-100 dark:bg-zinc-900'}`;
-                weekLabel.innerHTML = `<span class="text-[9px] font-montserrat font-bold ${isCurrentWeek ? 'text-zinc-400 dark:text-zinc-600' : 'text-zinc-500'}">WK</span><span class="text-sm font-montserrat font-black ${isCurrentWeek ? 'text-white dark:text-black' : 'text-zinc-900 dark:text-white'} leading-none mt-0.5">${w + 1}</span>`;
+                weekLabel.className = `flex flex-col items-center justify-center rounded-2xl transition-all min-h-0 ${isCurrentWeek ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-100 dark:bg-zinc-800/50 text-slate-500 dark:text-zinc-400'}`;
+                weekLabel.innerHTML = `<span class="text-[9px] font-bold uppercase tracking-wider opacity-70 leading-none">Wk</span><span class="text-base font-outfit font-bold leading-none mt-1">${w + 1}</span>`;
                 row.appendChild(weekLabel);
 
                 for (let d = 0; d < 5; d++) {
@@ -445,46 +472,51 @@
                     const isCurrentDay = isCurrentWeek && dayNames[d] === window.currentDayStr;
                     
                     const cellDate = new Date(2026, 6, 20 + (w * 7) + d);
-                    const dateStr = cellDate.getDate() + ' ' + cellDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                    const dateStr = cellDate.getDate() + ' ' + cellDate.toLocaleString('en-US', { month: 'short' });
                     
                     const cell = document.createElement('div');
-                    let cellClasses = "p-1 flex flex-col gap-1 overflow-hidden relative group transition-colors ";
+                    
+                    let cellClasses = "py-1.5 px-1.5 rounded-2xl flex flex-col relative group transition-all duration-300 border h-full min-h-0 overflow-hidden ";
                     
                     if (isCurrentDay) {
-                        cellClasses += "ring-2 ring-inset ring-white z-10 bg-white dark:bg-zinc-950 ";
-                    } else if (isCurrentWeek) {
-                        cellClasses += "bg-gray-100 dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-900 ";
+                        cellClasses += "bg-white dark:bg-zinc-900 border-emerald-200 dark:border-emerald-500/30 ring-2 ring-emerald-500/10 shadow-sm z-10 ";
                     } else {
-                        cellClasses += "bg-white dark:bg-zinc-950 hover:bg-zinc-50 dark:hover:bg-zinc-900 ";
+                        cellClasses += "bg-white/60 dark:bg-zinc-900/40 border-slate-200/60 dark:border-zinc-800/60 hover:bg-white dark:hover:bg-zinc-900 hover:shadow-md hover:border-slate-300 dark:hover:border-zinc-700 ";
                     }
                     cell.className = cellClasses;
 
                     const absoluteLink = `https://paulpbou.github.io/timetable-hub/index.html#Term%203/Week%20${w + 1}/${dayNames[d]}`;
                     
+                    // Fixed sub-elements matching the previous iteration exact coordinates
                     cell.innerHTML += `
-                        <div class="absolute bottom-1 right-1.5 z-[25] pointer-events-none text-[8px] md:text-[9px] font-montserrat font-bold text-zinc-300 dark:text-zinc-700 drop-shadow-none">
-                            ${dateStr}
+                        <span class="absolute bottom-1 right-1 z-40 text-[8px] font-medium pointer-events-none opacity-70 ${isCurrentDay ? 'text-emerald-600 dark:text-emerald-400 bg-white/40 dark:bg-zinc-900/40' : 'text-slate-500 dark:text-zinc-400 bg-white/30 dark:bg-zinc-900/30'} rounded backdrop-blur-[2px] px-1 py-0.5 leading-none">${dateStr}</span>
+                        
+                        <div class="absolute top-1 right-1 z-30 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a href="${absoluteLink}" target="_blank" class="w-5 h-5 rounded-md bg-white/90 dark:bg-zinc-800/90 hover:bg-slate-200 dark:hover:bg-zinc-700 flex items-center justify-center text-slate-500 transition-colors shadow-sm pointer-events-auto backdrop-blur-sm" title="Open Timetable">
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
+                            </a>
+                            <button onclick="openAddModal(${w}, ${d})" class="w-5 h-5 rounded-md bg-emerald-50/90 hover:bg-emerald-100 dark:bg-emerald-500/40 dark:hover:bg-emerald-500/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center transition-colors shadow-sm pointer-events-auto backdrop-blur-sm" title="Add Event">
+                                <i class="fa-solid fa-plus text-[8px]"></i>
+                            </button>
                         </div>
-                        <a href="${absoluteLink}" title="Go to ${dayNames[d]} timetable" target="_blank" class="absolute top-1 left-1 w-5 h-5 bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black z-20 cursor-pointer border border-zinc-300 dark:border-zinc-600 shadow-[1px_1px_0_rgba(0,0,0,0.5)] dark:shadow-[1px_1px_0_rgba(255,255,255,0.5)]">
-                            <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
-                        </a>
-                        <button onclick="openAddModal(${w}, ${d})" title="Add Event" class="absolute top-1 right-1 w-5 h-5 bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-cyan-600 hover:text-white dark:hover:bg-cyan-400 dark:hover:text-black z-20 cursor-pointer border border-zinc-300 dark:border-zinc-600 shadow-[1px_1px_0_rgba(0,0,0,0.5)] dark:shadow-[1px_1px_0_rgba(255,255,255,0.5)]">
-                            <i class="fa-solid fa-plus text-[10px]"></i>
-                        </button>
                     `;
 
-                    const eventCount = events.length;
+                    const eventsContainer = document.createElement('div');
+                    eventsContainer.className = "flex-1 flex flex-col gap-[3px] min-h-0 overflow-y-auto no-scrollbar w-full h-full relative z-10";
+                    
                     events.forEach(evt => {
-                        const styleObj = colorStyles[evt.color] || colorStyles['cyan'];
-                        let heightClass = "flex-1"; 
-                        if (eventCount === 1) heightClass = "h-full py-2";
-
-                        cell.innerHTML += `<button onclick="openEventDetail('${evt.id}', ${w}, ${d})" class="${heightClass} w-full flex items-center justify-start px-2 py-1 relative z-10 cursor-pointer transition-all duration-200 overflow-hidden ${styleObj.badge} hover:translate-x-[2px] shadow-sm group/evt">
-                            <div class="absolute left-0 top-0 bottom-0 w-1 ${styleObj.accent} opacity-100 group-hover/evt:w-1.5 transition-all duration-300"></div>
-                            <span class="truncate w-full leading-tight pointer-events-none text-left font-outfit text-[10px] md:text-[11px] font-semibold tracking-wide pl-1.5">${evt.title}</span>
+                        const styleKey = evt.color || 'indigo';
+                        const styleObj = colorStyles[styleKey] || colorStyles['indigo'];
+                        
+                        // Updated to fully rounded corners (rounded-full) with slightly higher padding (px-2) for the capsule shape
+                        eventsContainer.innerHTML += `
+                        <button onclick="openEventDetail('${evt.id}', ${w}, ${d})" class="w-full text-left px-2 py-[3px] rounded-full border ${styleObj.pill} transition-all hover:scale-[1.02] flex items-center gap-1.5 group/evt shrink-0">
+                            <div class="w-1.5 h-1.5 rounded-full ${styleObj.dot} shrink-0"></div>
+                            <span class="truncate font-medium text-[9px] flex-1 leading-tight">${evt.title}</span>
                         </button>`;
                     });
-
+                    
+                    cell.appendChild(eventsContainer);
                     row.appendChild(cell);
                 }
                 grid.appendChild(row);
@@ -496,8 +528,12 @@
             document.getElementById('modal-add-title').innerText = `Week ${w + 1} - ${dayNames[d]}`;
             document.getElementById('new-event-title').value = '';
             document.getElementById('new-event-details').value = '';
-            document.getElementById('modal-add-event').classList.remove('hidden');
-            document.getElementById('modal-add-event').classList.add('flex');
+            
+            selectColor('indigo'); // Keeping default event color as indigo to not mess with users existing event color habits
+            
+            const modal = document.getElementById('modal-add-event');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
             setTimeout(() => { document.getElementById('new-event-title').focus(); }, 100);
         };
 
@@ -508,42 +544,50 @@
             if (!evt) return;
 
             window.activeCell = { w, d, id }; 
-            window.editSelectedColor = evt.color;
-            const styleObj = colorStyles[evt.color] || colorStyles['cyan'];
+            const colorKey = evt.color || 'indigo';
+            window.editSelectedColor = colorKey === 'cyan' ? 'indigo' : colorKey; 
+            const styleObj = colorStyles[colorKey] || colorStyles['indigo'];
             const container = document.getElementById('detail-modal-container');
             
             container.innerHTML = `
-                <div class="flex justify-between items-start p-6 ${styleObj.modalHeader}">
-                    <div class="pr-4 w-full">
-                        <input type="text" id="edit-detail-title" value="${evt.title.replace(/"/g, '&quot;')}" class="hidden w-full bg-transparent border-b-2 border-zinc-400 dark:border-zinc-600 px-0 py-1 mb-2 text-2xl font-montserrat font-black ${styleObj.titleColor} focus:outline-none focus:border-cyan-500 transition-all uppercase">
-                        <h3 id="display-detail-title" class="text-2xl font-montserrat font-black ${styleObj.titleColor} leading-tight mb-1 uppercase tracking-wide break-words">${evt.title}</h3>
-                        <p class="text-xs font-montserrat font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mt-2">Week ${w + 1} - ${dayNames[d]}</p>
+                <div class="relative p-6 md:p-8 pb-4">
+                    <div class="absolute top-8 left-8 w-3 h-3 rounded-full ${styleObj.dot} shadow-lg shadow-${styleObj.base}-500/40"></div>
+                    
+                    <div class="pl-6 pr-8">
+                        <input type="text" id="edit-detail-title" value="${evt.title.replace(/"/g, '&quot;')}" class="hidden w-full bg-transparent border-b border-slate-300 dark:border-zinc-700 px-0 py-1 mb-2 text-2xl font-outfit font-bold text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 transition-all">
+                        <h3 id="display-detail-title" class="text-2xl font-outfit font-bold text-slate-900 dark:text-white leading-tight mb-1 break-words">${evt.title}</h3>
+                        <p class="text-sm font-medium text-slate-500 mt-1">Week ${w + 1} - ${dayNames[d]}</p>
                     </div>
-                    <button onclick="closeModals()" class="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors w-8 h-8 flex items-center justify-center border border-transparent hover:border-zinc-900 dark:hover:border-white bg-transparent shrink-0"><i class="fa-solid fa-xmark text-xl"></i></button>
+                    
+                    <button onclick="closeModals()" class="absolute top-6 right-6 w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                <div class="p-6">
-                    <textarea id="edit-detail-desc" class="hidden w-full h-56 md:h-72 bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 p-3 text-sm font-didact text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-500 resize-none custom-scrollbar transition-all"></textarea>
-                    <div id="display-detail-desc" class="h-56 md:h-72 overflow-y-auto custom-scrollbar pr-2">${window.beautifyNote(evt.details)}</div>
-                    <div id="edit-detail-colors" class="hidden mt-6 pt-4 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-                        <span class="text-xs font-montserrat font-bold text-zinc-900 dark:text-zinc-300 uppercase tracking-widest">Tag:</span>
-                        <div class="flex gap-3">
-                            <button data-color="cyan" onclick="window.editSelectedColor='cyan'; updateEditColorSelection()" class="w-6 h-6 bg-cyan-500 border-2 ${evt.color==='cyan'?'border-zinc-900 dark:border-white shadow-[2px_2px_0_rgba(0,0,0,1)] dark:shadow-[2px_2px_0_rgba(255,255,255,1)]':'border-transparent hover:border-zinc-400 dark:hover:border-zinc-600'} edit-color-btn transition-transform"></button>
-                            <button data-color="emerald" onclick="window.editSelectedColor='emerald'; updateEditColorSelection()" class="w-6 h-6 bg-emerald-500 border-2 ${evt.color==='emerald'?'border-zinc-900 dark:border-white shadow-[2px_2px_0_rgba(0,0,0,1)] dark:shadow-[2px_2px_0_rgba(255,255,255,1)]':'border-transparent hover:border-zinc-400 dark:hover:border-zinc-600'} edit-color-btn transition-transform"></button>
-                            <button data-color="amber" onclick="window.editSelectedColor='amber'; updateEditColorSelection()" class="w-6 h-6 bg-amber-500 border-2 ${evt.color==='amber'?'border-zinc-900 dark:border-white shadow-[2px_2px_0_rgba(0,0,0,1)] dark:shadow-[2px_2px_0_rgba(255,255,255,1)]':'border-transparent hover:border-zinc-400 dark:hover:border-zinc-600'} edit-color-btn transition-transform"></button>
-                            <button data-color="rose" onclick="window.editSelectedColor='rose'; updateEditColorSelection()" class="w-6 h-6 bg-rose-500 border-2 ${evt.color==='rose'?'border-zinc-900 dark:border-white shadow-[2px_2px_0_rgba(0,0,0,1)] dark:shadow-[2px_2px_0_rgba(255,255,255,1)]':'border-transparent hover:border-zinc-400 dark:hover:border-zinc-600'} edit-color-btn transition-transform"></button>
-                            <button data-color="purple" onclick="window.editSelectedColor='purple'; updateEditColorSelection()" class="w-6 h-6 bg-purple-500 border-2 ${evt.color==='purple'?'border-zinc-900 dark:border-white shadow-[2px_2px_0_rgba(0,0,0,1)] dark:shadow-[2px_2px_0_rgba(255,255,255,1)]':'border-transparent hover:border-zinc-400 dark:hover:border-zinc-600'} edit-color-btn transition-transform"></button>
+                
+                <div class="px-6 md:px-8 pb-6">
+                    <textarea id="edit-detail-desc" class="hidden w-full h-48 bg-slate-50 dark:bg-zinc-950/50 rounded-2xl border border-slate-200 dark:border-zinc-800 p-4 text-sm text-slate-700 dark:text-slate-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 resize-none custom-scrollbar transition-all mt-4"></textarea>
+                    
+                    <div id="display-detail-desc" class="mt-4 max-h-64 overflow-y-auto custom-scrollbar pr-2">${window.beautifyNote(evt.details)}</div>
+                    
+                    <div id="edit-detail-colors" class="hidden mt-6 bg-slate-50 dark:bg-zinc-950/50 p-3 rounded-2xl border border-slate-200 dark:border-zinc-800 flex items-center gap-4 w-fit">
+                        <span class="text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Color</span>
+                        <div class="flex gap-2">
+                            <button data-color="indigo" onclick="window.editSelectedColor='indigo'; updateEditColorSelection()" class="w-6 h-6 rounded-full bg-indigo-500 border-2 edit-color-btn transition-all ${window.editSelectedColor==='indigo'?'ring-4 ring-indigo-500/20 scale-110 border-transparent':'border-transparent hover:border-slate-300'}"></button>
+                            <button data-color="emerald" onclick="window.editSelectedColor='emerald'; updateEditColorSelection()" class="w-6 h-6 rounded-full bg-emerald-500 border-2 edit-color-btn transition-all ${window.editSelectedColor==='emerald'?'ring-4 ring-emerald-500/20 scale-110 border-transparent':'border-transparent hover:border-slate-300'}"></button>
+                            <button data-color="amber" onclick="window.editSelectedColor='amber'; updateEditColorSelection()" class="w-6 h-6 rounded-full bg-amber-500 border-2 edit-color-btn transition-all ${window.editSelectedColor==='amber'?'ring-4 ring-amber-500/20 scale-110 border-transparent':'border-transparent hover:border-slate-300'}"></button>
+                            <button data-color="rose" onclick="window.editSelectedColor='rose'; updateEditColorSelection()" class="w-6 h-6 rounded-full bg-rose-500 border-2 edit-color-btn transition-all ${window.editSelectedColor==='rose'?'ring-4 ring-rose-500/20 scale-110 border-transparent':'border-transparent hover:border-slate-300'}"></button>
+                            <button data-color="violet" onclick="window.editSelectedColor='violet'; updateEditColorSelection()" class="w-6 h-6 rounded-full bg-violet-500 border-2 edit-color-btn transition-all ${window.editSelectedColor==='violet'||window.editSelectedColor==='purple'?'ring-4 ring-violet-500/20 scale-110 border-transparent':'border-transparent hover:border-slate-300'}"></button>
                         </div>
                     </div>
                 </div>
-                <div class="p-5 border-t-2 border-zinc-900 dark:border-zinc-100 bg-zinc-100 dark:bg-zinc-900 flex justify-end gap-3">
-                    <button id="btn-delete-event" onclick="deleteEvent('${evt.id}')" class="flex items-center gap-2 px-4 py-2 border border-rose-500 text-rose-600 hover:bg-rose-500 hover:text-white dark:hover:bg-rose-600 dark:hover:text-white font-montserrat font-bold text-xs uppercase tracking-wider transition-colors">
-                        <i class="fa-solid fa-trash"></i> Delete
+                
+                <div class="p-6 md:p-8 pt-4 border-t border-slate-100 dark:border-zinc-800 flex justify-end gap-3 bg-slate-50/50 dark:bg-zinc-900/20">
+                    <button id="btn-delete-event" onclick="deleteEvent('${evt.id}')" class="px-4 py-2 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 font-semibold text-sm transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-trash-can"></i> Delete
                     </button>
-                    <button id="btn-edit-event" onclick="toggleEditEventMode()" class="flex items-center gap-2 px-4 py-2 border border-zinc-900 dark:border-white text-zinc-900 dark:text-white hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black font-montserrat font-bold text-xs uppercase tracking-wider transition-colors shadow-[2px_2px_0_rgba(0,0,0,1)] dark:shadow-[2px_2px_0_rgba(255,255,255,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none">
+                    <button id="btn-edit-event" onclick="toggleEditEventMode()" class="px-5 py-2 rounded-xl bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 text-slate-800 dark:text-white font-semibold text-sm transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-pen"></i> Edit
                     </button>
-                    <button id="btn-save-event" onclick="saveEditedEvent('${evt.id}', ${w}, ${d})" class="hidden items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-montserrat font-bold text-xs uppercase tracking-wider transition-colors shadow-[2px_2px_0_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none border border-zinc-900">
-                        <i class="fa-solid fa-floppy-disk"></i> Save
+                    <button id="btn-save-event" onclick="saveEditedEvent('${evt.id}', ${w}, ${d})" class="hidden px-6 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm transition-colors shadow-md shadow-emerald-500/20 items-center gap-2">
+                        <i class="fa-solid fa-check"></i> Save Changes
                     </button>
                 </div>
             `;
@@ -566,12 +610,14 @@
 
         window.updateEditColorSelection = () => {
             document.querySelectorAll('.edit-color-btn').forEach(btn => {
-                if (btn.dataset.color === window.editSelectedColor) {
-                    btn.classList.add('border-zinc-900', 'dark:border-white', 'shadow-[2px_2px_0_rgba(0,0,0,1)]', 'dark:shadow-[2px_2px_0_rgba(255,255,255,1)]');
-                    btn.classList.remove('border-transparent');
+                let colorBase = btn.dataset.color;
+                let isActive = colorBase === window.editSelectedColor || (colorBase === 'violet' && window.editSelectedColor === 'purple');
+                
+                if (isActive) {
+                    btn.classList.add(`ring-4`, `ring-${colorBase}-500/20`, `scale-110`);
+                    btn.classList.remove('border-slate-300', 'dark:border-zinc-600', 'hover:border-slate-300');
                 } else {
-                    btn.classList.remove('border-zinc-900', 'dark:border-white', 'shadow-[2px_2px_0_rgba(0,0,0,1)]', 'dark:shadow-[2px_2px_0_rgba(255,255,255,1)]');
-                    btn.classList.add('border-transparent');
+                    btn.className = `w-6 h-6 rounded-full bg-${colorBase}-500 border-2 edit-color-btn transition-all border-transparent hover:border-slate-300 dark:hover:border-zinc-600`;
                 }
             });
         };
@@ -601,13 +647,14 @@
 
         window.selectColor = (color) => {
             window.selectedColor = color;
-            document.querySelectorAll('.color-btn').forEach(btn => {
+            document.querySelectorAll('#modal-add-event .color-btn').forEach(btn => {
+                let base = color;
                 if (btn.classList.contains(`bg-${color}-500`)) {
-                    btn.classList.add('border-zinc-900', 'dark:border-white', 'shadow-[2px_2px_0_rgba(0,0,0,1)]', 'dark:shadow-[2px_2px_0_rgba(255,255,255,1)]');
-                    btn.classList.remove('border-transparent');
+                    btn.classList.add('ring-4', `ring-${color}-500/20`, 'scale-110');
+                    btn.classList.remove('border-slate-300', 'dark:border-zinc-600', 'hover:border-slate-300');
                 } else {
-                    btn.classList.remove('border-zinc-900', 'dark:border-white', 'shadow-[2px_2px_0_rgba(0,0,0,1)]', 'dark:shadow-[2px_2px_0_rgba(255,255,255,1)]');
-                    btn.classList.add('border-transparent');
+                    const bgClass = Array.from(btn.classList).find(c => c.startsWith('bg-') && c.endsWith('-500'));
+                    btn.className = `w-6 h-6 rounded-full ${bgClass} border-2 border-transparent hover:border-slate-300 dark:hover:border-zinc-600 color-btn transition-all`;
                 }
             });
         };
@@ -650,20 +697,6 @@
             });
         };
 
-        window.toggleAccordion = (contentId, chevronId) => {
-            const content = document.getElementById(contentId);
-            const chevron = document.getElementById(chevronId);
-            if (content.classList.contains('grid-rows-[0fr]')) {
-                content.classList.remove('grid-rows-[0fr]');
-                content.classList.add('grid-rows-[1fr]');
-                chevron.classList.replace('fa-chevron-down', 'fa-chevron-up');
-            } else {
-                content.classList.add('grid-rows-[0fr]');
-                content.classList.remove('grid-rows-[1fr]');
-                chevron.classList.replace('fa-chevron-up', 'fa-chevron-down');
-            }
-        };
-
         const loadTodosFromFirebase = () => {
             if (unsubscribeTodos) unsubscribeTodos();
             unsubscribeTodos = onSnapshot(doc(db, "timetables", `2026_Term3_Week${window.activeTodoWeek}`), (docSnap) => {
@@ -675,49 +708,22 @@
         const renderSidebarTodos = () => {
             const list = document.getElementById('sidebar-todos-list');
             if (window.todosData.length === 0) {
-                list.innerHTML = `<div class="flex flex-col items-center justify-center py-8 text-zinc-400 dark:text-zinc-600 opacity-0 group-hover/sidebar:opacity-100 md:opacity-100 transition-opacity"><i class="fa-solid fa-list-check text-2xl mb-3"></i><p class="text-[10px] font-Outfit font-bold uppercase tracking-widest">All Clear</p></div>`;
+                list.innerHTML = `<div class="flex flex-col items-center justify-center py-6 text-slate-400 dark:text-zinc-600"><div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center mb-2"><i class="fa-solid fa-check-double text-base"></i></div><p class="text-[10px] font-semibold uppercase tracking-widest">All caught up</p></div>`;
                 return;
             }
 
-            // Defines colorful background and border rotation dynamically for high-contrast aesthetic 
-            const getTodoStyles = (idx, isDone) => {
-                const colors = ['cyan', 'emerald', 'amber', 'rose', 'purple'];
-                const c = colors[idx % colors.length];
-                
-                if (isDone) {
-                    return {
-                        bg: 'bg-zinc-100 dark:bg-zinc-900/40 opacity-60',
-                        border: 'border border-zinc-200 dark:border-zinc-800 border-l-4 border-l-zinc-300 dark:border-l-zinc-700',
-                        text: 'text-zinc-500 dark:text-zinc-500',
-                        check: 'border-zinc-300 dark:border-zinc-700 bg-zinc-200 dark:bg-zinc-800',
-                        icon: 'text-zinc-400 dark:text-zinc-600'
-                    };
-                }
-                
-                const styles = {
-                    'cyan': { bg: 'bg-cyan-50 dark:bg-cyan-900/20', border: 'border border-cyan-200 dark:border-cyan-800/50 border-l-4 border-l-cyan-500 shadow-sm', text: 'text-zinc-900 dark:text-zinc-100', check: 'border-cyan-400 dark:border-cyan-600 hover:border-cyan-500 bg-white dark:bg-zinc-950', icon: 'text-cyan-600 dark:text-cyan-400' },
-                    'emerald': { bg: 'bg-emerald-50 dark:bg-emerald-900/20', border: 'border border-emerald-200 dark:border-emerald-800/50 border-l-4 border-l-emerald-500 shadow-sm', text: 'text-zinc-900 dark:text-zinc-100', check: 'border-emerald-400 dark:border-emerald-600 hover:border-emerald-500 bg-white dark:bg-zinc-950', icon: 'text-emerald-600 dark:text-emerald-400' },
-                    'amber': { bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border border-amber-200 dark:border-amber-800/50 border-l-4 border-l-amber-500 shadow-sm', text: 'text-zinc-900 dark:text-zinc-100', check: 'border-amber-400 dark:border-amber-600 hover:border-amber-500 bg-white dark:bg-zinc-950', icon: 'text-amber-600 dark:text-amber-500' },
-                    'rose': { bg: 'bg-rose-50 dark:bg-rose-900/20', border: 'border border-rose-200 dark:border-rose-800/50 border-l-4 border-l-rose-500 shadow-sm', text: 'text-zinc-900 dark:text-zinc-100', check: 'border-rose-400 dark:border-rose-600 hover:border-rose-500 bg-white dark:bg-zinc-950', icon: 'text-rose-600 dark:text-rose-400' },
-                    'purple': { bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'border border-purple-200 dark:border-purple-800/50 border-l-4 border-l-purple-500 shadow-sm', text: 'text-zinc-900 dark:text-zinc-100', check: 'border-purple-400 dark:border-purple-600 hover:border-purple-500 bg-white dark:bg-zinc-950', icon: 'text-purple-600 dark:text-purple-400' }
-                };
-                return styles[c];
-            };
-
             list.innerHTML = window.todosData.map((todo, idx) => {
-                const s = getTodoStyles(idx, todo.done);
-                // Minimized gap/padding, shrunk text slightly for tighter density
                 return `
-                <div class="group relative flex items-start gap-2.5 px-2.5 py-1.5 ${s.bg} ${s.border} transition-all duration-300 w-full shrink-0">
+                <div class="group relative flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-colors w-full shrink-0">
                     <input type="checkbox" id="todo-${idx}" class="peer sr-only todo-checkbox" ${todo.done ? 'checked' : ''} onchange="toggleTodo(${idx}, this.checked)">
-                    <div class="relative w-3.5 h-3.5 border-2 ${s.check} transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 mt-[2px]" onclick="document.getElementById('todo-${idx}').click()">
-                        <i class="fa-solid fa-check ${s.icon} text-[9px] scale-0 opacity-0 check-icon transition-all duration-200"></i>
+                    <div class="relative w-4 h-4 rounded-full border border-slate-300 dark:border-zinc-700 peer-checked:border-emerald-500 peer-checked:bg-emerald-500 transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 mt-0.5" onclick="document.getElementById('todo-${idx}').click()">
+                        <i class="fa-solid fa-check text-white text-[8px] scale-0 opacity-0 check-icon transition-all duration-200"></i>
                     </div>
-                    <label for="todo-${idx}" class="flex-1 min-w-0 text-xs font-outfit ${s.text} peer-checked:line-through cursor-pointer leading-tight pr-6">
+                    <label for="todo-${idx}" class="flex-1 min-w-0 text-xs font-medium ${todo.done ? 'text-slate-400 dark:text-zinc-600 line-through decoration-slate-300 dark:decoration-zinc-700' : 'text-slate-700 dark:text-slate-300'} cursor-pointer leading-snug pr-5 transition-all duration-300">
                         ${todo.text}
                     </label>
-                    <button onclick="deleteTodo(${idx})" class="absolute right-1.5 top-1.5 w-5 h-5 flex items-center justify-center text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-all duration-300 shrink-0">
-                        <i class="fa-solid fa-xmark text-sm"></i>
+                    <button onclick="deleteTodo(${idx})" class="absolute right-2 top-2.5 w-5 h-5 rounded flex items-center justify-center text-slate-400 dark:text-zinc-600 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/20 opacity-0 group-hover:opacity-100 transition-all duration-200 shrink-0">
+                        <i class="fa-solid fa-xmark text-xs"></i>
                     </button>
                 </div>
                 `;
@@ -730,21 +736,18 @@
             const btn = document.getElementById('show-todo-input-btn');
             
             if (container.classList.contains('grid-rows-[0fr]')) {
-                container.classList.remove('grid-rows-[0fr]', 'opacity-0');
-                container.classList.add('grid-rows-[1fr]', 'opacity-100');
-                btn.innerHTML = '<i class="fa-solid fa-xmark text-[10px]"></i> Close';
-                btn.classList.replace('bg-cyan-100', 'bg-zinc-200');
-                btn.classList.replace('dark:bg-cyan-900/30', 'dark:bg-zinc-800');
-                btn.classList.replace('border-cyan-300', 'border-zinc-300');
-                btn.classList.replace('dark:border-cyan-700', 'dark:border-zinc-700');
-                btn.classList.replace('text-cyan-700', 'text-zinc-700');
-                btn.classList.replace('dark:text-cyan-400', 'dark:text-zinc-300');
+                container.classList.remove('grid-rows-[0fr]');
+                container.classList.add('grid-rows-[1fr]');
+                btn.innerHTML = '<i class="fa-solid fa-xmark text-[10px]"></i>';
+                btn.classList.add('bg-slate-200', 'text-slate-600', 'rotate-90', 'border-transparent');
+                btn.classList.remove('hover:border-emerald-500', 'hover:bg-emerald-500', 'hover:text-white', 'bg-white', 'dark:bg-zinc-800');
                 setTimeout(() => input.focus(), 300);
             } else {
-                container.classList.add('grid-rows-[0fr]', 'opacity-0');
-                container.classList.remove('grid-rows-[1fr]', 'opacity-100');
-                btn.innerHTML = '<i class="fa-solid fa-plus text-[10px]"></i> Add';
-                btn.className = "text-[9px] font-montserrat font-bold text-cyan-700 hover:text-white dark:text-cyan-400 dark:hover:text-black bg-cyan-100 hover:bg-cyan-600 dark:bg-cyan-900/30 dark:hover:bg-cyan-400 px-3 py-1.5 transition-colors border border-cyan-300 dark:border-cyan-700 flex items-center gap-1.5 uppercase tracking-wider";
+                container.classList.add('grid-rows-[0fr]');
+                container.classList.remove('grid-rows-[1fr]');
+                btn.innerHTML = '<i class="fa-solid fa-plus text-[10px]"></i>';
+                btn.classList.remove('bg-slate-200', 'text-slate-600', 'rotate-90', 'border-transparent');
+                btn.classList.add('hover:border-emerald-500', 'hover:bg-emerald-500', 'hover:text-white', 'bg-white', 'dark:bg-zinc-800');
                 input.value = '';
             }
         };
@@ -777,14 +780,27 @@
             const icons = document.querySelectorAll('.theme-icon-class');
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark');
-                icons.forEach(icon => icon.classList.replace('fa-circle-half-stroke', 'fa-circle-half-stroke')); // Visual feedback
+                icons.forEach(icon => icon.classList.replace('fa-sun', 'fa-moon')); 
                 localStorage.theme = 'light';
             } else {
                 html.classList.add('dark');
-                icons.forEach(icon => icon.classList.replace('fa-circle-half-stroke', 'fa-circle-half-stroke'));
+                icons.forEach(icon => icon.classList.replace('fa-moon', 'fa-sun'));
                 localStorage.theme = 'dark';
             }
         };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            const icons = document.querySelectorAll('.theme-icon-class');
+            icons.forEach(icon => {
+                if(isDark) icon.classList.replace('fa-moon', 'fa-sun');
+            });
+            
+            // Enter key handler for todos input
+            document.getElementById('new-todo-input').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') window.addTodo();
+            });
+        });
 
         if (localStorage.theme === 'light' || (!('theme' in localStorage) && !window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.remove('dark');
