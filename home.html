@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Using Inter for UI, Outfit for Headers, creating a very modern feel -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script>
@@ -21,7 +20,7 @@
                         outfit: ['Outfit', 'sans-serif'], 
                     },
                     gridTemplateColumns: {
-                        'term': '3rem repeat(5, minmax(0, 1fr))', /* Slightly tighter week column */
+                        'term': '3rem repeat(5, minmax(0, 1fr))',
                     },
                     colors: {
                         background: 'rgb(var(--color-background) / <alpha-value>)',
@@ -35,20 +34,20 @@
     
     <style>
         :root {
-            --color-background: 248 250 252; /* slate-50 */
+            --color-background: 248 250 252;
             --color-surface: 255 255 255;
-            --color-border: 226 232 240; /* slate-200 */
+            --color-border: 226 232 240;
         }
         
         .dark {
-            --color-background: 9 9 11; /* zinc-950 */
-            --color-surface: 24 24 27; /* zinc-900 */
-            --color-border: 39 39 42; /* zinc-800 */
+            --color-background: 9 9 11;
+            --color-surface: 24 24 27;
+            --color-border: 39 39 42;
         }
 
         body { 
             font-family: 'Inter', sans-serif; 
-            overflow: hidden; /* Strict no scroll on body */
+            overflow: hidden;
             margin: 0; 
             padding: 0;
             width: 100vw; 
@@ -64,7 +63,6 @@
             color: #f4f4f5;
         }
 
-        /* Ambient glowing background effect - Emerald/Teal */
         .ambient-bg {
             position: absolute;
             inset: 0;
@@ -105,7 +103,6 @@
             100% { transform: translate(50px, 30px) scale(1.1); }
         }
 
-        /* Modern Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { 
@@ -114,11 +111,9 @@
         }
         ::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.6); }
 
-        /* Hide scrollbar for internal cells */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Glassmorphism utilities */
         .glass {
             background: rgba(var(--color-surface) / 0.7);
             backdrop-filter: blur(16px);
@@ -126,7 +121,6 @@
             border: 1px solid rgba(var(--color-border) / 0.5);
         }
 
-        /* Checkbox animation - Emerald */
         .todo-checkbox:checked + div .check-icon {
             transform: scale(1);
             opacity: 1;
@@ -136,11 +130,9 @@
             border-color: #10b981;
         }
 
-        /* Hide elements dynamically */
         .grid-rows-0 { grid-template-rows: 0fr; }
         .grid-rows-1 { grid-template-rows: 1fr; }
         
-        /* Smooth inputs */
         input:focus, textarea:focus { outline: none; }
     </style>
 </head>
@@ -148,10 +140,7 @@
     <div class="ambient-bg"></div>
     <div id="toast-container" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none font-sans"></div>
 
-    <!-- Redesigned Sidebar: Clean, sharp, card-based aesthetic -->
     <aside class="relative z-10 w-full md:w-72 flex flex-col glass rounded-2xl shadow-xl overflow-hidden shrink-0 transition-all duration-300 h-auto md:h-full group/sidebar">
-        
-        <!-- Header -->
         <div class="p-4 pb-2 flex justify-between items-center shrink-0 relative z-10">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-xl bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900 shadow-md">
@@ -169,8 +158,6 @@
         </div>
 
         <div class="flex-1 overflow-y-auto px-4 pb-3 flex flex-col gap-5 relative z-10 mt-2">
-            
-            <!-- Quick Links / Toolkit -> Individual clean floating cards -->
             <div class="flex flex-col gap-2">
                 <div class="px-1 text-[10px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-wider mb-0.5">Teacher Toolkit</div>
                 
@@ -193,7 +180,6 @@
                 </a>
             </div>
 
-            <!-- Todos Section -> Solid clean card -->
             <div class="flex-1 flex flex-col min-h-0 bg-white/90 dark:bg-black/20 rounded-2xl border border-slate-200/80 dark:border-white/5 shadow-sm overflow-hidden">
                 <div class="px-4 py-3 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50/50 dark:bg-white/5 shrink-0">
                     <span class="text-[10px] font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
@@ -221,7 +207,6 @@
             </div>
         </div>
 
-        <!-- Sidebar Actions -->
         <div class="p-4 pt-0 mt-auto flex gap-3 shrink-0 relative z-10">
             <a href="https://paulpbou.github.io/timetable-hub/index.html#start-day" class="flex-1 py-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-md hover:shadow-lg group border border-slate-800 dark:border-white/20">
                 <i class="fa-solid fa-bolt text-emerald-400 dark:text-emerald-600 group-hover:animate-pulse"></i> Start Day
@@ -232,15 +217,12 @@
         </div>
     </aside>
 
-    <!-- Main Term Grid Container -->
     <main class="relative z-10 flex-1 flex flex-col glass rounded-2xl shadow-xl overflow-hidden min-w-0 h-[calc(100vh-1rem)] md:h-full">
         
-        <!-- Headers -->
         <div class="grid grid-cols-term gap-3 shrink-0 border-b border-slate-200/50 dark:border-zinc-800/50 bg-white/50 dark:bg-zinc-900/50">
             <div class="flex items-center justify-center py-2 border-r border-slate-200/50 dark:border-zinc-800/50">
                 <span class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Wk</span>
             </div>
-            <!-- Condensed header height -->
             <div class="py-2 flex items-center justify-center text-xs font-outfit font-bold text-slate-800 dark:text-slate-200">Monday</div>
             <div class="py-2 flex items-center justify-center text-xs font-outfit font-bold text-slate-800 dark:text-slate-200">Tuesday</div>
             <div class="py-2 flex items-center justify-center text-xs font-outfit font-bold text-slate-800 dark:text-slate-200">Wednesday</div>
@@ -248,7 +230,6 @@
             <div class="py-2 flex items-center justify-center text-xs font-outfit font-bold text-slate-800 dark:text-slate-200">Friday</div>
         </div>
 
-        <!-- Grid Body -->
         <div class="flex-1 overflow-hidden py-3 px-2 custom-scrollbar bg-slate-50/60 dark:bg-[#131315]">
             <div class="grid grid-rows-10 gap-2 h-full min-h-0" id="term-grid">
                 <!-- Injected via JS -->
@@ -258,8 +239,8 @@
 
     <!-- Add Event Modal -->
     <div id="modal-add-event" class="hidden fixed inset-0 z-[150] items-center justify-center p-4 bg-slate-900/40 dark:bg-black/60 backdrop-blur-md transition-opacity">
-        <div class="bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-zinc-800">
-            <div class="flex justify-between items-center p-6 border-b border-slate-100 dark:border-zinc-800">
+        <div class="bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl w-full max-w-md h-full flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-zinc-800">
+            <div class="flex justify-between items-center p-6 border-b border-slate-100 dark:border-zinc-800 shrink-0">
                 <div>
                     <h3 class="text-xl font-outfit font-bold text-slate-900 dark:text-white" id="modal-add-title">Week 1 - Monday</h3>
                     <p class="text-xs font-medium text-emerald-500 uppercase tracking-wider mt-1">New Event</p>
@@ -267,16 +248,23 @@
                 <button onclick="closeModals()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <div class="p-6 space-y-6">
-                <div>
+            <div class="p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-6">
+                <div class="shrink-0">
                     <input type="text" id="new-event-title" placeholder="Event Title" class="w-full bg-transparent border-none px-0 py-2 text-2xl font-outfit font-bold text-slate-900 dark:text-white placeholder:text-slate-300 dark:placeholder:text-zinc-600 focus:ring-0" />
                 </div>
                 
-                <div>
-                    <textarea id="new-event-details" placeholder="Add notes, links, or lists (start line with '-')..." class="w-full bg-slate-50 dark:bg-zinc-950/50 rounded-2xl border border-slate-200 dark:border-zinc-800 p-4 text-sm text-slate-700 dark:text-slate-300 h-32 resize-none custom-scrollbar focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"></textarea>
+                <div class="flex-1 flex flex-col min-h-0 relative">
+                    <textarea id="new-event-details" onpaste="window.handlePasteEvent(event, 'new-event-details')" placeholder="Add notes, links, lists... (Paste images directly here with Ctrl+V)" class="w-full flex-1 bg-slate-50 dark:bg-zinc-950/50 rounded-2xl border border-slate-200 dark:border-zinc-800 p-4 pb-12 text-sm text-slate-700 dark:text-slate-300 resize-none custom-scrollbar focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"></textarea>
+                    
+                    <div class="absolute bottom-3 right-3 flex gap-2">
+                        <button type="button" onclick="document.getElementById('new-event-file').click()" class="w-8 h-8 rounded-lg bg-white dark:bg-zinc-800 shadow-sm border border-slate-200 dark:border-zinc-700 text-slate-500 hover:text-emerald-500 hover:border-emerald-500 transition-all flex items-center justify-center" title="Upload Image">
+                            <i class="fa-solid fa-image"></i>
+                        </button>
+                        <input type="file" id="new-event-file" class="hidden" accept="image/*" onchange="window.handleFileInput(this, 'new-event-details')">
+                    </div>
                 </div>
 
-                <div class="flex items-center gap-4 bg-slate-50 dark:bg-zinc-950/50 p-3 rounded-2xl border border-slate-200 dark:border-zinc-800 w-fit">
+                <div class="flex items-center gap-4 bg-slate-50 dark:bg-zinc-950/50 p-3 rounded-2xl border border-slate-200 dark:border-zinc-800 w-fit shrink-0">
                     <span class="text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Color</span>
                     <div class="flex gap-2" id="color-picker">
                         <button onclick="selectColor('indigo')" class="w-6 h-6 rounded-full bg-indigo-500 ring-4 ring-indigo-500/20 color-btn transition-all scale-110"></button>
@@ -288,15 +276,15 @@
                 </div>
             </div>
 
-            <div class="p-6 pt-0 mt-2">
-                <button onclick="submitNewEvent()" class="w-full rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3.5 text-sm transition-all shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2"><i class="fa-solid fa-check"></i> Create Event</button>
+            <div class="p-6 pt-0 mt-auto shrink-0 border-t border-slate-100 dark:border-zinc-800/50 bg-slate-50/50 dark:bg-zinc-950/30 flex justify-end">
+                <button onclick="submitNewEvent()" class="w-full mt-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3.5 text-sm transition-all shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2"><i class="fa-solid fa-check"></i> Create Event</button>
             </div>
         </div>
     </div>
 
     <!-- Event Detail & Edit Modal -->
     <div id="modal-event-detail" class="hidden fixed inset-0 z-[160] items-center justify-center p-4 bg-slate-900/40 dark:bg-black/60 backdrop-blur-md transition-opacity">
-        <div class="bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-zinc-800" id="detail-modal-container">
+        <div class="bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl w-full max-w-lg h-full flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-zinc-800" id="detail-modal-container">
             <!-- Injected dynamically -->
         </div>
     </div>
@@ -305,6 +293,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCEGrh2SIC20vJj_nLm4x34ok01srxip7I",
@@ -318,31 +307,32 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
 
         // Core Time Logic
         window.getCurrentSchoolTime = () => {
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    const term3Start = new Date(2026, 6, 20); // July 20, 2026
-    let weekNum = 0, curDay = 'Monday', isTerm3 = false;
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            const term3Start = new Date(2026, 6, 20); // July 20, 2026
+            let weekNum = 0, curDay = 'Monday', isTerm3 = false;
 
-    if (now >= term3Start) {
-        const daysDiff = Math.floor((now - term3Start) / (1000 * 60 * 60 * 24));
-        weekNum = Math.floor(daysDiff / 7) + 1;
-        if(weekNum >= 1 && weekNum <= 10) isTerm3 = true;
-    }
+            if (now >= term3Start) {
+                const daysDiff = Math.floor((now - term3Start) / (1000 * 60 * 60 * 24));
+                weekNum = Math.floor(daysDiff / 7) + 1;
+                if(weekNum >= 1 && weekNum <= 10) isTerm3 = true;
+            }
 
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    curDay = days[now.getDay()];
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            curDay = days[now.getDay()];
 
-    // Fast-forward to next week's Monday on weekends to match index.html
-    if (curDay === 'Saturday' || curDay === 'Sunday' || curDay === 'Friday') {
-        curDay = 'Monday';
-        weekNum += 1;
-    }
+            // Fast-forward to next week's Monday on weekends
+            if (curDay === 'Saturday' || curDay === 'Sunday' || curDay === 'Friday') {
+                curDay = 'Monday';
+                weekNum += 1;
+            }
 
-    return { isTerm3, week: weekNum, day: curDay };
-};
+            return { isTerm3, week: weekNum, day: curDay };
+        };
 
         const schoolTime = window.getCurrentSchoolTime();
         window.currentWeekNum = schoolTime.isTerm3 ? schoolTime.week : -1;
@@ -383,6 +373,57 @@
             }, 3000);
         };
 
+        // --- IMAGE UPLOAD LOGIC ---
+        window.uploadImage = async (file, textareaId) => {
+            if (!file || !file.type.startsWith('image/')) return;
+            const textarea = document.getElementById(textareaId);
+            if (!textarea) return;
+
+            const placeholder = `\n[Uploading image...]\n`;
+            const start = textarea.selectionStart;
+            textarea.value = textarea.value.substring(0, start) + placeholder + textarea.value.substring(textarea.selectionEnd);
+            
+            showToast("Uploading image...");
+            
+            try {
+                // Generate a random path in storage
+                const fileName = `event_images/${Date.now()}_${Math.random().toString(36).substring(7)}`;
+                const storageRef = ref(storage, fileName);
+                
+                // Upload file
+                const snapshot = await uploadBytesResumable(storageRef, file);
+                const downloadURL = await getDownloadURL(snapshot.ref);
+                
+                // Replace placeholder with markdown image
+                textarea.value = textarea.value.replace(placeholder, `\n![Event Image](${downloadURL})\n`);
+                showToast("Image uploaded!");
+            } catch (err) {
+                console.error("Upload failed", err);
+                textarea.value = textarea.value.replace(placeholder, `\n[Image upload failed]\n`);
+                showToast("Failed to upload image.");
+            }
+        };
+
+        window.handlePasteEvent = (e, textareaId) => {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let index in items) {
+                const item = items[index];
+                if (item.kind === 'file' && item.type.startsWith('image/')) {
+                    e.preventDefault(); // Stop standard pasting of the blob string
+                    const file = item.getAsFile();
+                    window.uploadImage(file, textareaId);
+                }
+            }
+        };
+
+        window.handleFileInput = (inputElement, textareaId) => {
+            if (inputElement.files && inputElement.files[0]) {
+                window.uploadImage(inputElement.files[0], textareaId);
+                inputElement.value = ''; // Reset input
+            }
+        };
+
+        // --- RENDER LOGIC ---
         window.beautifyNote = (rawText) => {
             if (!rawText) return '<span class="italic text-slate-400 font-sans">No additional details provided.</span>';
             const lines = rawText.split('\n');
@@ -396,13 +437,27 @@
                     return;
                 }
 
-                const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)/gi;
-                let formattedText = text.replace(urlRegex, (url) => {
-                    let href = url.startsWith('http') ? url : 'https://' + url;
-                    return `<a href="${href}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-zinc-800 text-emerald-600 dark:text-emerald-400 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors text-xs font-medium shadow-sm"><i class="fa-solid fa-link text-[10px]"></i> Link</a>`;
-                });
+                // Check if the line contains a markdown image ![alt](url)
+                const imgRegex = /!\[.*?\]\((.*?)\)/g;
+                let hasImage = imgRegex.test(text);
+                let formattedText = text;
 
-                if (text.startsWith('-')) {
+                if (hasImage) {
+                    // Render image
+                    formattedText = text.replace(imgRegex, (match, url) => {
+                        return `<img src="${url}" class="max-w-full rounded-xl border border-slate-200 dark:border-zinc-700 shadow-sm my-2 max-h-[40vh] object-contain cursor-pointer hover:opacity-90 transition-opacity bg-slate-50 dark:bg-black/20" alt="Event Image" onclick="window.open('${url}', '_blank')" title="Click to view full size">`;
+                    });
+                } else {
+                    // Process normal URLs
+                    const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)/gi;
+                    formattedText = text.replace(urlRegex, (url) => {
+                        let href = url.startsWith('http') ? url : 'https://' + url;
+                        return `<a href="${href}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-zinc-800 text-emerald-600 dark:text-emerald-400 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors text-xs font-medium shadow-sm"><i class="fa-solid fa-link text-[10px]"></i> Link</a>`;
+                    });
+                }
+
+                // Process lists
+                if (text.startsWith('-') && !hasImage) {
                     if (!inList) { 
                         html += '<div class="mt-4 mb-4 bg-slate-50/50 dark:bg-zinc-950/30 rounded-2xl p-4 border border-slate-100 dark:border-zinc-800/50"><div class="space-y-3">'; 
                         inList = true; 
@@ -414,6 +469,7 @@
                     html += `<div class="text-sm text-slate-800 dark:text-slate-200 leading-relaxed">${formattedText}</div>`;
                 }
             });
+            
             if (inList) html += '</div></div>';
             html += '</div>';
             return html;
@@ -506,14 +562,12 @@
                         </div>
                     `;
 
-                    // Dynamic sizing based on number of events to prevent scrollbars
                     const numEvents = events.length;
                     let gapClass = "gap-[3px]";
                     if (numEvents === 3) gapClass = "gap-[2px]";
                     if (numEvents >= 4) gapClass = "gap-[1px]";
 
                     const eventsContainer = document.createElement('div');
-                    // Changed to overflow-hidden so scrollbars can never appear, allowing elements to flex shrink
                     eventsContainer.className = `flex-1 flex flex-col ${gapClass} min-h-0 overflow-hidden w-full h-full relative z-10`;
                     
                     events.forEach(evt => {
@@ -524,18 +578,16 @@
                         let textClass = "text-[9px]";
                         let dotClass = "w-1.5 h-1.5";
                         
-                        // Dynamically adjust padding, font size, and element size as it fills up
                         if (numEvents === 3) {
                             pyClass = "py-[2px]";
                             textClass = "text-[8px]";
                             dotClass = "w-1 h-1";
                         } else if (numEvents >= 4) {
-                            pyClass = "py-px"; // Equivalent to py-[1px]
+                            pyClass = "py-px"; 
                             textClass = "text-[7.5px]";
                             dotClass = "w-1 h-1";
                         }
                         
-                        // Added shrink and min-h-0 so the browser can squash them if vertically constrained
                         eventsContainer.innerHTML += `
                         <button onclick="openEventDetail('${evt.id}', ${w}, ${d})" class="w-full text-left px-1.5 ${pyClass} rounded-full border ${styleObj.pill} transition-all hover:scale-[1.02] flex items-center gap-1.5 group/evt shrink min-h-0">
                             <div class="${dotClass} rounded-full ${styleObj.dot} shrink-0 transition-all"></div>
@@ -556,7 +608,7 @@
             document.getElementById('new-event-title').value = '';
             document.getElementById('new-event-details').value = '';
             
-            selectColor('indigo'); // Keeping default event color as indigo to not mess with users existing event color habits
+            selectColor('indigo'); 
             
             const modal = document.getElementById('modal-add-event');
             modal.classList.remove('hidden');
@@ -577,7 +629,7 @@
             const container = document.getElementById('detail-modal-container');
             
             container.innerHTML = `
-                <div class="relative p-6 md:p-8 pb-4">
+                <div class="relative p-6 md:p-8 pb-4 shrink-0">
                     <div class="absolute top-8 left-8 w-3 h-3 rounded-full ${styleObj.dot} shadow-lg shadow-${styleObj.base}-500/40"></div>
                     
                     <div class="pl-6 pr-8">
@@ -589,12 +641,21 @@
                     <button onclick="closeModals()" class="absolute top-6 right-6 w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 
-                <div class="px-6 md:px-8 pb-6">
-                    <textarea id="edit-detail-desc" class="hidden w-full h-48 bg-slate-50 dark:bg-zinc-950/50 rounded-2xl border border-slate-200 dark:border-zinc-800 p-4 text-sm text-slate-700 dark:text-slate-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 resize-none custom-scrollbar transition-all mt-4"></textarea>
+                <div class="px-6 md:px-8 pb-6 flex-1 flex flex-col min-h-0 overflow-hidden">
                     
-                    <div id="display-detail-desc" class="mt-4 max-h-64 overflow-y-auto custom-scrollbar pr-2">${window.beautifyNote(evt.details)}</div>
+                    <div id="edit-detail-desc-container" class="hidden relative flex-1 flex flex-col min-h-0 mt-4">
+                        <textarea id="edit-detail-desc" onpaste="window.handlePasteEvent(event, 'edit-detail-desc')" class="flex-1 w-full bg-slate-50 dark:bg-zinc-950/50 rounded-2xl border border-slate-200 dark:border-zinc-800 p-4 pb-12 text-sm text-slate-700 dark:text-slate-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 resize-none custom-scrollbar transition-all"></textarea>
+                        <div class="absolute bottom-3 right-3 flex gap-2">
+                            <button type="button" onclick="document.getElementById('edit-event-file').click()" class="w-8 h-8 rounded-lg bg-white dark:bg-zinc-800 shadow-sm border border-slate-200 dark:border-zinc-700 text-slate-500 hover:text-emerald-500 hover:border-emerald-500 transition-all flex items-center justify-center" title="Upload Image">
+                                <i class="fa-solid fa-image"></i>
+                            </button>
+                            <input type="file" id="edit-event-file" class="hidden" accept="image/*" onchange="window.handleFileInput(this, 'edit-detail-desc')">
+                        </div>
+                    </div>
                     
-                    <div id="edit-detail-colors" class="hidden mt-6 bg-slate-50 dark:bg-zinc-950/50 p-3 rounded-2xl border border-slate-200 dark:border-zinc-800 flex items-center gap-4 w-fit">
+                    <div id="display-detail-desc" class="mt-4 flex-1 overflow-y-auto custom-scrollbar pr-2">${window.beautifyNote(evt.details)}</div>
+                    
+                    <div id="edit-detail-colors" class="hidden mt-6 bg-slate-50 dark:bg-zinc-950/50 p-3 rounded-2xl border border-slate-200 dark:border-zinc-800 shrink-0 items-center gap-4 w-fit">
                         <span class="text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Color</span>
                         <div class="flex gap-2">
                             <button data-color="indigo" onclick="window.editSelectedColor='indigo'; updateEditColorSelection()" class="w-6 h-6 rounded-full bg-indigo-500 border-2 edit-color-btn transition-all ${window.editSelectedColor==='indigo'?'ring-4 ring-indigo-500/20 scale-110 border-transparent':'border-transparent hover:border-slate-300'}"></button>
@@ -606,7 +667,7 @@
                     </div>
                 </div>
                 
-                <div class="p-6 md:p-8 pt-4 border-t border-slate-100 dark:border-zinc-800 flex justify-end gap-3 bg-slate-50/50 dark:bg-zinc-900/20">
+                <div class="p-6 md:p-8 pt-4 border-t border-slate-100 dark:border-zinc-800 flex justify-end gap-3 bg-slate-50/50 dark:bg-zinc-900/20 shrink-0">
                     <button id="btn-delete-event" onclick="deleteEvent('${evt.id}')" class="px-4 py-2 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 font-semibold text-sm transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-trash-can"></i> Delete
                     </button>
@@ -618,6 +679,10 @@
                     </button>
                 </div>
             `;
+            
+            // Re-populate text area just in case it wasn't caught in the dynamic HTML building
+            document.getElementById('edit-detail-desc').value = evt.details;
+            
             document.getElementById('modal-event-detail').classList.remove('hidden');
             document.getElementById('modal-event-detail').classList.add('flex');
         };
@@ -626,7 +691,7 @@
             document.getElementById('display-detail-title').classList.add('hidden');
             document.getElementById('edit-detail-title').classList.remove('hidden');
             document.getElementById('display-detail-desc').classList.add('hidden');
-            document.getElementById('edit-detail-desc').classList.remove('hidden');
+            document.getElementById('edit-detail-desc-container').classList.remove('hidden');
             document.getElementById('edit-detail-colors').classList.remove('hidden');
             document.getElementById('edit-detail-colors').classList.add('flex');
             document.getElementById('btn-edit-event').classList.add('hidden');
@@ -823,7 +888,6 @@
                 if(isDark) icon.classList.replace('fa-moon', 'fa-sun');
             });
             
-            // Enter key handler for todos input
             document.getElementById('new-todo-input').addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') window.addTodo();
             });
