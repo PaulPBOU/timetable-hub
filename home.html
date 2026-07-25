@@ -321,21 +321,28 @@
 
         // Core Time Logic
         window.getCurrentSchoolTime = () => {
-            const now = new Date();
-            now.setHours(0, 0, 0, 0);
-            const term3Start = new Date(2026, 6, 20); // July 20, 2026
-            let weekNum = 0, curDay = 'Monday', isTerm3 = false;
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const term3Start = new Date(2026, 6, 20); // July 20, 2026
+    let weekNum = 0, curDay = 'Monday', isTerm3 = false;
 
-            if (now >= term3Start) {
-                const daysDiff = Math.floor((now - term3Start) / (1000 * 60 * 60 * 24));
-                weekNum = Math.floor(daysDiff / 7) + 1;
-                if(weekNum >= 1 && weekNum <= 10) isTerm3 = true;
-            }
+    if (now >= term3Start) {
+        const daysDiff = Math.floor((now - term3Start) / (1000 * 60 * 60 * 24));
+        weekNum = Math.floor(daysDiff / 7) + 1;
+        if(weekNum >= 1 && weekNum <= 10) isTerm3 = true;
+    }
 
-            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            curDay = days[now.getDay()];
-            return { isTerm3, week: weekNum, day: curDay };
-        };
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    curDay = days[now.getDay()];
+
+    // Fast-forward to next week's Monday on weekends to match index.html
+    if (curDay === 'Saturday' || curDay === 'Sunday' || curDay === 'Friday') {
+        curDay = 'Monday';
+        weekNum += 1;
+    }
+
+    return { isTerm3, week: weekNum, day: curDay };
+};
 
         const schoolTime = window.getCurrentSchoolTime();
         window.currentWeekNum = schoolTime.isTerm3 ? schoolTime.week : -1;
