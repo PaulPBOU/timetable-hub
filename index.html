@@ -289,11 +289,12 @@
                         <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400">Time / Duration</label>
                         <div class="flex gap-1.5">
                             <button onclick="setQuickEditDuration(15)" class="text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded font-bold hover:bg-cyan-500 hover:text-white transition-colors">15m</button>
+                            <button onclick="setQuickEditDuration(30)" class="text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded font-bold hover:bg-cyan-500 hover:text-white transition-colors">30m</button>
                             <button onclick="setQuickEditDuration(45)" class="text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded font-bold hover:bg-cyan-500 hover:text-white transition-colors">45m</button>
                             <button onclick="setQuickEditDuration(60)" class="text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded font-bold hover:bg-cyan-500 hover:text-white transition-colors">60m</button>
                         </div>
                     </div>
-                    <input id="edit-time" type="text" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500" />
+                    <input id="edit-time" type="text" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500 font-bold" />
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Subject / Header</label>
@@ -397,7 +398,7 @@
         <div class="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-2xl shadow-2xl w-full max-w-sm flex flex-col overflow-hidden">
             <div class="p-5 border-b border-slate-300 dark:border-slate-700 bg-rose-50 dark:bg-rose-900/20 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-rose-700 dark:text-rose-400 flex items-center"><i class="fa-solid fa-ban mr-2"></i> Cancel <span id="cancel-day-title" class="ml-1"></span></h3>
-                <button onclick="closeModals()" class="text-rose-500 hover:text-rose-800 dark:text-rose-400 dark:hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <button onclick="closeModals()" class="text-rose-500 hover:text-rose-800 dark:text-slate-400 dark:hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="p-5 space-y-4">
                 <div>
@@ -419,7 +420,6 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // *** YOUR REAL FIREBASE CONFIG ***
         const firebaseConfig = {
             apiKey: "AIzaSyCEGrh2SIC20vJj_nLm4x34ok01srxip7I",
             authDomain: "paul-s-2026.firebaseapp.com",
@@ -428,7 +428,6 @@
             messagingSenderId: "524167059781",
             appId: "1:524167059781:web:57347f46b29c9d4a49862c"
         };
-        // **********************************
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -442,13 +441,11 @@
             coverData: {}, 
             todosData: { Monday: [], Tuesday: [], Wednesday: [], Thursday: [] },
             soundPlayed: false,
-            // Populate Modal specific state
             newDayForm: [],
             addingDay: '',
             activeBlockIndex: 0
         };
 
-        // Time parsing helper
         window.parseTimeStrToMins = (tStr) => {
             if(!tStr) return 0;
             const match = tStr.trim().match(/(\d+):(\d+)\s*(am|pm)/i);
@@ -484,32 +481,6 @@
         window.setQuickEditDuration = (mins) => {
             const timeInput = document.getElementById('edit-time');
             timeInput.value = calculateNewTimeString(timeInput.value, mins);
-        };
-
-        window.setPopulateDuration = (mins) => {
-            const idx = window.appState.activeBlockIndex;
-            let form = window.appState.newDayForm;
-            if(!form[idx]) return;
-
-            const newTime = calculateNewTimeString(form[idx].time, mins);
-            form[idx].time = newTime;
-            
-            // Cascade shift subsequent blocks up to the next break
-            let currentEnd = window.parseTimeStrToMins(newTime.split('-')[1]);
-            for(let i = idx + 1; i < form.length; i++) {
-                if(form[i].type === 'break') break; 
-                
-                const bParts = form[i].time.split('-');
-                const bStart = window.parseTimeStrToMins(bParts[0]);
-                const bEnd = window.parseTimeStrToMins(bParts[1]);
-                const bDur = (bEnd > bStart) ? (bEnd - bStart) : 40; 
-                
-                const newBStart = currentEnd;
-                const newBEnd = currentEnd + bDur;
-                form[i].time = `${window.formatMinsToTimeStr(newBStart)} - ${window.formatMinsToTimeStr(newBEnd)}`;
-                currentEnd = newBEnd;
-            }
-            renderPopulateUI();
         };
 
         window.toggleTheme = () => {
@@ -561,10 +532,10 @@
                     osc.start(ctx.currentTime + time);
                     osc.stop(ctx.currentTime + time + 0.5);
                 };
-                playOsc(523.25, 0.0); // C5
-                playOsc(659.25, 0.1); // E5
-                playOsc(783.99, 0.2); // G5
-                playOsc(1046.50, 0.3, 'triangle'); // C6
+                playOsc(523.25, 0.0);
+                playOsc(659.25, 0.1);
+                playOsc(783.99, 0.2);
+                playOsc(1046.50, 0.3, 'triangle');
             } catch(e) { console.log('Audio not supported', e); }
         };
 
@@ -1215,7 +1186,6 @@
                     } else { targetDay = days[curIdx - 1]; }
                 }
 
-                // Hide any open dropdowns after selection
                 document.querySelectorAll('.copy-dropdown').forEach(d => {
                     d.classList.add('hidden');
                     d.classList.remove('flex');
@@ -1318,7 +1288,6 @@
             }
         };
 
-        // NEW FEATURE: Add Lesson directly from standard views
         window.addLessonDirectly = (day) => {
             const data = [...(window.appState.weekData[day] || [])];
             let lastTimeStr = '2:30pm - 3:00pm';
@@ -1326,7 +1295,7 @@
                 lastTimeStr = data[data.length - 1].time;
             }
             let endPart = lastTimeStr.split('-')[1]?.trim() || '3:00pm';
-            let newEndMins = window.parseTimeStrToMins(endPart) + 30; // Default 30 min duration
+            let newEndMins = window.parseTimeStrToMins(endPart) + 30;
             let newTimeStr = `${endPart} - ${window.formatMinsToTimeStr(newEndMins)}`;
             
             data.push({
@@ -1353,8 +1322,6 @@
         window.deleteLesson = (day, idx, btn) => {
             if (btn.dataset.confirmed === "true") {
                 const currentData = [...window.appState.weekData[day]];
-                
-                // Splice out the entire lesson
                 currentData.splice(idx, 1);
                 
                 window.appState.weekData[day] = currentData;
@@ -1368,13 +1335,10 @@
                 
                 const modal = document.getElementById('modal-lesson-detail');
                 if (modal && !modal.classList.contains('hidden')) {
-                    // Close the detail view since the lesson is now gone
                     closeModals(); 
                 }
-                
                 showToast("Lesson deleted completely.");
             } else {
-                // First click: Request confirmation
                 btn.dataset.confirmed = "true";
                 const originalHTML = btn.innerHTML;
                 btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
@@ -1422,13 +1386,11 @@
                 };
             }
             
-            // Highlighted subject rules tailored exactly to screenshot
             if (lowerSub.startsWith('geography')) return { bar: 'bg-emerald-400 dark:bg-emerald-500/60', iconColor: 'text-emerald-500/80 dark:text-emerald-400/80', badgeBg: 'bg-emerald-50 dark:bg-emerald-900/30', badgeText: 'text-emerald-700 dark:text-emerald-300', badgeBorder: 'border-emerald-200/70 dark:border-emerald-700/50', weekCardBorder: 'border-l-[4px] border-l-emerald-400 dark:border-l-emerald-600', icon: 'fa-earth-americas', cardExtra: '', basicColor: 'emerald' };
             if (lowerSub.startsWith('assembly')) return { bar: 'bg-fuchsia-400 dark:bg-fuchsia-500/60', iconColor: 'text-fuchsia-500/80 dark:text-fuchsia-400/80', badgeBg: 'bg-fuchsia-50 dark:bg-fuchsia-900/30', badgeText: 'text-fuchsia-700 dark:text-fuchsia-300', badgeBorder: 'border-fuchsia-200/70 dark:border-fuchsia-700/50', weekCardBorder: 'border-l-[4px] border-l-fuchsia-400 dark:border-l-fuchsia-600', icon: 'fa-bullhorn', cardExtra: '', basicColor: 'fuchsia' };
             if (lowerSub.startsWith('scripture')) return { bar: 'bg-violet-400 dark:bg-violet-500/60', iconColor: 'text-violet-500/80 dark:text-violet-400/80', badgeBg: 'bg-violet-50 dark:bg-violet-900/30', badgeText: 'text-violet-700 dark:text-violet-300', badgeBorder: 'border-violet-200/70 dark:border-violet-700/50', weekCardBorder: 'border-l-[4px] border-l-violet-400 dark:border-l-violet-600', icon: 'fa-dove', cardExtra: '', basicColor: 'violet' };
             if (lowerSub.startsWith('leadership')) return { bar: 'bg-blue-400 dark:bg-blue-500/60', iconColor: 'text-blue-500/80 dark:text-blue-400/80', badgeBg: 'bg-blue-50 dark:bg-blue-900/30', badgeText: 'text-blue-700 dark:text-blue-300', badgeBorder: 'border-blue-200/70 dark:border-blue-700/50', weekCardBorder: 'border-l-[4px] border-l-blue-400 dark:border-l-blue-600', icon: 'fa-crown', cardExtra: '', basicColor: 'blue' };
 
-            // Standard rules
             if (lowerSub.includes('spelling') || lowerTopic.includes('spelling')) return { bar: 'bg-teal-400 dark:bg-teal-500/60', iconColor: 'text-teal-500/80 dark:text-teal-400/80', badgeBg: 'bg-teal-50 dark:bg-teal-900/30', badgeText: 'text-teal-700 dark:text-teal-300', badgeBorder: 'border-teal-200/70 dark:border-teal-700/50', weekCardBorder: 'border-l-[4px] border-l-teal-400 dark:border-l-teal-600', icon: 'fa-spell-check', cardExtra: '', basicColor: 'teal' };
             if (lowerSub.includes('shared reading') || lowerTopic.includes('shared reading')) return { bar: 'bg-cyan-300 dark:bg-cyan-500/40', iconColor: 'text-cyan-400/80 dark:text-cyan-500/70', badgeBg: 'bg-cyan-50/70 dark:bg-cyan-900/20', badgeText: 'text-cyan-600 dark:text-cyan-400', badgeBorder: 'border-cyan-100/70 dark:border-cyan-800/50', weekCardBorder: 'border-l-[4px] border-l-cyan-400 dark:border-l-cyan-600', icon: 'fa-book-open-reader', cardExtra: '', basicColor: 'cyan' };
             if (lowerSub.includes('daily write') || lowerTopic.includes('daily write')) return { bar: 'bg-blue-300 dark:bg-blue-500/40', iconColor: 'text-blue-400/80 dark:text-blue-500/70', badgeBg: 'bg-blue-50/70 dark:bg-blue-900/20', badgeText: 'text-blue-600 dark:text-blue-400', badgeBorder: 'border-blue-100/70 dark:border-blue-800/50', weekCardBorder: 'border-l-[4px] border-l-blue-400 dark:border-l-blue-600', icon: 'fa-pen-nib', cardExtra: '', basicColor: 'blue' };
@@ -1886,6 +1848,9 @@
         window.initEdit = (day, idx) => {
             window.appState.day = day; window.appState.editingBlock = { ...window.appState.weekData[day][idx], index: idx };
             document.getElementById('edit-badge').innerText = day + ' | ' + window.appState.editingBlock.time;
+            
+            // Fix: ensure the time is populated in the edit input
+            document.getElementById('edit-time').value = window.appState.editingBlock.time || '';
             document.getElementById('edit-subject').value = window.appState.editingBlock.subject || '';
             document.getElementById('edit-topic').value = window.appState.editingBlock.topic || '';
             document.getElementById('edit-outline').value = window.appState.editingBlock.unitOutlineLink || '';
@@ -1921,6 +1886,8 @@
             const idx = window.appState.editingBlock.index;
             const printInputs = Array.from(document.querySelectorAll('.edit-print-input')).map(inp => inp.value.trim()).filter(val => val !== '');
 
+            // Fix: ensure time input is saved
+            updated[idx].time = document.getElementById('edit-time').value;
             updated[idx].subject = document.getElementById('edit-subject').value;
             updated[idx].topic = document.getElementById('edit-topic').value;
             updated[idx].unitOutlineLink = document.getElementById('edit-outline').value;
@@ -1947,7 +1914,6 @@
         window.initAddDay = (day) => {
             window.appState.addingDay = day;
             
-            // Deep copy existing weekData for the day or generate skeleton
             const currentData = window.appState.weekData[day] || [];
             if (currentData.length > 0 && currentData[0].type !== 'cancelled') {
                 window.appState.newDayForm = currentData.map(b => JSON.parse(JSON.stringify(b)));
@@ -1971,7 +1937,6 @@
             const sidebarContainer = document.getElementById('populate-sidebar-list');
             const editorContainer = document.getElementById('populate-editor-panel');
             
-            // 1. Render Sidebar Timeline
             let sidebarHTML = '';
             form.forEach((block, idx) => {
                 if(block.type === 'break') {
@@ -1986,7 +1951,7 @@
                             ${isActive ? `<div class="absolute left-0 top-0 bottom-0 w-1 bg-${theme.basicColor}-500 rounded-l"></div>` : `<div class="absolute left-0 top-0 bottom-0 w-1 bg-${theme.basicColor}-300 dark:bg-${theme.basicColor}-700 rounded-l opacity-0 group-hover:opacity-100 transition-opacity"></div>`}
                             <div class="flex justify-between items-start pl-2">
                                 <div class="flex flex-col min-w-0 pr-2">
-                                    <div class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 mb-0.5"><i class="fa-regular fa-clock mr-1 opacity-70"></i>${block.time}</div>
+                                    <div id="pop-side-time-${idx}" class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 mb-0.5"><i class="fa-regular fa-clock mr-1 opacity-70"></i>${block.time}</div>
                                     <div id="pop-side-sub-${idx}" class="font-black text-sm md:text-base leading-tight truncate ${isActive ? `text-${theme.basicColor}-700 dark:text-${theme.basicColor}-300` : 'text-slate-700 dark:text-slate-200'}">${subLabel}</div>
                                 </div>
                                 <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isActive ? `bg-${theme.basicColor}-100 dark:bg-${theme.basicColor}-900/50 text-${theme.basicColor}-600 dark:text-${theme.basicColor}-400` : 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500'}">
@@ -1999,7 +1964,6 @@
             });
             sidebarContainer.innerHTML = sidebarHTML;
 
-            // 2. Render Editor Form
             const activeBlock = form[activeIdx];
             if (!activeBlock || activeBlock.type === 'break') {
                 editorContainer.innerHTML = `<div class="flex-1 flex flex-col items-center justify-center text-slate-400"><i class="fa-solid fa-mug-hot text-5xl mb-4"></i><p class="font-bold">Select a lesson block to edit.</p></div>`;
@@ -2009,7 +1973,6 @@
             const commonSubjects = ['English - Writing', 'English - Spelling', 'English - Shared Reading', 'Maths', 'History', 'Science', 'Geography', 'PDHPE', 'Creative Arts', 'Sport', 'RFF', 'Assembly', 'Scripture - Year 5', 'LEADERSHIP'];
             const subjectChipsHTML = commonSubjects.map(sub => `<button onclick="setPopulatePresetSubject('${sub}')" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-cyan-50 dark:hover:bg-cyan-900/30 text-slate-600 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 border border-slate-200 dark:border-slate-700 hover:border-cyan-300 dark:hover:border-cyan-700 transition-colors text-[10px] md:text-xs font-bold shadow-sm whitespace-nowrap">${sub}</button>`).join('');
 
-            // Identify Next Block
             let nextBlockIdx = -1;
             for(let i = activeIdx + 1; i < form.length; i++) {
                 if(form[i].type !== 'break') { nextBlockIdx = i; break; }
@@ -2020,28 +1983,28 @@
 
             editorContainer.innerHTML = `
                 <div class="mb-6 pb-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
-                    <div>
-                        <h2 class="text-2xl md:text-3xl font-black text-slate-800 dark:text-white leading-tight">Edit Lesson Details</h2>
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 mt-2 rounded-full bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 text-xs md:text-sm font-bold border border-cyan-200 dark:border-cyan-800/50"><i class="fa-regular fa-clock"></i> ${activeBlock.time}</span>
+                    <div class="w-full">
+                        <h2 class="text-2xl md:text-3xl font-black text-slate-800 dark:text-white leading-tight mb-3">Edit Lesson Details</h2>
+                        <div class="flex flex-col gap-1.5 w-full max-w-sm">
+                            <label class="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest"><i class="fa-regular fa-clock text-cyan-500 mr-1"></i> Time Slot</label>
+                            <input type="text" value="${activeBlock.time}" oninput="handlePopulateInput('time', this)" placeholder="e.g. 9:00am - 10:00am" class="w-full bg-cyan-50/50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800/50 rounded-xl px-4 py-2.5 text-sm md:text-base font-bold text-cyan-700 dark:text-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all shadow-sm" />
+                        </div>
                     </div>
                 </div>
 
                 <div class="space-y-6 md:space-y-8 flex-1">
                     
-                    <!-- Subject Section -->
                     <div class="space-y-3">
                         <label class="flex items-center text-sm font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest"><i class="fa-solid fa-book-open text-cyan-500 mr-2"></i> Subject</label>
                         <div class="flex flex-wrap gap-2 mb-3">${subjectChipsHTML}</div>
                         <input id="pop-sub-input" type="text" value="${activeBlock.subject}" oninput="handlePopulateInput('subject', this)" placeholder="e.g. Maths, English, Assembly..." class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-base text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all font-bold shadow-sm" />
                     </div>
 
-                    <!-- Topic Section -->
                     <div class="space-y-3">
                         <label class="flex items-center text-sm font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest"><i class="fa-solid fa-bullseye text-amber-500 mr-2"></i> Topic / Focus</label>
                         <input type="text" value="${activeBlock.topic}" oninput="handlePopulateInput('topic', this)" placeholder="What are we learning about?" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-base text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all shadow-sm" />
                     </div>
 
-                    <!-- Links Section -->
                     <div class="bg-slate-50/50 dark:bg-slate-800/30 p-5 rounded-2xl border border-slate-200 dark:border-slate-700/50 space-y-4">
                         <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center mb-2"><i class="fa-solid fa-link mr-1.5"></i> Digital Resources</h4>
                         
@@ -2070,7 +2033,6 @@
                         </div>
                     </div>
 
-                    <!-- Print Links Section -->
                     <div class="space-y-3">
                         <label class="flex justify-between items-center text-sm font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest"><span class="flex items-center"><i class="fa-solid fa-print text-pink-500 mr-2"></i> Print Materials</span></label>
                         <div id="populate-print-container" class="space-y-2.5 bg-slate-50/50 dark:bg-slate-800/30 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/50">
@@ -2080,7 +2042,6 @@
 
                 </div>
 
-                <!-- Footer Nav -->
                 <div class="mt-8 pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0">
                     <div class="flex items-center gap-4">
                         <div class="text-xs font-bold text-slate-400">Block ${form.filter(b => b.type !== 'break').indexOf(activeBlock) + 1} of ${form.filter(b => b.type !== 'break').length}</div>
@@ -2107,11 +2068,9 @@
             const sideLabel = document.getElementById(`pop-side-sub-${idx}`);
             if(sideLabel) sideLabel.innerText = sub;
             
-            // Re-render sidebar to apply new theme colors based on subject
             const sidebarContainer = document.getElementById('populate-sidebar-list');
             const scrollPos = sidebarContainer.parentElement.scrollTop;
             renderPopulateUI(); 
-            // restore scroll position after full re-render
             setTimeout(() => { document.getElementById('populate-sidebar-list').parentElement.scrollTop = scrollPos; }, 0);
         };
 
@@ -2123,6 +2082,10 @@
             if(field === 'subject') {
                 const sideLabel = document.getElementById(`pop-side-sub-${idx}`);
                 if(sideLabel) sideLabel.innerText = val || 'Empty Block';
+            } else if (field === 'time') {
+                // Instantly sync time field in the sidebar display
+                const sideTime = document.getElementById(`pop-side-time-${idx}`);
+                if (sideTime) sideTime.innerHTML = `<i class="fa-regular fa-clock mr-1 opacity-70"></i>${val}`;
             }
         };
 
@@ -2133,7 +2096,7 @@
             if(!container) return;
 
             let links = Array.isArray(block.printLink) ? block.printLink : [];
-            if(links.length === 0) links = ['']; // Show at least one empty input by default
+            if(links.length === 0) links = [''];
 
             container.innerHTML = links.map((link, i) => `
                 <div class="relative flex items-center">
@@ -2169,7 +2132,6 @@
             renderPopulatePrintLinks();
         };
         
-        // NEW FEATURE: Add block inside Day Builder Modal
         window.addPopulateBlock = () => {
             let form = window.appState.newDayForm;
             let lastTimeStr = '2:30pm - 3:00pm';
@@ -2196,11 +2158,10 @@
             renderPopulateUI();
         };
 
-        // NEW FEATURE: Delete block inside Day Builder Modal
         window.deletePopulateBlock = (idx) => {
             window.appState.newDayForm.splice(idx, 1);
             if (window.appState.newDayForm.length === 0) {
-                window.addPopulateBlock(); // ensure there is always at least one block to edit
+                window.addPopulateBlock(); 
                 return;
             }
             if (window.appState.activeBlockIndex >= window.appState.newDayForm.length) {
@@ -2213,7 +2174,6 @@
         };
 
         window.saveFullDay = () => {
-            // Clean up print links (remove empty ones)
             const cleanedForm = window.appState.newDayForm.map(b => {
                 if(b.type === 'break') return b;
                 const cleanedPrint = Array.isArray(b.printLink) ? b.printLink.filter(l => l.trim() !== '') : [];
