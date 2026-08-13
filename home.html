@@ -325,8 +325,8 @@
             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             curDay = days[now.getDay()];
 
-            // Fast-forward to next week's Monday on weekends
-            if (curDay === 'Saturday' || curDay === 'Sunday' || curDay === 'Friday') {
+            // Fast-forward to next week's Monday on weekends (Saturday/Sunday)
+            if (curDay === 'Saturday' || curDay === 'Sunday') {
                 curDay = 'Monday';
                 weekNum += 1;
             }
@@ -341,6 +341,7 @@
         window.activeTodoWeek = (window.currentWeekNum >= 1 && window.currentWeekNum <= 10) ? window.currentWeekNum : 1;
         window.activeTodoDay = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].includes(window.currentDayStr) ? window.currentDayStr : 'Monday';
         
+        window.allWeekTodos = {}; // Global tracker for all todos in the week to prevent overwriting
         window.todosData = [];
         let unsubscribeTodos = null;
         window.termEvents = {};
@@ -497,8 +498,8 @@
 
                 const curDocRef = doc(db, "timetables", `2026_Term3_Week${currentWeek}`);
                 const curSnap = await getDoc(curDocRef);
-                let currentTodos = [];
-                if (curSnap.exists() && curSnap.data().todos && curSnap.data().todos[currentDay]) currentTodos = curSnap.data().todos[currentDay];
+                let allCurrentWeekTodos = (curSnap.exists() && curSnap.data().todos) ? curSnap.data().todos : {};
+                let currentTodos = allCurrentWeekTodos[currentDay] || [];
 
                 let added = false;
                 undone.forEach(ut => {
@@ -508,7 +509,10 @@
                     }
                 });
 
-                if (added) await setDoc(curDocRef, { todos: { [currentDay]: currentTodos } }, { merge: true });
+                if (added) {
+                    allCurrentWeekTodos[currentDay] = currentTodos;
+                    await setDoc(curDocRef, { todos: allCurrentWeekTodos }, { merge: true });
+                }
             } catch (e) { console.error("Error carrying over todos:", e); }
         };
 
@@ -680,7 +684,6 @@
                 </div>
             `;
             
-            // Re-populate text area just in case it wasn't caught in the dynamic HTML building
             document.getElementById('edit-detail-desc').value = evt.details;
             
             document.getElementById('modal-event-detail').classList.remove('hidden');
@@ -792,7 +795,8 @@
         const loadTodosFromFirebase = () => {
             if (unsubscribeTodos) unsubscribeTodos();
             unsubscribeTodos = onSnapshot(doc(db, "timetables", `2026_Term3_Week${window.activeTodoWeek}`), (docSnap) => {
-                window.todosData = (docSnap.exists() && docSnap.data().todos) ? (docSnap.data().todos[window.activeTodoDay] || []) : [];
+                window.allWeekTodos = (docSnap.exists() && docSnap.data().todos) ? docSnap.data().todos : {};
+                window.todosData = window.allWeekTodos[window.activeTodoDay] || [];
                 renderSidebarTodos();
             });
         };
@@ -864,7 +868,8 @@
         };
 
         const saveTodosToFirebase = () => {
-            setDoc(doc(db, "timetables", `2026_Term3_Week${window.activeTodoWeek}`), { todos: { [window.activeTodoDay]: window.todosData } }, { merge: true });
+            window.allWeekTodos[window.activeTodoDay] = window.todosData;
+            setDoc(doc(db, "timetables", `2026_Term3_Week${window.activeTodoWeek}`), { todos: window.allWeekTodos }, { merge: true });
         };
 
         window.toggleTheme = () => {
@@ -916,3 +921,4 @@
     </script>
 </body>
 </html>
+```eof
