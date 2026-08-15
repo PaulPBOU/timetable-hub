@@ -87,10 +87,24 @@
     <div class="absolute filter blur-[100px] md:blur-[120px] z-0 opacity-40 dark:opacity-30 rounded-full w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-indigo-200 dark:bg-indigo-600 top-[-10%] left-[-10%] pointer-events-none transition-colors duration-300"></div>
     <div class="absolute filter blur-[100px] md:blur-[120px] z-0 opacity-40 dark:opacity-30 rounded-full w-[250px] md:w-[400px] h-[250px] md:h-[400px] bg-cyan-200 dark:bg-cyan-600 bottom-[-10%] right-[-5%] pointer-events-none transition-colors duration-300"></div>
 
-    <a href="learning_zone.html" class="fixed bottom-4 right-4 md:bottom-6 md:right-6 w-14 h-14 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full flex items-center justify-center transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] z-50 border border-emerald-400 group">
-        <i class="fa-solid fa-headphones text-xl"></i>
-        <span class="absolute right-16 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-emerald-200 dark:border-emerald-500/30 shadow-lg">Enter Learning Zone</span>
-    </a>
+   <!-- ... existing code ... -->
+    <div class="absolute filter blur-[100px] md:blur-[120px] z-0 opacity-40 dark:opacity-30 rounded-full w-[250px] md:w-[400px] h-[250px] md:h-[400px] bg-cyan-200 dark:bg-cyan-600 bottom-[-10%] right-[-5%] pointer-events-none transition-colors duration-300"></div>
+
+    <!-- Floating Action Buttons Dock -->
+    <div class="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 flex gap-3 md:gap-4">
+        <a href="https://paulpbou.github.io/timetable-hub/leaderboard.html" target="_blank" class="relative w-14 h-14 bg-amber-500 hover:bg-amber-400 text-white rounded-full flex items-center justify-center transition-all shadow-[0_0_15px_rgba(245,158,11,0.4)] hover:shadow-[0_0_25px_rgba(245,158,11,0.6)] border border-amber-400 group">
+            <i class="fa-solid fa-ranking-star text-xl"></i>
+            <span class="absolute right-16 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-amber-200 dark:border-amber-500/30 shadow-lg">Rewards Leaderboard</span>
+        </a>
+        
+        <a href="learning_zone.html" class="relative w-14 h-14 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full flex items-center justify-center transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] border border-emerald-400 group">
+            <i class="fa-solid fa-headphones text-xl"></i>
+            <span class="absolute right-16 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-emerald-200 dark:border-emerald-500/30 shadow-lg">Enter Learning Zone</span>
+        </a>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+<!-- ... existing code ... -->
 
     <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
