@@ -14,7 +14,9 @@
                 extend: {
                     fontFamily: {
                         'nunito': ['"Nunito"', 'sans-serif'],
-                        'display': ['"Fredoka One"', 'cursive']
+                        'display': ['"Outfit"', 'sans-serif'],
+                        'avatar': ['"Fredoka One"', 'cursive'],
+                        'montserrat': ['"Montserrat"', 'sans-serif']
                     },
                     animation: {
                         'float': 'float 3s ease-in-out infinite',
@@ -36,7 +38,7 @@
     </script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Montserrat:wght@800&family=Nunito:wght@400;700;900&family=Outfit:wght@700;900&display=swap');
         
         body {
             font-family: 'Nunito', sans-serif;
@@ -46,7 +48,8 @@
             touch-action: pan-y;
         }
 
-        h1, h2, .font-display { font-family: 'Fredoka One', cursive; }
+        h1, h2, .font-display { font-family: 'Outfit', sans-serif; }
+        .font-avatar { font-family: 'Fredoka One', cursive; }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -96,9 +99,41 @@
             100% { opacity: 0.8; }
         }
 
+        .shooting-star {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,1));
+            animation: shoot 3s linear infinite;
+            z-index: -1;
+            opacity: 0;
+            transform: rotate(-45deg);
+            border-radius: 999px;
+        }
+        
+        .shooting-star::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 3px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        .shooting-star:nth-child(1) { top: 10%; left: 80%; width: 100px; animation-delay: 0s; animation-duration: 3s; }
+        .shooting-star:nth-child(2) { top: 30%; left: 100%; width: 150px; animation-delay: 1.5s; animation-duration: 4s; background: linear-gradient(90deg, rgba(0,0,0,0), rgba(56, 189, 248, 1)); }
+        .shooting-star:nth-child(3) { top: 60%; left: 90%; width: 80px; animation-delay: 2.8s; animation-duration: 2.5s; background: linear-gradient(90deg, rgba(0,0,0,0), rgba(139, 92, 246, 1)); }
+        .shooting-star:nth-child(4) { top: -10%; left: 50%; width: 120px; animation-delay: 4.1s; animation-duration: 3.5s; background: linear-gradient(90deg, rgba(0,0,0,0), rgba(251, 191, 36, 1)); }
+        .shooting-star:nth-child(5) { top: 80%; left: 70%; width: 90px; animation-delay: 5.5s; animation-duration: 3s; }
+        .shooting-star:nth-child(6) { top: 40%; left: 60%; width: 140px; animation-delay: 7s; animation-duration: 4.5s; }
+        .shooting-star:nth-child(7) { top: 15%; left: 30%; width: 110px; animation-delay: 8.2s; animation-duration: 3.2s; background: linear-gradient(90deg, rgba(0,0,0,0), rgba(244, 114, 182, 1)); }
+
         @keyframes shoot {
             0% { transform: translateX(0) translateY(0) rotate(-45deg); opacity: 1; }
-            100% { transform: translateX(-1000px) translateY(1000px) rotate(-45deg); opacity: 0; }
+            100% { transform: translateX(-1500px) translateY(1500px) rotate(-45deg); opacity: 0; }
         }
 
         /* --- FLIP Animation --- */
@@ -158,7 +193,7 @@
             animation: spinBorder 2.5s linear infinite;
         }
 
-        /* The new sparkly starlight overlay with independent twinkling stars */
+        /* Dynamic "Warp Speed" Boost Pad Pattern */
         .prize-winner::after {
             content: "";
             position: absolute;
@@ -166,8 +201,26 @@
             border-radius: inherit;
             pointer-events: none;
             z-index: -1;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='80'%3E%3Ccircle cx='10%25' cy='20%25' r='1' fill='%23ffffff'%3E%3Canimate attributeName='opacity' values='0;1;0' dur='1.2s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='30%25' cy='70%25' r='1.5' fill='%23fde68a'%3E%3Canimate attributeName='opacity' values='0;1;0' dur='2.1s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='50%25' cy='30%25' r='1' fill='%23ffffff'%3E%3Canimate attributeName='opacity' values='0;1;0' dur='1.5s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='70%25' cy='80%25' r='1.5' fill='%23fde68a'%3E%3Canimate attributeName='opacity' values='0;1;0' dur='2.7s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='90%25' cy='40%25' r='1' fill='%23ffffff'%3E%3Canimate attributeName='opacity' values='0;1;0' dur='1.8s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='20%25' cy='85%25' r='1' fill='%23fde68a'%3E%3Canimate attributeName='opacity' values='0;1;0' dur='3.2s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='60%25' cy='15%25' r='1.5' fill='%23ffffff'%3E%3Canimate attributeName='opacity' values='0;1;0' dur='1.9s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='85%25' cy='75%25' r='1' fill='%23fde68a'%3E%3Canimate attributeName='opacity' values='0;1;0' dur='2.4s' repeatCount='indefinite'/%3E%3C/circle%3E%3C/svg%3E");
-            background-size: 300px 80px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='40' viewBox='0 0 32 40'%3E%3Cpath d='M0 40 L12 20 L0 0 H8 L20 20 L8 40 Z' fill='%23fbbf24' fill-opacity='0.25'/%3E%3C/svg%3E");
+            background-size: 32px 40px;
+            animation: boostPad 0.5s linear infinite;
+            /* Fades the racing arrows at the edges so the text stays easy to read */
+            -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 15%, black 85%, transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0%, black 15%, black 85%, transparent 100%);
+        }
+
+        @keyframes boostPad {
+            0% { background-position: 0 0; }
+            100% { background-position: 32px 0; }
+        }
+
+        /* --- New Glass Sweep Animation --- */
+        @keyframes glassSweep {
+            0% { transform: translateX(-150%) skewX(-15deg); }
+            100% { transform: translateX(300%) skewX(-15deg); }
+        }
+        .group:hover .sweep-effect {
+            animation: glassSweep 1.5s ease-in-out infinite;
         }
 
         /* Default Ranks */
@@ -182,15 +235,39 @@
     <div class="shooting-star"></div>
     <div class="shooting-star"></div>
     <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
 
     <!-- Main Container (Reduced to max-w-xl for tighter spacing) -->
     <div class="flex flex-col h-full w-full max-w-xl mx-auto relative z-10">
         
         <!-- Compact Header - Forced Single Line -->
         <div class="flex flex-row justify-between items-center px-4 md:px-6 py-3 shrink-0">
-            <h1 class="text-2xl md:text-3xl font-display text-white drop-shadow-lg tracking-wide truncate flex items-center gap-2 flex-1 min-w-0">
-                🚀 <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 to-indigo-300 filter drop-shadow-sm truncate">5-6N WEEKLY POINTS</span>
-            </h1>
+            
+            <!-- Reimagined HUD-style Title -->
+            <div class="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                <!-- Glowing Rocket Emblem (Green Theme) -->
+                <div class="relative shrink-0 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-[0.6rem] bg-slate-800/80 border border-slate-600/50 shadow-[inset_0_2px_5px_rgba(255,255,255,0.1),_0_0_15px_rgba(16,185,129,0.2)] overflow-hidden group cursor-default">
+                    <div class="absolute inset-0 bg-gradient-to-b from-emerald-400/10 to-teal-500/20"></div>
+                    <div class="absolute inset-0 -translate-x-[150%] skew-x-[-15deg] bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-[glassSweep_1.5s_ease-in-out_infinite]"></div>
+                    <i class="fa-solid fa-rocket text-emerald-400 text-sm md:text-base relative z-10 [text-shadow:0_0_8px_rgba(52,211,153,0.8)] transform -rotate-12 group-hover:rotate-0 group-hover:scale-110 transition-all duration-300"></i>
+                </div>
+                
+                <!-- Stylized Typography -->
+                <h1 class="font-montserrat flex items-center gap-2 md:gap-3 min-w-0">
+                    <!-- Added pr-1.5 and md:pr-2 to prevent italic clipping -->
+                    <span class="text-2xl md:text-3xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-100 to-slate-400 [text-shadow:0_0_20px_rgba(255,255,255,0.2)] pr-1.5 md:pr-2">
+                        5-6N  
+                    </span>
+                    <!-- Green Theme for Label -->
+                    <span class="flex text-[8px] md:text-[10px] font-bold tracking-[0.15em] md:tracking-[0.25em] text-emerald-300 uppercase px-2 py-1 md:px-2.5 md:py-1 rounded-md border border-emerald-500/40 bg-emerald-950/50 shadow-[inset_0_0_10px_rgba(16,185,129,0.3)] truncate items-center gap-1 md:gap-1.5 mt-0.5">
+                        <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></div>
+                        <span class="truncate">Weekly Points</span>
+                    </span>
+                </h1>
+            </div>
             
             <button onclick="openResetModal()" class="ml-3 bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white border border-white/20 backdrop-blur-sm rounded-full w-9 h-9 md:w-10 md:h-10 flex items-center justify-center shrink-0 transition-all shadow-lg" title="Start New Week">
                 <i class="fa-solid fa-rotate-right text-sm md:text-base"></i>
@@ -555,9 +632,10 @@
         }
 
         function getRankClass(index) {
-            if (index === 0) return 'rank-1 bg-amber-500/10 border-amber-400/50';
-            return 'bg-slate-900/60 border-indigo-500/30';
+            if (index === 0) return 'rank-1 bg-gradient-to-r from-amber-900/40 to-amber-900/10 border-amber-400/50 shadow-[0_0_20px_rgba(251,191,36,0.15)]';
+            return 'bg-gradient-to-r from-slate-800/80 to-slate-900/60 border-indigo-500/30';
         }
+        
         function renderLeaderboard() {
             // FLIP Setup
             const currentPositions = new Map();
@@ -597,27 +675,38 @@
                 }
 
                 const el = document.createElement('div');
-                el.className = `student-row flex items-center justify-between py-1.5 md:py-2 px-3 md:px-4 rounded-xl backdrop-blur-md shadow-lg border border-opacity-50 relative flip-item cursor-pointer transition-colors hover:bg-slate-800/80 ${getRankClass(index)} ${extraClasses}`;
+                el.className = `student-row flex items-center justify-between py-1.5 md:py-2 px-2 md:px-3 rounded-full backdrop-blur-xl shadow-lg border relative flip-item cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:brightness-110 group ${getRankClass(index)} ${extraClasses}`;
                 el.dataset.id = student.id;
                 el.onclick = (e) => openPopover(student.id, e.currentTarget);
 
-                let rankIcon = `<span class="text-base md:text-xl font-display font-black w-6 text-center text-slate-500/80">${index + 1}</span>`;
-                if (index === 0) rankIcon = `<span class="text-lg md:text-2xl w-6 text-center drop-shadow-[0_0_8px_rgba(251,191,36,0.8)] animate-pulse-glow">👑</span>`;
+                let rankIcon = `<span class="text-base md:text-xl font-display font-black w-6 md:w-8 text-center text-slate-500/80 shrink-0 z-10">${index + 1}</span>`;
+                if (index === 0) rankIcon = `<span class="text-lg md:text-2xl w-6 md:w-8 text-center drop-shadow-[0_0_8px_rgba(251,191,36,0.8)] animate-pulse-glow shrink-0 z-10">👑</span>`;
 
                 el.innerHTML = `
-                    <div class="flex items-center gap-2 md:gap-3 overflow-hidden">
+                    <!-- 3D Glass Highlight for Pill Shape -->
+                    <div class="absolute top-0 left-[5%] right-[5%] h-[30%] bg-gradient-to-b from-white/10 to-transparent rounded-t-full pointer-events-none z-0"></div>
+                    
+                    <div class="flex items-center gap-2 md:gap-4 overflow-hidden z-10 relative">
                         ${rankIcon}
-                        <div class="h-8 w-8 md:h-10 md:w-10 rounded-full bg-slate-800 flex items-center justify-center text-white font-display font-bold text-sm md:text-lg shadow-inner border border-white/10 shrink-0 uppercase">
-                            ${student.name.charAt(0)}
+                        
+                        <!-- Glowing Colored Avatar Ring -->
+                        <div class="relative shrink-0 ${studentColor}">
+                            <div class="absolute inset-0 bg-current opacity-40 blur-md rounded-full"></div>
+                            <div class="h-10 w-10 md:h-12 md:w-12 rounded-full bg-slate-900 flex items-center justify-center text-white font-avatar font-bold text-sm md:text-lg shadow-[inset_0_0_15px_rgba(255,255,255,0.15)] border-2 border-current z-10 relative uppercase">
+                                ${student.name.charAt(0)}
+                            </div>
                         </div>
-                        <span class="text-xl md:text-2xl font-display font-black ${studentColor} truncate tracking-wide">${student.name}</span>
+                        
+                        <span class="text-2xl md:text-3xl font-display font-black ${studentColor} truncate tracking-wide drop-shadow-md leading-none">${student.name}</span>
                     </div>
                     
-                    <div class="flex items-center gap-2">
-                        <div class="bg-black/40 rounded-lg px-2 md:px-3 py-1 shadow-inner border border-white/5 min-w-[50px] text-center">
-                            <span class="text-xl md:text-2xl font-display font-black text-sky-300 tracking-tight leading-none">${student.points}</span>
-                            <span class="text-[8px] md:text-[10px] font-bold text-slate-400 block -mt-1 uppercase">Pts</span>
-                        </div>
+                    <!-- Deep Inset Digital Scoreboard -->
+                    <div class="relative flex items-center justify-center bg-black/50 rounded-full px-4 md:px-5 py-1 md:py-1.5 border border-white/10 shadow-[inset_0_3px_10px_rgba(0,0,0,0.5)] overflow-hidden shrink-0 z-10 group-hover:border-white/20 transition-colors">
+                        <!-- Radar Sweep Animation -->
+                        <div class="absolute top-0 left-0 h-full w-[40%] z-0 bg-gradient-to-r from-transparent via-white/20 to-transparent sweep-effect -translate-x-[150%]"></div>
+                        
+                        <span class="text-2xl md:text-3xl font-display font-black text-sky-400 tracking-tighter drop-shadow-[0_0_10px_rgba(56,189,248,0.5)] z-10 relative leading-none">${student.points}</span>
+                        <span class="text-[9px] md:text-[11px] font-bold text-sky-200/50 uppercase ml-1 mt-1 z-10 relative">Pts</span>
                     </div>
                 `;
                 leaderboardList.appendChild(el);
