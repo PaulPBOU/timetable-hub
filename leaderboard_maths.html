@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Maths Rewards Leaderboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'nunito': ['"Nunito"', 'sans-serif'],
+                        'display': ['"Outfit"', 'sans-serif'],
+                        'math': ['"Space Mono"', 'monospace'], // Added monospace for math scores
+                        'montserrat': ['"Montserrat"', 'sans-serif']
+                    },
+                    animation: {
+                        'float-math': 'floatMath 15s linear infinite',
+                        'pulse-glow-gold': 'pulseGlowGold 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'scanline': 'scanline 3s linear infinite',
+                    },
+                    keyframes: {
+                        floatMath: {
+                            '0%': { transform: 'translateY(100vh) rotate(0deg)', opacity: 0 },
+                            '10%': { opacity: 0.15 },
+                            '90%': { opacity: 0.15 },
+                            '100%': { transform: 'translateY(-20vh) rotate(360deg)', opacity: 0 },
+                        },
+                        pulseGlowGold: {
+                            '0%, 100%': { opacity: 1, filter: 'drop-shadow(0 0 15px rgba(250,204,21,0.8))' },
+                            '50%': { opacity: .7, filter: 'drop-shadow(0 0 5px rgba(250,204,21,0.4))' },
+                        },
+                        scanline: {
+                            '0%': { transform: 'translateY(-100%)' },
+                            '100%': { transform: 'translateY(200%)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Nunito:wght@400;700;900&family=Outfit:wght@700;900&family=Space+Mono:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #080f1e; /* Deep dark blue for blueprint style */
+            color: white;
+            overflow: hidden; /* Prevent body scroll */
+            touch-action: pan-y;
+        }
+
+        h1, h2, .font-display { font-family: 'Outfit', sans-serif; }
+        .font-math { font-family: 'Space Mono', monospace; }
+
+        /* --- Hide Number Input Arrows --- */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* --- Blueprint/Math Grid Background --- */
+        .grid-bg {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #080f1e;
+            background-image: 
+                linear-gradient(rgba(56, 189, 248, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.07) 1px, transparent 1px),
+                linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px, 40px 40px, 10px 10px, 10px 10px;
+            background-position: center center;
+            z-index: -2;
+        }
+
+        /* Ambient glow in corners */
+        .ambient-glow {
+            position: fixed;
+            top: -20%; left: -10%;
+            width: 50vw; height: 50vw;
+            background: radial-gradient(circle, rgba(14,165,233,0.15) 0%, rgba(0,0,0,0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .ambient-glow-2 {
+            position: fixed;
+            bottom: -20%; right: -10%;
+            width: 60vw; height: 60vw;
+            background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, rgba(0,0,0,0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- Floating Math Symbols --- */
+        .floating-math {
+            position: absolute;
+            font-family: 'Space Mono', monospace;
+            font-weight: bold;
+            color: rgba(186, 230, 253, 0.8);
+            font-size: 2rem;
+            z-index: -1;
+            opacity: 0;
+            user-select: none;
+            pointer-events: none;
+            animation: floatMath 15s linear infinite;
+        }
+
+        .floating-math:nth-child(1) { left: 10%; animation-duration: 18s; animation-delay: 0s; font-size: 2.5rem; }
+        .floating-math:nth-child(2) { left: 30%; animation-duration: 14s; animation-delay: 4s; font-size: 1.5rem; }
+        .floating-math:nth-child(3) { left: 50%; animation-duration: 22s; animation-delay: 1s; font-size: 3rem; }
+        .floating-math:nth-child(4) { left: 70%; animation-duration: 16s; animation-delay: 7s; font-size: 1.8rem; }
+        .floating-math:nth-child(5) { left: 90%; animation-duration: 19s; animation-delay: 3s; font-size: 2.2rem; }
+        .floating-math:nth-child(6) { left: 20%; animation-duration: 20s; animation-delay: 10s; font-size: 1.2rem; }
+        .floating-math:nth-child(7) { left: 80%; animation-duration: 15s; animation-delay: 8s; font-size: 2.8rem; }
+
+        /* --- FLIP Animation --- */
+        .flip-item {
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
+        }
+
+        /* --- Custom Winner Highlight Animation (Math Theme) --- */
+        @keyframes mathGoldSparkle {
+            0%, 100% { 
+                background-color: rgba(250, 204, 21, 0.03); 
+                box-shadow: 0 0 10px rgba(250, 204, 21, 0.05), inset 0 0 5px rgba(250, 204, 21, 0.05); 
+            }
+            50% { 
+                background-color: rgba(250, 204, 21, 0.1); 
+                box-shadow: 0 0 20px rgba(250, 204, 21, 0.2), inset 0 0 10px rgba(250, 204, 21, 0.1); 
+            }
+        }
+
+        .prize-winner {
+            position: relative;
+            border-color: rgba(250,204,21,0.5) !important;
+            animation: mathGoldSparkle 3s ease-in-out infinite alternate !important;
+        }
+
+        /* Golden circuitry/grid pattern for winners */
+        .prize-winner::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            z-index: -1;
+            background-image: 
+                linear-gradient(rgba(250, 204, 21, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(250, 204, 21, 0.1) 1px, transparent 1px);
+            background-size: 8px 8px;
+            /* Fades at the edges */
+            -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
+        }
+
+        /* Default Ranks */
+        .rank-1 { box-shadow: 0 0 25px rgba(250, 204, 21, 0.25); border-color: rgba(250, 204, 21, 0.6); }
+
+        /* Calculator button active state */
+        .calc-btn:active {
+            transform: scale(0.95);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col relative">
+
+    <!-- Background Elements -->
+    <div class="grid-bg"></div>
+    <div class="ambient-glow"></div>
+    <div class="ambient-glow-2"></div>
+    
+    <!-- Floating Math Symbols instead of shooting stars -->
+    <div class="floating-math">π</div>
+    <div class="floating-math">∑</div>
+    <div class="floating-math">∫</div>
+    <div class="floating-math">√</div>
+    <div class="floating-math">∞</div>
+    <div class="floating-math">θ</div>
+    <div class="floating-math">Δ</div>
+
+    <!-- Main Container -->
+    <div class="flex flex-col h-full w-full max-w-xl mx-auto relative z-10">
+        
+        <!-- Compact Header - Forced Single Line -->
+        <div class="flex flex-row justify-between items-center px-4 md:px-6 py-3 shrink-0">
+            
+            <!-- Reimagined HUD-style Title (Math Theme) -->
+            <div class="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                <!-- Glowing Calculator/Math Emblem (Blue/Cyan Theme) -->
+                <div class="relative shrink-0 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg bg-slate-900 border border-sky-500/50 shadow-[inset_0_2px_5px_rgba(255,255,255,0.1),_0_0_15px_rgba(14,165,233,0.3)] overflow-hidden group cursor-default">
+                    <div class="absolute inset-0 bg-gradient-to-b from-sky-400/10 to-blue-600/20"></div>
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-sky-400/20 to-transparent group-hover:animate-scanline"></div>
+                    <i class="fa-solid fa-square-root-variable text-sky-400 text-sm md:text-base relative z-10 [text-shadow:0_0_8px_rgba(56,189,248,0.8)] group-hover:scale-110 transition-all duration-300"></i>
+                </div>
+                
+                <!-- Stylized Typography -->
+                <h1 class="font-montserrat flex items-center gap-2 md:gap-3 min-w-0">
+                    <span class="text-2xl md:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-sky-100 to-blue-300 [text-shadow:0_0_20px_rgba(14,165,233,0.3)] pr-1.5 md:pr-2">
+                        MATHS PROS
+                    </span>
+                    <!-- Blue Theme for Label -->
+                    <span class="flex text-[8px] md:text-[10px] font-bold tracking-[0.15em] md:tracking-[0.25em] text-sky-300 uppercase px-2 py-1 md:px-2.5 md:py-1 rounded-md border border-sky-500/40 bg-sky-950/50 shadow-[inset_0_0_10px_rgba(14,165,233,0.3)] truncate items-center gap-1 md:gap-1.5 mt-0.5">
+                        <div class="w-1.5 h-1.5 rounded-sm bg-sky-400 animate-pulse shrink-0"></div>
+                        <span class="truncate">Weekly Score</span>
+                    </span>
+                </h1>
+            </div>
+            
+            <button onclick="openResetModal()" class="ml-3 bg-slate-800 hover:bg-slate-700 text-sky-300 hover:text-white border border-sky-500/30 rounded-lg w-9 h-9 md:w-10 md:h-10 flex items-center justify-center shrink-0 transition-all shadow-lg" title="Start New Week">
+                <i class="fa-solid fa-eraser text-sm md:text-base"></i>
+            </button>
+        </div>
+
+        <!-- Leaderboard List Area -->
+        <div id="leaderboardList" class="flex-1 overflow-y-auto no-scrollbar px-3 md:px-5 pb-20 flex flex-col gap-2 relative">
+            <!-- Students injected here -->
+            <div class="h-full flex flex-col items-center justify-center text-sky-400/50 text-xl font-math animate-pulse gap-3">
+                <i class="fa-solid fa-calculator text-4xl"></i>
+                Calculating data...
+            </div>
+        </div>
+        
+        <!-- Compact Bottom Dock (Math Aesthetic) -->
+        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 w-full max-w-xl px-2 md:px-3 z-30 pointer-events-none">
+            <div class="bg-slate-900/95 backdrop-blur-xl border border-blue-500/40 p-2 rounded-xl shadow-[0_0_40px_rgba(14,165,233,0.2)] pointer-events-auto flex items-center gap-1.5 md:gap-2">
+                
+                <!-- Winner Trophy Selector (Custom UI) -->
+                <div class="relative shrink-0" id="customTrophyDropdown">
+                    <button type="button" onclick="toggleTrophyMenu(event)" class="flex items-center justify-between w-[68px] md:w-[75px] pl-2.5 pr-2 py-2 md:py-2.5 bg-slate-800 border border-amber-500/40 hover:bg-slate-700 hover:border-amber-400/60 rounded-lg text-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all cursor-pointer shadow-inner">
+                        <i class="fa-solid fa-medal"></i>
+                        <span id="trophySelectedValue" class="font-math font-bold text-sm md:text-base ml-1.5">0</span>
+                        <i class="fa-solid fa-caret-up text-amber-400/50 text-[10px] ml-1"></i>
+                    </button>
+                    
+                    <!-- Custom Dropdown Grid -->
+                    <div id="trophyMenu" class="hidden absolute bottom-full left-0 mb-3 w-56 bg-slate-900 backdrop-blur-xl border border-amber-500/40 shadow-[0_10px_40px_rgba(0,0,0,0.8)] rounded-xl p-2.5 z-50 animate-in zoom-in-95 duration-200 origin-bottom-left">
+                        <div class="text-center mb-2 pb-2 border-b border-amber-500/20">
+                            <span class="text-[10px] font-black text-amber-400/80 uppercase tracking-widest flex items-center justify-center gap-1.5"><i class="fa-solid fa-star text-amber-400"></i> Top Mathematicians</span>
+                        </div>
+                        <div class="grid grid-cols-5 gap-1.5 mb-2 font-math">
+                            <button type="button" onclick="selectTopX(1)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">1</button>
+                            <button type="button" onclick="selectTopX(2)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">2</button>
+                            <button type="button" onclick="selectTopX(3)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">3</button>
+                            <button type="button" onclick="selectTopX(4)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">4</button>
+                            <button type="button" onclick="selectTopX(5)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">5</button>
+                            <button type="button" onclick="selectTopX(6)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">6</button>
+                            <button type="button" onclick="selectTopX(7)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">7</button>
+                            <button type="button" onclick="selectTopX(8)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">8</button>
+                            <button type="button" onclick="selectTopX(9)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">9</button>
+                            <button type="button" onclick="selectTopX(10)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">10</button>
+                        </div>
+                        <button type="button" onclick="selectTopX(0)" class="w-full text-center py-2 rounded-lg font-bold text-slate-400 bg-slate-800 hover:bg-slate-700 hover:text-white transition-all text-xs border border-slate-700/50 shadow-inner">Turn Off Highlight</button>
+                    </div>
+                </div>
+
+                <div class="flex-1 relative min-w-0">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-terminal text-blue-400"></i>
+                    </div>
+                    <input type="text" id="studentNameInput" placeholder="Name..." class="block w-full pl-9 pr-2 py-2 md:py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-bold font-math text-sm md:text-base transition-all">
+                </div>
+
+                <div class="w-16 md:w-20 relative shrink-0">
+                    <input type="number" id="pointsInput" placeholder="Pts" class="block w-full px-2 py-2 md:py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-white text-center placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-bold font-math text-sm md:text-base transition-all">
+                </div>
+
+                <button id="mainActionBtn" onclick="handleAddNew()" class="w-10 h-10 md:w-11 md:h-11 shrink-0 bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-[0_0_15px_rgba(37,99,235,0.4)] flex items-center justify-center transition-all calc-btn border border-blue-400/50">
+                    <i class="fa-solid fa-plus text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tiny Popover for Existing Students (Math themed) -->
+    <div id="actionPopover" class="hidden fixed z-50 bg-slate-900 border border-sky-500/30 shadow-[0_0_30px_rgba(0,0,0,0.8)] rounded-xl p-3 w-64 text-sm animate-in zoom-in-95 duration-200">
+        <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-700">
+            <span id="popoverStudentName" class="font-math font-bold text-sky-300 truncate text-base">Name</span>
+            <button onclick="closePopover()" class="text-slate-400 hover:text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-slate-800 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div class="grid grid-cols-3 gap-2 mb-2 font-math">
+            <button onclick="quickAddPoints(1)" class="bg-slate-800 hover:bg-sky-600 text-sky-400 hover:text-white py-2 rounded-lg font-bold border border-sky-500/20 transition-all calc-btn">+1</button>
+            <button onclick="quickAddPoints(5)" class="bg-slate-800 hover:bg-sky-600 text-sky-400 hover:text-white py-2 rounded-lg font-bold border border-sky-500/20 transition-all calc-btn">+5</button>
+            <button onclick="quickAddPoints(10)" class="bg-slate-800 hover:bg-sky-600 text-sky-400 hover:text-white py-2 rounded-lg font-bold border border-sky-500/20 transition-all calc-btn">+10</button>
+        </div>
+
+        <div class="flex gap-2 items-center">
+            <input type="number" id="popoverCustomPoints" placeholder="Value" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-white font-math font-bold text-center focus:outline-none focus:border-sky-400">
+            <button onclick="applyCustomUpdate('add')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1.5 rounded-lg font-bold transition-all shadow-sm calc-btn" title="Add"><i class="fa-solid fa-plus"></i></button>
+            <button onclick="applyCustomUpdate('set')" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1.5 rounded-lg font-bold transition-all shadow-sm calc-btn" title="Set exact score"><i class="fa-solid fa-equals"></i></button>
+        </div>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div id="resetModal" class="hidden fixed inset-0 z-[100] items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm transition-opacity">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 md:p-8 max-w-sm w-full text-center shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-red-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="w-16 h-16 bg-slate-800 rounded-xl flex items-center justify-center mx-auto mb-4 border border-red-500/30 text-red-400 text-3xl">
+                <i class="fa-solid fa-eraser"></i>
+            </div>
+            
+            <h2 class="text-2xl font-display font-bold text-white mb-2">Clear Data?</h2>
+            <p class="text-slate-400 mb-6 font-semibold text-sm">This will permanently erase all student scores for the current week. Proceed?</p>
+            
+            <div class="flex gap-3 justify-center font-math">
+                <button onclick="closeResetModal()" class="px-5 py-2.5 rounded-lg font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-600 transition-colors w-full">Cancel</button>
+                <button onclick="confirmReset()" class="px-5 py-2.5 rounded-lg font-bold text-white bg-red-600 hover:bg-red-500 shadow-lg shadow-red-500/20 transition-colors w-full">Erase</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // Firebase Configuration (Matching your Hub)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEGrh2SIC20vJj_nLm4x34ok01srxip7I",
+            authDomain: "paul-s-2026.firebaseapp.com",
+            projectId: "paul-s-2026",
+            storageBucket: "paul-s-2026.firebasestorage.app",
+            messagingSenderId: "524167059781",
+            appId: "1:524167059781:web:57347f46b29c9d4a49862c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- MATH THEME DB COLLECTION ---
+        // Using a different collection to avoid mixing scores with the normal class
+        const DB_COLLECTION = "math_class_leaderboard"; 
+        const DB_DOCUMENT = "current_week";
+
+        // State
+        let students = [];
+        let currentlyEditingId = null;
+        let previousTopStudentId = null;
+        let topWinnersCount = 0; 
+        let previousStudentOrder = []; 
+
+        // DOM Elements
+        const leaderboardList = document.getElementById('leaderboardList');
+        const nameInput = document.getElementById('studentNameInput');
+        const pointsInput = document.getElementById('pointsInput');
+        const actionPopover = document.getElementById('actionPopover');
+
+        // Color Array for assigning consistent dynamic colors based on name (Tech/Math Theme palette)
+        const nameColors = [
+            'text-sky-400', 'text-cyan-400', 'text-blue-400', 
+            'text-emerald-400', 'text-teal-400', 'text-indigo-400', 
+            'text-amber-400', 'text-rose-400'
+        ];
+
+        // Helper to consistently assign a color to a string (name)
+        function getColorForName(name) {
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const index = Math.abs(hash) % nameColors.length;
+            return nameColors[index];
+        }
+
+        // --- STREAMING_CHUNK:Initializing Application... ---
+        function init() {
+            setupInputListeners();
+            
+            // Close popovers and custom menus when clicking outside
+            document.addEventListener('click', (e) => {
+                if(!actionPopover.contains(e.target) && !e.target.closest('.student-row')) {
+                    closePopover();
+                }
+                const trophyMenu = document.getElementById('trophyMenu');
+                const customTrophyDropdown = document.getElementById('customTrophyDropdown');
+                if (trophyMenu && !trophyMenu.classList.contains('hidden') && customTrophyDropdown && !customTrophyDropdown.contains(e.target)) {
+                    trophyMenu.classList.add('hidden');
+                }
+            });
+            
+            // Connect to Firebase realtime updates
+            signInAnonymously(auth).then(() => {
+                const docRef = doc(db, DB_COLLECTION, DB_DOCUMENT);
+                onSnapshot(docRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        students = data.students || [];
+                        topWinnersCount = data.topWinnersCount || 0;
+                        updateTopXUI(topWinnersCount); 
+                        
+                        if (students.length > 0) {
+                            sortStudents();
+                            if(!previousTopStudentId) previousTopStudentId = students[0].id;
+                        }
+                    } else {
+                        students = [];
+                        topWinnersCount = 0;
+                    }
+                    renderLeaderboard();
+                });
+            }).catch((error) => {
+                console.error("Firebase Auth Error:", error);
+                leaderboardList.innerHTML = `<div class="text-rose-400 text-center py-10 font-bold font-math">Database connection failed.</div>`;
+            });
+        }
+
+        function saveData() {
+            if (auth.currentUser) {
+                setDoc(doc(db, DB_COLLECTION, DB_DOCUMENT), { 
+                    students: students,
+                    topWinnersCount: topWinnersCount 
+                }, { merge: true });
+            }
+        }
+
+        // --- STREAMING_CHUNK:Event Handlers and Logic... ---
+        function updateTopXUI(val) {
+            const display = document.getElementById('trophySelectedValue');
+            if (display) {
+                display.innerText = val == 0 ? '0' : val;
+            }
+        }
+
+        function toggleTrophyMenu(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('trophyMenu');
+            menu.classList.toggle('hidden');
+            closePopover(); 
+        }
+
+        function selectTopX(val) {
+            topWinnersCount = parseInt(val);
+            updateTopXUI(topWinnersCount);
+            saveData(); 
+            document.getElementById('trophyMenu').classList.add('hidden');
+            if (topWinnersCount > 0) {
+                fireConfetti(); 
+            }
+        }
+
+        function setupInputListeners() {
+            nameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if(nameInput.value.trim() !== '') pointsInput.focus();
+                }
+            });
+
+            pointsInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddNew();
+                }
+            });
+
+            const popCustom = document.getElementById('popoverCustomPoints');
+            popCustom.addEventListener('keypress', (e) => {
+                if(e.key === 'Enter') {
+                    e.preventDefault();
+                    applyCustomUpdate('add');
+                }
+            })
+        }
+        
+        function sortStudents() {
+            students.sort((a, b) => b.points - a.points);
+        }
+
+        function handleAddNew() {
+            const name = nameInput.value.trim();
+            const pointsStr = pointsInput.value.trim();
+            const points = parseInt(pointsStr, 10);
+
+            if (!name) return;
+
+            // Check if student exists
+            const existingIndex = students.findIndex(s => s.name.toLowerCase() === name.toLowerCase());
+
+            if (existingIndex >= 0) {
+                // Flash and pop open if they exist
+                const studentId = students[existingIndex].id;
+                const rowEl = document.querySelector(`.student-row[data-id="${studentId}"]`);
+                if(rowEl) {
+                    rowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    rowEl.classList.add('bg-blue-900/60');
+                    setTimeout(() => rowEl.classList.remove('bg-blue-900/60'), 1000);
+                    openPopover(studentId, rowEl);
+                }
+                nameInput.value = '';
+                pointsInput.value = '';
+                return;
+            }
+
+            if (isNaN(points)) {
+                pointsInput.focus();
+                return;
+            }
+
+            // Create new student
+            const newStudent = {
+                id: Date.now().toString(),
+                name: name,
+                points: points
+            };
+
+            students.push(newStudent);
+            saveData(); 
+
+            nameInput.value = '';
+            pointsInput.value = '';
+            nameInput.focus();
+            
+            fireConfetti();
+        }
+
+        // --- STREAMING_CHUNK:Popover Management... ---
+        function openPopover(id, el) {
+            currentlyEditingId = id;
+            const student = students.find(s => s.id === id);
+            if(!student) return;
+
+            document.getElementById('popoverStudentName').innerText = student.name;
+            document.getElementById('popoverCustomPoints').value = '';
+
+            const rect = el.getBoundingClientRect();
+            actionPopover.classList.remove('hidden');
+            
+            const popoverHeight = actionPopover.offsetHeight;
+            const spaceBelow = window.innerHeight - rect.bottom;
+            
+            let topPos = rect.bottom + 5;
+            if (spaceBelow < popoverHeight + 20) {
+                topPos = rect.top - popoverHeight - 5;
+            }
+            
+            let leftPos = rect.left + (rect.width / 2) - (actionPopover.offsetWidth / 2);
+            if (leftPos < 10) leftPos = 10;
+            if (leftPos + actionPopover.offsetWidth > window.innerWidth - 10) {
+                leftPos = window.innerWidth - actionPopover.offsetWidth - 10;
+            }
+
+            actionPopover.style.top = `${topPos}px`;
+            actionPopover.style.left = `${leftPos}px`;
+
+            setTimeout(() => { document.getElementById('popoverCustomPoints').focus(); }, 50);
+        }
+
+        function closePopover() {
+            actionPopover.classList.add('hidden');
+            currentlyEditingId = null;
+        }
+
+        function quickAddPoints(amount) {
+            if(!currentlyEditingId) return;
+            const idx = students.findIndex(s => s.id === currentlyEditingId);
+            if(idx !== -1) {
+                students[idx].points += amount;
+                saveData();
+                fireConfetti();
+            }
+            closePopover();
+        }
+
+        function applyCustomUpdate(mode) {
+            if(!currentlyEditingId) return;
+            const val = parseInt(document.getElementById('popoverCustomPoints').value);
+            if(isNaN(val)) return;
+
+            const idx = students.findIndex(s => s.id === currentlyEditingId);
+            if(idx !== -1) {
+                if(mode === 'add') {
+                    students[idx].points += val;
+                } else if (mode === 'set') {
+                    students[idx].points = val;
+                }
+                saveData();
+                if(mode === 'add' && val > 0) fireConfetti();
+            }
+            closePopover();
+        }
+
+        // --- STREAMING_CHUNK:Rendering DOM and Animations... ---
+        function getRankClass(index) {
+            // Math Theme Colors: Slate/Blue for normal, Amber/Gold for rank 1
+            if (index === 0) return 'rank-1 bg-gradient-to-r from-amber-900/30 to-amber-950/40 border-amber-500/50 shadow-[0_0_20px_rgba(250,204,21,0.15)]';
+            return 'bg-slate-900/80 border-blue-500/20 hover:border-blue-400/40';
+        }
+        
+        function renderLeaderboard() {
+            // FLIP Setup
+            const currentPositions = new Map();
+            document.querySelectorAll('.student-row').forEach(el => {
+                currentPositions.set(el.dataset.id, el.getBoundingClientRect());
+            });
+
+            previousStudentOrder = students.map(s => s.id);
+            sortStudents();
+
+            if (students.length > 1 && previousTopStudentId && previousTopStudentId !== students[0].id) {
+                fireGrandConfetti();
+                previousTopStudentId = students[0].id;
+            } else if (students.length === 1) {
+                previousTopStudentId = students[0].id;
+            }
+
+            leaderboardList.innerHTML = '';
+            
+            if (students.length === 0) {
+                leaderboardList.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-slate-500 mt-10">
+                        <i class="fa-solid fa-square-root-variable text-5xl mb-4 opacity-50"></i>
+                        <p class="font-bold font-display text-xl">Awaiting Data</p>
+                        <p class="text-sm font-math">Input calculations below.</p>
+                    </div>`;
+                return;
+            }
+
+            students.forEach((student, index) => {
+                const studentColor = getColorForName(student.name);
+
+                let extraClasses = '';
+                if (topWinnersCount > 0 && index < topWinnersCount) {
+                    extraClasses = 'prize-winner';
+                }
+
+                const el = document.createElement('div');
+                // Altered to have slightly rounded borders (rounded-lg) instead of pill (rounded-full) for tech vibe
+                el.className = `student-row flex items-center justify-between py-2 px-3 md:px-4 rounded-xl backdrop-blur-md shadow-lg border relative flip-item cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:brightness-110 group ${getRankClass(index)} ${extraClasses}`;
+                el.dataset.id = student.id;
+                el.onclick = (e) => openPopover(student.id, e.currentTarget);
+
+                let rankIcon = `<span class="text-base md:text-xl font-math font-bold w-6 md:w-8 text-center text-slate-500 shrink-0 z-10">#${index + 1}</span>`;
+                if (index === 0) rankIcon = `<span class="text-lg md:text-2xl w-6 md:w-8 text-center drop-shadow-[0_0_8px_rgba(250,204,21,0.8)] animate-pulse-glow-gold shrink-0 z-10"><i class="fa-solid fa-trophy text-amber-400"></i></span>`;
+
+                el.innerHTML = `
+                    <div class="flex items-center gap-3 md:gap-4 overflow-hidden z-10 relative">
+                        ${rankIcon}
+                        
+                        <!-- Square-ish Avatar for Math Theme -->
+                        <div class="relative shrink-0 ${studentColor}">
+                            <div class="absolute inset-0 bg-current opacity-20 blur-md rounded-lg"></div>
+                            <div class="h-10 w-10 md:h-12 md:w-12 rounded-lg bg-slate-950 flex items-center justify-center text-white font-display font-black text-sm md:text-lg shadow-inner border border-current z-10 relative uppercase">
+                                ${student.name.charAt(0)}
+                            </div>
+                        </div>
+                        
+                        <span class="text-xl md:text-2xl font-display font-black ${studentColor} truncate tracking-wide drop-shadow-sm leading-none">${student.name}</span>
+                    </div>
+                    
+                    <!-- Digital Scoreboard Panel -->
+                    <div class="relative flex items-center justify-center bg-black/60 rounded-lg px-4 md:px-5 py-1.5 md:py-2 border border-slate-700 shadow-inner overflow-hidden shrink-0 z-10 group-hover:border-slate-500 transition-colors min-w-[70px]">
+                        <!-- Scanline Effect overlay -->
+                        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none opacity-50 z-0"></div>
+                        
+                        <span class="text-2xl md:text-3xl font-math font-bold text-emerald-400 tracking-tighter drop-shadow-[0_0_10px_rgba(52,211,153,0.5)] z-10 relative leading-none">${student.points}</span>
+                    </div>
+                `;
+                leaderboardList.appendChild(el);
+            });
+
+            // FLIP Execute
+            requestAnimationFrame(() => {
+                document.querySelectorAll('.student-row').forEach(el => {
+                    const oldRect = currentPositions.get(el.dataset.id);
+                    if (oldRect) {
+                        const newRect = el.getBoundingClientRect();
+                        const deltaY = oldRect.top - newRect.top;
+                        
+                        if (deltaY !== 0) {
+                            el.style.transform = `translateY(${deltaY}px)`;
+                            el.style.transition = 'none';
+                            
+                            requestAnimationFrame(() => {
+                                el.style.transform = '';
+                                el.style.transition = 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                                el.style.zIndex = '10';
+                            });
+                            setTimeout(() => { el.style.zIndex = ''; }, 600);
+                        }
+                    } else {
+                        el.style.opacity = '0';
+                        el.style.transform = 'translateY(20px)';
+                        requestAnimationFrame(() => {
+                            el.style.transition = 'all 0.4s ease-out';
+                            el.style.opacity = '1';
+                            el.style.transform = 'translateY(0)';
+                        });
+                    }
+                });
+            });
+        }
+
+        // --- STREAMING_CHUNK:Confetti and Modal Helpers... ---
+        function fireConfetti() {
+            confetti({
+                particleCount: 60,
+                spread: 70,
+                origin: { y: 0.8 },
+                colors: ['#0ea5e9', '#3b82f6', '#10b981', '#f59e0b'] // Tech colored confetti
+            });
+        }
+
+        function fireGrandConfetti() {
+            const duration = 3000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#f59e0b', '#fbbf24', '#d97706']
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#f59e0b', '#fbbf24', '#d97706']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+
+        function openResetModal() {
+            document.getElementById('resetModal').classList.remove('hidden');
+            document.getElementById('resetModal').classList.add('flex');
+            closePopover();
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.add('hidden');
+            document.getElementById('resetModal').classList.remove('flex');
+        }
+
+        function confirmReset() {
+            students = [];
+            topWinnersCount = 0;
+            saveData();
+            closeResetModal();
+        }
+
+        // Expose functions globally for inline HTML event handlers
+        window.openResetModal = openResetModal;
+        window.closeResetModal = closeResetModal;
+        window.confirmReset = confirmReset;
+        window.handleAddNew = handleAddNew;
+        window.openPopover = openPopover;
+        window.closePopover = closePopover;
+        window.quickAddPoints = quickAddPoints;
+        window.applyCustomUpdate = applyCustomUpdate;
+        window.toggleTrophyMenu = toggleTrophyMenu;
+        window.selectTopX = selectTopX;
+
+        // Boot app
+        init();
+
+    </script>
+</body>
+</html>
