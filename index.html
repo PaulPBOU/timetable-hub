@@ -80,6 +80,101 @@
             background-size: 200% 200%;
             animation: gradient-x 3s ease infinite;
         }
+
+        .schedule-lesson-card {
+            transform-origin: center;
+            transition: transform 180ms cubic-bezier(.2,.8,.2,1), opacity 180ms ease, box-shadow 180ms ease, border-color 180ms ease, margin 180ms ease;
+        }
+        .lesson-dragging .schedule-lesson-card:not(.is-dragging) { opacity: 0.68; transform: scale(0.985); }
+        .schedule-lesson-card.is-dragging { opacity: 0.18 !important; transform: scale(0.94) rotate(-1deg); }
+        .schedule-lesson-card.drop-before { transform: translateY(9px); }
+        .schedule-lesson-card.drop-after { transform: translateY(-9px); }
+        .schedule-lesson-card.drop-before::before,
+        .schedule-lesson-card.drop-after::after {
+            content: 'Drop lesson here';
+            position: absolute;
+            left: 8px;
+            right: 8px;
+            height: 20px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #06b6d4, #6366f1);
+            color: white;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            line-height: 20px;
+            text-align: center;
+            box-shadow: 0 0 18px rgba(6,182,212,.65);
+            z-index: 90;
+            animation: drop-cue-pulse 900ms ease-in-out infinite alternate;
+        }
+        .schedule-lesson-card.drop-before::before { top: -13px; }
+        .schedule-lesson-card.drop-after::after { bottom: -13px; }
+        .schedule-break.drop-before-break,
+        .schedule-break.drop-after-break { opacity: 1 !important; transform: scale(1.035); }
+        .schedule-break.drop-before-break::before,
+        .schedule-break.drop-after-break::after {
+            position: absolute;
+            left: 8%;
+            right: 8%;
+            padding: 5px 8px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #06b6d4, #6366f1);
+            color: white;
+            font-size: 9px;
+            font-weight: 900;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            box-shadow: 0 8px 24px rgba(6,182,212,.35);
+            z-index: 90;
+        }
+        .schedule-break.drop-before-break::before { content: 'Place before break'; top: -12px; }
+        .schedule-break.drop-after-break::after { content: 'Place after break'; bottom: -12px; }
+        .day-drop-zone.drag-target-active {
+            background: linear-gradient(180deg, rgba(6,182,212,.08), rgba(99,102,241,.08));
+            outline: 2px dashed rgba(6,182,212,.45);
+            outline-offset: -5px;
+        }
+        .lesson-drag-ghost {
+            position: fixed;
+            top: -1000px;
+            left: -1000px;
+            width: 270px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(15,23,42,.94);
+            color: white;
+            border: 1px solid rgba(34,211,238,.65);
+            box-shadow: 0 20px 45px rgba(15,23,42,.4), 0 0 28px rgba(6,182,212,.25);
+            transform: rotate(2deg);
+            pointer-events: none;
+            z-index: 9999;
+        }
+        @keyframes drop-cue-pulse { from { opacity: .65; } to { opacity: 1; } }
+        @keyframes lesson-land {
+            0% { transform: scale(.94); opacity: .45; box-shadow: 0 0 0 rgba(6,182,212,0); }
+            55% { transform: scale(1.025); opacity: 1; box-shadow: 0 12px 35px rgba(6,182,212,.28); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .lesson-just-dropped { animation: lesson-land 520ms cubic-bezier(.2,.8,.2,1); }
+        .timing-clash-card { box-shadow: 0 0 0 2px rgba(244,63,94,.45), 0 10px 26px rgba(244,63,94,.12) !important; }
+        .timing-clash-badge { animation: drop-cue-pulse 1.1s ease-in-out infinite alternate; }
+        .copy-weekday-button {
+            height: 44px;
+            border-radius: 13px;
+            border: 1px solid rgba(148,163,184,.35);
+            background: rgba(241,245,249,.9);
+            color: #475569;
+            font-size: 12px;
+            font-weight: 900;
+            transition: transform 150ms ease, background 150ms ease, color 150ms ease, border-color 150ms ease;
+        }
+        .copy-weekday-button:hover { transform: translateY(-2px); background: #fef3c7; color: #d97706; border-color: #fcd34d; }
+        .copy-weekday-button:active { transform: scale(.95); }
+        .dark .copy-weekday-button { background: rgba(30,41,59,.85); color: #cbd5e1; border-color: rgba(71,85,105,.8); }
+        .dark .copy-weekday-button:hover { background: rgba(120,53,15,.35); color: #fbbf24; border-color: rgba(217,119,6,.65); }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center p-2 md:p-4 bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
@@ -288,6 +383,54 @@
         </div>
     </div>
 
+    <!-- Simple Lesson Copy Menu -->
+    <div id="modal-transfer" class="hidden fixed inset-0 z-[130] items-center justify-center p-3 md:p-6 bg-slate-900/95 backdrop-blur-sm" onclick="closeModals()">
+        <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden" onclick="event.stopPropagation()">
+            <div class="flex items-start justify-between gap-4 p-5 md:p-6 border-b border-slate-200 dark:border-slate-800">
+                <div>
+                    <div class="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-[0.2em] mb-2"><i class="fa-solid fa-copy"></i> Copy lesson</div>
+                    <h2 id="transfer-title" class="text-xl md:text-2xl font-black text-slate-800 dark:text-white leading-tight">Where should it go?</h2>
+                    <p id="transfer-source-summary" class="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-1"></p>
+                </div>
+                <button onclick="closeModals()" class="w-10 h-10 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-900/30 dark:hover:text-rose-400 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="p-5 md:p-6 space-y-5">
+                <button onclick="copyLessonToNextDay()" class="w-full flex items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white shadow-lg shadow-amber-900/20 transition-all active:scale-[.98] text-left">
+                    <span><span class="block text-base font-black">Copy to next day</span><span id="copy-next-day-label" class="block text-xs text-white/80 font-semibold mt-0.5"></span></span>
+                    <i class="fa-solid fa-arrow-right text-lg"></i>
+                </button>
+
+                <div>
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Copy to next week</div>
+                    <div class="grid grid-cols-5 gap-2">
+                        <button onclick="copyLessonToNextWeekday('Monday')" class="copy-weekday-button">M</button>
+                        <button onclick="copyLessonToNextWeekday('Tuesday')" class="copy-weekday-button">T</button>
+                        <button onclick="copyLessonToNextWeekday('Wednesday')" class="copy-weekday-button">W</button>
+                        <button onclick="copyLessonToNextWeekday('Thursday')" class="copy-weekday-button">T</button>
+                        <button onclick="copyLessonToNextWeekday('Friday')" class="copy-weekday-button">F</button>
+                    </div>
+                    <div class="grid grid-cols-5 gap-2 mt-1 text-center text-[8px] font-bold text-slate-400"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span></div>
+                </div>
+
+                <div class="relative flex items-center"><div class="h-px bg-slate-200 dark:bg-slate-700 flex-1"></div><span class="px-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">or</span><div class="h-px bg-slate-200 dark:bg-slate-700 flex-1"></div></div>
+
+                <button onclick="copyLessonForPaste()" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/35 border border-cyan-200 dark:border-cyan-800/60 text-left transition-all active:scale-[.98]">
+                    <span class="w-11 h-11 rounded-xl bg-cyan-500 text-white flex items-center justify-center shrink-0 shadow-md"><i class="fa-solid fa-copy"></i></span>
+                    <span class="flex-1"><span class="block text-sm font-black text-cyan-800 dark:text-cyan-300">Copy, then navigate and paste</span><span class="block text-[10px] text-cyan-700/70 dark:text-cyan-400/70 font-semibold mt-0.5">A paste bar will follow you to any day.</span></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lesson Clipboard Bar -->
+    <div id="lesson-clipboard-bar" class="hidden fixed left-1/2 -translate-x-1/2 bottom-4 md:bottom-6 z-[125] w-[calc(100%-1.5rem)] max-w-xl items-center gap-3 p-3 md:p-4 rounded-2xl bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 border border-cyan-400/40 shadow-2xl shadow-cyan-900/25 backdrop-blur-xl animate-in slide-in-from-bottom-6 fade-in duration-300">
+        <div class="w-10 h-10 rounded-xl bg-cyan-500 text-white flex items-center justify-center shrink-0"><i class="fa-solid fa-clipboard"></i></div>
+        <div class="flex-1 min-w-0"><div class="text-[9px] font-black uppercase tracking-widest text-cyan-300 dark:text-cyan-600">Lesson copied</div><div id="clipboard-lesson-summary" class="text-xs md:text-sm font-bold truncate"></div></div>
+        <button id="clipboard-paste-button" onclick="pasteCopiedLesson()" class="hidden px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-white text-xs font-black shadow-md transition-all active:scale-95 whitespace-nowrap"><i class="fa-solid fa-paste mr-1.5"></i>Paste here</button>
+        <button onclick="clearLessonClipboard()" class="w-9 h-9 rounded-full hover:bg-white/10 dark:hover:bg-slate-900/10 text-white/70 dark:text-slate-600 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
     <!-- Edit Single Block Modal -->
     <div id="modal-edit" class="hidden fixed inset-0 z-[100] items-center justify-center p-4 bg-slate-900/95 backdrop-blur-sm">
         <div class="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden">
@@ -424,7 +567,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, getDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCEGrh2SIC20vJj_nLm4x34ok01srxip7I",
@@ -449,8 +592,115 @@
             soundPlayed: false,
             newDayForm: [],
             addingDay: '',
-            activeBlockIndex: 0
+            activeBlockIndex: 0,
+            lessonTransfer: null,
+            draggedLesson: null,
+            lessonClipboard: null,
+            recentlyDroppedLessonId: null
         };
+
+        const SCHOOL_YEAR = 2026;
+        const SCHOOL_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        const TERM_COUNT = 4;
+        const WEEKS_PER_TERM = 12;
+        const SCHEDULE_SECTIONS = {
+            beforeBreak1: { label: 'Before Break 1', start: 9 * 60, end: 11 * 60 },
+            betweenBreaks: { label: 'Between Breaks', start: 11 * 60 + 30, end: 13 * 60 + 30 },
+            afterBreak2: { label: 'After Break 2', start: 14 * 60, end: 15 * 60 }
+        };
+        const FIXED_BREAKS = {
+            break1: { id: 'br1', type: 'break', time: '11:00am - 11:30am', topic: 'Break 1', icon: 'mug-hot', isDuty: false },
+            break2: { id: 'br2', type: 'break', time: '1:30pm - 2:00pm', topic: 'Break 2', icon: 'apple-whole', isDuty: false }
+        };
+
+        const emptyWeekDays = () => Object.fromEntries(SCHOOL_DAYS.map(day => [day, []]));
+        const timetableDocId = (term, week) => `${SCHOOL_YEAR}_${term.replaceAll(' ', '')}_${week.replaceAll(' ', '')}`;
+        const timetableDocRef = (term, week) => doc(db, 'timetables', timetableDocId(term, week));
+        const createLessonId = (prefix = 'lesson') => `${prefix}_${Date.now()}_${crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)}`;
+        const cloneBlock = block => ({ ...block, printLink: Array.isArray(block.printLink) ? [...block.printLink] : block.printLink });
+
+        const getLessonSection = block => {
+            if (SCHEDULE_SECTIONS[block.scheduleSection]) return block.scheduleSection;
+            const start = window.parseTimeStrToMins(String(block.time || '').split('-')[0]);
+            if (start < SCHEDULE_SECTIONS.beforeBreak1.end) return 'beforeBreak1';
+            if (start < SCHEDULE_SECTIONS.afterBreak2.start) return 'betweenBreaks';
+            return 'afterBreak2';
+        };
+
+        const getBreakDuty = (blocks, breakNumber) => {
+            const existing = (blocks || []).find(block => block.type === 'break' && String(block.topic || '').includes(`Break ${breakNumber}`));
+            return Boolean(existing && existing.isDuty);
+        };
+
+        const composeScheduledDay = (sections, originalBlocks = []) => {
+            const output = [];
+            for (const sectionKey of Object.keys(SCHEDULE_SECTIONS)) {
+                const lessons = (sections[sectionKey] || []).map((lesson, index) => {
+                    const copy = cloneBlock(lesson);
+                    copy.id = copy.id || createLessonId();
+                    copy.type = 'lesson';
+                    copy.scheduleSection = sectionKey;
+                    copy.scheduleOrder = index;
+                    return copy;
+                });
+                output.push(...lessons);
+                if (sectionKey === 'beforeBreak1') output.push({ ...FIXED_BREAKS.break1, isDuty: getBreakDuty(originalBlocks, 1) });
+                if (sectionKey === 'betweenBreaks') output.push({ ...FIXED_BREAKS.break2, isDuty: getBreakDuty(originalBlocks, 2) });
+            }
+            return output;
+        };
+
+        const splitDayIntoSections = blocks => {
+            const sections = { beforeBreak1: [], betweenBreaks: [], afterBreak2: [] };
+            (blocks || []).filter(block => block.type !== 'break' && block.type !== 'cancelled').forEach(block => {
+                sections[getLessonSection(block)].push(cloneBlock(block));
+            });
+            Object.keys(sections).forEach(sectionKey => {
+                sections[sectionKey].sort((a, b) => {
+                    const orderDifference = (Number.isFinite(a.scheduleOrder) ? a.scheduleOrder : Number.MAX_SAFE_INTEGER) - (Number.isFinite(b.scheduleOrder) ? b.scheduleOrder : Number.MAX_SAFE_INTEGER);
+                    if (orderDifference !== 0) return orderDifference;
+                    return window.parseTimeStrToMins(String(a.time || '').split('-')[0]) - window.parseTimeStrToMins(String(b.time || '').split('-')[0]);
+                });
+            });
+            return sections;
+        };
+
+        const normalizeStoredDay = blocks => {
+            if (!blocks || blocks.length === 0) return [];
+            if (blocks.length === 1 && blocks[0].type === 'cancelled') return blocks.map(cloneBlock);
+            return composeScheduledDay(splitDayIntoSections(blocks), blocks);
+        };
+
+        const getBlockTimeRange = block => {
+            const [startText, endText] = String(block.time || '').split('-');
+            const start = window.parseTimeStrToMins(startText);
+            const end = window.parseTimeStrToMins(endText);
+            return end > start ? { start, end } : null;
+        };
+
+        const rangesOverlap = (first, second) => first && second && first.start < second.end && first.end > second.start;
+
+        const getTimingClashIndexes = blocks => {
+            const clashIndexes = new Set();
+            const lessons = (blocks || []).map((block, index) => ({ block, index, range: getBlockTimeRange(block) })).filter(item => item.block.type === 'lesson' && item.range);
+            for (let first = 0; first < lessons.length; first++) {
+                for (let second = first + 1; second < lessons.length; second++) {
+                    if (rangesOverlap(lessons[first].range, lessons[second].range)) {
+                        clashIndexes.add(lessons[first].index);
+                        clashIndexes.add(lessons[second].index);
+                    }
+                }
+            }
+            const breakRanges = Object.values(FIXED_BREAKS).map(getBlockTimeRange);
+            lessons.forEach(item => {
+                if (breakRanges.some(breakRange => rangesOverlap(item.range, breakRange))) clashIndexes.add(item.index);
+            });
+            return clashIndexes;
+        };
+
+        const timingClashBadge = hasClash => hasClash
+            ? '<span class="timing-clash-badge inline-flex items-center gap-1 px-2 py-1 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300 border border-rose-300 dark:border-rose-700 text-[8px] md:text-[9px] font-black uppercase tracking-wider"><i class="fa-solid fa-triangle-exclamation"></i> Time clash</span>'
+            : '';
 
         window.parseTimeStrToMins = (tStr) => {
             if(!tStr) return 0;
@@ -724,17 +974,18 @@
         signInAnonymously(auth).then(() => { handleHashRouting(); });
 
         window.loadWeekData = (term, week) => {
-            window.appState.weekData = { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] };
+            window.appState.weekData = emptyWeekDays();
             window.appState.coverData = {};
-            window.appState.todosData = { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] };
+            window.appState.todosData = emptyWeekDays();
             
             if (unsubscribeDB) unsubscribeDB(); 
-            const docRef = doc(db, "timetables", `2026_${term.replace(' ', '')}_${week.replace(' ', '')}`);
+            const docRef = timetableDocRef(term, week);
             unsubscribeDB = onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
-                    window.appState.weekData = docSnap.data().days || window.appState.weekData;
+                    const storedDays = docSnap.data().days || {};
+                    window.appState.weekData = Object.fromEntries(SCHOOL_DAYS.map(day => [day, normalizeStoredDay(storedDays[day] || [])]));
                     window.appState.coverData = docSnap.data().cover || {};
-                    window.appState.todosData = docSnap.data().todos || { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] };
+                    window.appState.todosData = docSnap.data().todos || emptyWeekDays();
                 } else {
                     setDoc(docRef, { days: window.appState.weekData, cover: {}, todos: window.appState.todosData }, { merge: true });
                 }
@@ -983,10 +1234,11 @@
                     window.autoCarryOverTodos(window.appState.day);
                 }
             }
+            if (window.updateLessonClipboardUI) window.updateLessonClipboardUI();
         };
 
         window.closeModals = () => {
-            ['modal-add', 'modal-edit', 'modal-cancel', 'modal-lesson-detail', 'modal-todos'].forEach(id => {
+            ['modal-add', 'modal-edit', 'modal-cancel', 'modal-lesson-detail', 'modal-todos', 'modal-transfer'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) { el.classList.add('hidden'); el.classList.remove('flex'); }
             });
@@ -1082,266 +1334,421 @@
             let termNum = parseInt(term.replace('Term ', ''));
             let weekNum = parseInt(weekStr.replace('Week ', ''));
             if (weekNum > 1) return { term: term, week: `Week ${weekNum - 1}` };
-            else if (termNum > 1) return { term: `Term ${termNum - 1}`, week: `Week 10` }; 
+            else if (termNum > 1) return { term: `Term ${termNum - 1}`, week: `Week ${WEEKS_PER_TERM}` };
             return null; 
         };
 
-        window.getMappedIndex = (sourceDay, targetDay, sourceIdx) => {
-            if (sourceDay === targetDay) return sourceIdx;
-            
-            const getStructure = (day) => {
-                const data = window.appState.weekData[day] || getSkeleton(day);
-                const br1 = data.findIndex(b => b.type === 'break' && b.topic.includes('Break 1'));
-                if (br1 === -1) return day === 'Tuesday' ? 2 : 4; 
-                return br1; 
-            };
-
-            const sourceB1Len = getStructure(sourceDay);
-            const targetB1Len = getStructure(targetDay);
-
-            if (sourceB1Len === targetB1Len) return sourceIdx;
-            
-            if (sourceB1Len === 4 && targetB1Len === 2) {
-                const map = { 0:3, 1:4, 2:5, 3:6, 5:0, 6:1, 8:8, 9:9 };
-                return map[sourceIdx] !== undefined ? map[sourceIdx] : sourceIdx;
-            } 
-            else if (sourceB1Len === 2 && targetB1Len === 4) {
-                const map = { 0:5, 1:6, 3:0, 4:1, 5:2, 6:3, 8:8, 9:9 };
-                return map[sourceIdx] !== undefined ? map[sourceIdx] : sourceIdx;
-            }
-
-            return sourceIdx; 
-        };
-
-        window.shiftLesson = (day, idx, direction) => {
-            let data = [...window.appState.weekData[day]];
-            let targetIdx = idx + direction;
-            
-            while (targetIdx >= 0 && targetIdx < data.length && data[targetIdx].type === 'break') {
-                targetIdx += direction;
-            }
-
-            if (targetIdx >= 0 && targetIdx < data.length && data[targetIdx].type !== 'break') {
-                let tempTime = data[idx].time;
-                data[idx].time = data[targetIdx].time;
-                data[targetIdx].time = tempTime;
-
-                data = window.sortDayBlocks(data);
-
-                window.appState.weekData[day] = data;
-                setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [day]: data } }, { merge: true });
-
-                if (window.appState.view === 'day') renderDayBlocks();
-                if (window.appState.view === 'week') renderWeekGrid();
-                if (window.appState.view === 'start-day') renderStartDay();
-                
-                const modal = document.getElementById('modal-lesson-detail');
-                if (modal && !modal.classList.contains('hidden')) {
-                    closeModals(); 
-                }
-                showToast(direction === -1 ? "Moved Lesson Up" : "Moved Lesson Down");
-            } else {
-                showToast("Cannot move lesson further in this direction.");
-            }
-        };
-
-        window.splitLesson = (day, idx) => {
-            let data = [...window.appState.weekData[day]];
-            let block = data[idx];
-            
-            let startStr = block.time.split('-')[0].trim();
-            let endStr = block.time.split('-')[1]?.trim() || startStr;
-            
-            let startMins = window.parseTimeStrToMins(startStr);
-            let endMins = window.parseTimeStrToMins(endStr);
-            let dur = endMins - startMins;
-            if (dur <= 0) dur = 60; // fallback duration
-            
-            let midMins = Math.floor(startMins + (dur / 2));
-            let midStr = window.formatMinsToTimeStr(midMins);
-            
-            data[idx].time = `${startStr} - ${midStr}`;
-            
-            let newBlock = {
-                ...block,
-                id: 'split_' + Date.now(),
-                time: `${midStr} - ${endStr}`,
-                subject: block.subject,
-                topic: block.topic ? block.topic + ' (Cont.)' : '',
-                note: '',
-                printLink: []
-            };
-            
-            data.splice(idx + 1, 0, newBlock);
-            data = window.sortDayBlocks(data);
-            
-            window.appState.weekData[day] = data;
-            setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [day]: data } }, { merge: true });
-            
-            if (window.appState.view === 'day') renderDayBlocks();
-            if (window.appState.view === 'week') renderWeekGrid();
-            if (window.appState.view === 'start-day') renderStartDay();
-            
-            const modal = document.getElementById('modal-lesson-detail');
-            if (modal && !modal.classList.contains('hidden')) {
-                closeModals(); 
-            }
-            showToast("Lesson split into two blocks.");
-        };
-
-        window.swapBlocks = (day) => {
+        window.shiftLesson = async (day, idx, direction) => {
             const data = window.appState.weekData[day] || [];
-            if (data.length === 0 || (data.length === 1 && data[0].type === 'cancelled')) { showToast("Cannot swap an empty or cancelled day."); return; }
+            const sourceBlock = data[idx];
+            if (!sourceBlock || sourceBlock.type !== 'lesson') return;
+            let targetIdx = idx + direction;
+            while (targetIdx >= 0 && targetIdx < data.length && data[targetIdx].type === 'break') targetIdx += direction;
+            if (targetIdx < 0 || targetIdx >= data.length || data[targetIdx].type !== 'lesson') {
+                showToast('Cannot move lesson further in this direction.');
+                return;
+            }
 
-            const br1Idx = data.findIndex(b => b.type === 'break' && b.topic.includes('Break 1'));
-            const br2Idx = data.findIndex(b => b.type === 'break' && b.topic.includes('Break 2'));
-
-            if (br1Idx === -1 || br2Idx === -1) { showToast("Cannot swap: Missing standard breaks."); return; }
-
-            const block1 = data.slice(0, br1Idx);
-            const break1 = data[br1Idx];
-            const block2 = data.slice(br1Idx + 1, br2Idx);
-            const rest = data.slice(br2Idx);
-
-            const retimeBlocks = (blocksToRetime, startMins) => {
-                let currentMins = startMins;
-                return blocksToRetime.map(b => {
-                    if (b.type === 'break') return b;
-                    const parts = b.time.split('-');
-                    let dur = 30; // fallback duration
-                    if (parts.length === 2) {
-                        const s = window.parseTimeStrToMins(parts[0]);
-                        const e = window.parseTimeStrToMins(parts[1]);
-                        dur = e - s;
-                        if (dur <= 0) dur = 30;
-                    }
-                    const newStart = currentMins;
-                    const newEnd = currentMins + dur;
-                    currentMins = newEnd;
-                    return { ...b, time: `${window.formatMinsToTimeStr(newStart)} - ${window.formatMinsToTimeStr(newEnd)}` };
+            const targetBlock = data[targetIdx];
+            const section = getLessonSection(targetBlock);
+            const sectionLessons = splitDayIntoSections(data)[section].filter(lesson => lesson.id !== sourceBlock.id);
+            const adjacentIndex = sectionLessons.findIndex(lesson => lesson.id === targetBlock.id);
+            const position = Math.max(0, adjacentIndex + (direction > 0 ? 1 : 0));
+            try {
+                await performLessonTransfer({
+                    source: { term: window.appState.term, week: window.appState.week, day, index: idx, lessonId: sourceBlock.id, subject: sourceBlock.subject, time: sourceBlock.time },
+                    target: { term: window.appState.term, week: window.appState.week, day },
+                    mode: 'move',
+                    section,
+                    position
                 });
-            };
-
-            const newBlock1 = retimeBlocks(block2, window.parseTimeStrToMins("9:00am"));
-            const b1End = break1.time.split('-')[1] || "11:30am";
-            const newBlock2 = retimeBlocks(block1, window.parseTimeStrToMins(b1End));
-
-            const newData = [...newBlock1, break1, ...newBlock2, ...rest];
-            window.sortDayBlocks(newData);
-
-            window.appState.weekData[day] = newData;
-            if (window.appState.view === 'day') renderDayBlocks();
-            if (window.appState.view === 'week') renderWeekGrid();
-
-            setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [day]: newData } }, { merge: true });
-            showToast(`Swapped Blocks 1 & 2 for ${day}`);
+                closeModals();
+                showToast(direction < 0 ? 'Moved lesson up' : 'Moved lesson down');
+            } catch (error) {
+                showToast(error.message || 'Could not reorder that lesson.');
+            }
         };
 
-        window.moveLesson = async (day, idx, direction, btn) => {
-            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-            const curIdx = days.indexOf(day);
-            const isDropdownAction = typeof direction === 'string' || direction === 1;
-            
-            if (btn.dataset.confirmed === "true" || isDropdownAction) {
-                let targetDay;
-                let targetTerm = window.appState.term;
-                let targetWeek = window.appState.week;
-                let isDiffWeek = false;
+        const getSchoolDayLocation = (term, week, day, dayOffset = 1) => {
+            let termNumber = parseInt(term.replace('Term ', ''));
+            let weekNumber = parseInt(week.replace('Week ', ''));
+            let dayIndex = SCHOOL_DAYS.indexOf(day) + dayOffset;
+            while (dayIndex >= SCHOOL_DAYS.length) { dayIndex -= SCHOOL_DAYS.length; weekNumber += 1; }
+            while (dayIndex < 0) { dayIndex += SCHOOL_DAYS.length; weekNumber -= 1; }
+            while (weekNumber > WEEKS_PER_TERM) { weekNumber -= WEEKS_PER_TERM; termNumber += 1; }
+            while (weekNumber < 1) { weekNumber += WEEKS_PER_TERM; termNumber -= 1; }
+            if (termNumber < 1 || termNumber > TERM_COUNT) return null;
+            return { term: `Term ${termNumber}`, week: `Week ${weekNumber}`, day: SCHOOL_DAYS[dayIndex] };
+        };
 
-                if (typeof direction === 'string') {
-                    targetDay = direction.replace('next_week_', '');
-                    isDiffWeek = true;
-                    let termNum = parseInt(window.appState.term.replace('Term ', ''));
-                    let weekNum = parseInt(window.appState.week.replace('Week ', ''));
-                    weekNum += 1;
-                    if (weekNum > 12) {
-                        termNum += 1;
-                        if (termNum > 4) { showToast("Cannot copy lesson past Term 4."); return; }
-                        weekNum = 1;
+        const getNextWeekLocation = day => {
+            const nextMonday = getSchoolDayLocation(window.appState.term, window.appState.week, 'Friday', 1);
+            return nextMonday ? { ...nextMonday, day } : null;
+        };
+
+        const currentTransferSource = () => window.appState.lessonTransfer?.source || null;
+
+        window.openTransferModal = (day, idx) => {
+            const sourceBlock = window.appState.weekData[day]?.[idx];
+            if (!sourceBlock || sourceBlock.type !== 'lesson') return;
+            sourceBlock.id = sourceBlock.id || createLessonId();
+            window.appState.lessonTransfer = {
+                source: {
+                    term: window.appState.term,
+                    week: window.appState.week,
+                    day,
+                    index: idx,
+                    lessonId: sourceBlock.id,
+                    subject: sourceBlock.subject || 'Untitled lesson',
+                    time: sourceBlock.time,
+                    scheduleSection: getLessonSection(sourceBlock)
+                }
+            };
+            document.getElementById('transfer-source-summary').textContent = `${sourceBlock.subject || 'Untitled lesson'} · ${window.appState.term}, ${window.appState.week} ${day} · ${sourceBlock.time}`;
+            const nextDay = getSchoolDayLocation(window.appState.term, window.appState.week, day, 1);
+            document.getElementById('copy-next-day-label').textContent = nextDay ? `${nextDay.day} · ${nextDay.week}` : 'No later school day available';
+            closeModals();
+            document.getElementById('modal-transfer').classList.remove('hidden');
+            document.getElementById('modal-transfer').classList.add('flex');
+        };
+
+        window.copyLessonToNextDay = async () => {
+            const source = currentTransferSource();
+            if (!source) return;
+            const target = getSchoolDayLocation(source.term, source.week, source.day, 1);
+            if (!target) { showToast('No later school day is available.'); return; }
+            await copyLessonExactly(source, target);
+        };
+
+        window.copyLessonToNextWeekday = async day => {
+            const source = currentTransferSource();
+            if (!source) return;
+            const target = getNextWeekLocation(day);
+            if (!target) { showToast('No later school week is available.'); return; }
+            await copyLessonExactly(source, target);
+        };
+
+        window.copyLessonForPaste = () => {
+            const source = currentTransferSource();
+            if (!source) return;
+            const sourceBlock = window.appState.weekData[source.day]?.find(block => block.id === source.lessonId) || window.appState.weekData[source.day]?.[source.index];
+            if (!sourceBlock) return;
+            window.appState.lessonClipboard = { lesson: cloneBlock(sourceBlock), copiedFrom: `${source.term}, ${source.week} ${source.day}` };
+            localStorage.setItem('lessonClipboard', JSON.stringify(window.appState.lessonClipboard));
+            closeModals();
+            updateLessonClipboardUI();
+            showToast('Lesson copied. Navigate to any day and paste it.');
+        };
+
+        window.clearLessonClipboard = () => {
+            window.appState.lessonClipboard = null;
+            localStorage.removeItem('lessonClipboard');
+            updateLessonClipboardUI();
+        };
+
+        window.updateLessonClipboardUI = () => {
+            const bar = document.getElementById('lesson-clipboard-bar');
+            if (!bar) return;
+            const clipboard = window.appState.lessonClipboard;
+            if (!clipboard) { bar.classList.add('hidden'); bar.classList.remove('flex'); return; }
+            bar.classList.remove('hidden'); bar.classList.add('flex');
+            document.getElementById('clipboard-lesson-summary').textContent = `${clipboard.lesson.subject || 'Untitled lesson'} · ${clipboard.lesson.time}`;
+            const pasteButton = document.getElementById('clipboard-paste-button');
+            const canPaste = window.appState.view === 'day' && SCHOOL_DAYS.includes(window.appState.day);
+            pasteButton.classList.toggle('hidden', !canPaste);
+            if (canPaste) pasteButton.innerHTML = `<i class="fa-solid fa-paste mr-1.5"></i>Paste into ${window.appState.day}`;
+        };
+
+        try {
+            const savedClipboard = localStorage.getItem('lessonClipboard');
+            if (savedClipboard) window.appState.lessonClipboard = JSON.parse(savedClipboard);
+        } catch (error) {
+            localStorage.removeItem('lessonClipboard');
+        }
+        updateLessonClipboardUI();
+
+        window.pasteCopiedLesson = async () => {
+            const clipboard = window.appState.lessonClipboard;
+            if (!clipboard || window.appState.view !== 'day') return;
+            const target = { term: window.appState.term, week: window.appState.week, day: window.appState.day };
+            try {
+                const destinationId = await insertLessonCopyExact(clipboard.lesson, target);
+                markLessonLanding(destinationId);
+                showToast(`Pasted lesson into ${target.day} at ${clipboard.lesson.time}`);
+                clearLessonClipboard();
+            } catch (error) {
+                showToast(error.message || 'Could not paste that lesson.');
+            }
+        };
+
+        const findLessonIndex = (blocks, source) => {
+            const idMatch = (blocks || []).findIndex(block => block.type === 'lesson' && block.id === source.lessonId);
+            if (idMatch !== -1) return idMatch;
+            const indexedBlock = blocks?.[source.index];
+            if (indexedBlock?.type === 'lesson' && indexedBlock.subject === source.subject && indexedBlock.time === source.time) return source.index;
+            return -1;
+        };
+
+        const composeOrEmptyDay = (sections, originalBlocks) => {
+            const lessonCount = Object.values(sections).reduce((total, lessons) => total + lessons.length, 0);
+            return lessonCount === 0 ? [] : composeScheduledDay(sections, originalBlocks);
+        };
+
+        window.performLessonTransfer = async ({ source, target, mode, section, position }) => {
+            const sourceRef = timetableDocRef(source.term, source.week);
+            const targetRef = timetableDocRef(target.term, target.week);
+            const sameDocument = sourceRef.path === targetRef.path;
+
+            return await runTransaction(db, async transaction => {
+                const sourceSnapshot = await transaction.get(sourceRef);
+                const targetSnapshot = sameDocument ? sourceSnapshot : await transaction.get(targetRef);
+                const sourceDays = { ...emptyWeekDays(), ...(sourceSnapshot.exists() ? sourceSnapshot.data().days : {}) };
+                const targetDays = sameDocument ? sourceDays : { ...emptyWeekDays(), ...(targetSnapshot.exists() ? targetSnapshot.data().days : {}) };
+                const sourceBlocks = (sourceDays[source.day] || []).map(block => block.type === 'lesson' && !block.id ? { ...block, id: createLessonId('migrated') } : block);
+                sourceDays[source.day] = sourceBlocks;
+                const sourceIndex = findLessonIndex(sourceBlocks, source);
+                if (sourceIndex === -1) throw new Error('That lesson changed or was removed. Reopen it and try again.');
+                const sourceLesson = cloneBlock(sourceBlocks[sourceIndex]);
+                const sameDay = sameDocument && source.day === target.day;
+
+                if (sameDay) {
+                    const sections = splitDayIntoSections(sourceBlocks);
+                    if (mode === 'move') {
+                        Object.keys(sections).forEach(key => { sections[key] = sections[key].filter(lesson => lesson.id !== sourceLesson.id); });
                     }
-                    targetTerm = `Term ${termNum}`; targetWeek = `Week ${weekNum}`;
-                } else if (direction === 1) {
-                    if (curIdx === days.length - 1) {
-                        targetDay = 'Monday'; isDiffWeek = true;
-                        let termNum = parseInt(window.appState.term.replace('Term ', ''));
-                        let weekNum = parseInt(window.appState.week.replace('Week ', ''));
-                        weekNum += 1;
-                        if (weekNum > 12) {
-                            termNum += 1;
-                            if (termNum > 4) { showToast("Cannot copy lesson past Term 4."); return; }
-                            weekNum = 1;
-                        }
-                        targetTerm = `Term ${termNum}`; targetWeek = `Week ${weekNum}`;
-                    } else { targetDay = days[curIdx + 1]; }
-                } else {
-                    if (curIdx === 0) {
-                        targetDay = 'Friday'; isDiffWeek = true;
-                        let termNum = parseInt(window.appState.term.replace('Term ', ''));
-                        let weekNum = parseInt(window.appState.week.replace('Week ', ''));
-                        weekNum -= 1;
-                        if (weekNum < 1) {
-                            termNum -= 1;
-                            if (termNum < 1) { showToast("Cannot copy lesson before Term 1."); return; }
-                            weekNum = 12;
-                        }
-                        targetTerm = `Term ${termNum}`; targetWeek = `Week ${weekNum}`;
-                    } else { targetDay = days[curIdx - 1]; }
+                    const lessonForDestination = { ...sourceLesson, id: mode === 'copy' ? createLessonId('copy') : sourceLesson.id, scheduleSection: section };
+                    sections[section].splice(Math.min(Math.max(position, 0), sections[section].length), 0, lessonForDestination);
+                    sourceDays[source.day] = composeOrEmptyDay(sections, sourceBlocks);
+                    transaction.set(sourceRef, { days: sourceDays, schemaVersion: 2 }, { merge: true });
+                    return lessonForDestination.id;
                 }
 
-                document.querySelectorAll('.copy-dropdown').forEach(d => {
-                    d.classList.add('hidden');
-                    d.classList.remove('flex');
+                let targetBlocks = (targetDays[target.day] || []).map(block => block.type === 'lesson' && !block.id ? { ...block, id: createLessonId('migrated') } : block);
+                if (targetBlocks.length === 1 && targetBlocks[0].type === 'cancelled') targetBlocks = [];
+                const targetSections = splitDayIntoSections(targetBlocks);
+                const lessonForDestination = { ...sourceLesson, id: createLessonId(mode === 'copy' ? 'copy' : 'moved'), scheduleSection: section };
+                targetSections[section].splice(Math.min(Math.max(position, 0), targetSections[section].length), 0, lessonForDestination);
+                targetDays[target.day] = composeOrEmptyDay(targetSections, targetBlocks);
+
+                if (mode === 'move') {
+                    const sourceSections = splitDayIntoSections(sourceBlocks);
+                    Object.keys(sourceSections).forEach(key => { sourceSections[key] = sourceSections[key].filter(lesson => lesson.id !== sourceLesson.id); });
+                    sourceDays[source.day] = composeOrEmptyDay(sourceSections, sourceBlocks);
+                }
+
+                if (sameDocument) {
+                    transaction.set(sourceRef, { days: sourceDays, schemaVersion: 2 }, { merge: true });
+                } else {
+                    if (mode === 'move') transaction.set(sourceRef, { days: sourceDays, schemaVersion: 2 }, { merge: true });
+                    transaction.set(targetRef, { days: targetDays, schemaVersion: 2 }, { merge: true });
+                }
+                return lessonForDestination.id;
+            });
+        };
+
+        const insertLessonCopyExact = async (lesson, target) => {
+            const targetRef = timetableDocRef(target.term, target.week);
+            return await runTransaction(db, async transaction => {
+                const snapshot = await transaction.get(targetRef);
+                const days = { ...emptyWeekDays(), ...(snapshot.exists() ? snapshot.data().days : {}) };
+                let targetBlocks = days[target.day] || [];
+                if (targetBlocks.length === 1 && targetBlocks[0].type === 'cancelled') targetBlocks = [];
+                const sections = splitDayIntoSections(targetBlocks);
+                const section = getLessonSection(lesson);
+                const copiedLesson = { ...cloneBlock(lesson), id: createLessonId('copy'), scheduleSection: section };
+                const start = getBlockTimeRange(copiedLesson)?.start ?? Number.MAX_SAFE_INTEGER;
+                const position = sections[section].findIndex(existing => (getBlockTimeRange(existing)?.start ?? Number.MAX_SAFE_INTEGER) > start);
+                sections[section].splice(position === -1 ? sections[section].length : position, 0, copiedLesson);
+                days[target.day] = composeOrEmptyDay(sections, targetBlocks);
+                transaction.set(targetRef, { days, schemaVersion: 2 }, { merge: true });
+                return copiedLesson.id;
+            });
+        };
+
+        const markLessonLanding = lessonId => {
+            window.appState.recentlyDroppedLessonId = lessonId;
+            setTimeout(() => {
+                if (window.appState.view === 'week') renderWeekGrid();
+                if (window.appState.view === 'day') renderDayBlocks();
+            }, 80);
+        };
+
+        const copyLessonExactly = async (source, target) => {
+            try {
+                const destinationId = await performLessonTransfer({ source, target, mode: 'copy', section: source.scheduleSection || 'beforeBreak1', position: Number.MAX_SAFE_INTEGER });
+                markLessonLanding(destinationId);
+                closeModals();
+                showToast(`Copied to ${target.day}, ${target.week} at ${source.time}`);
+            } catch (error) {
+                console.error('Lesson copy failed', error);
+                showToast(error.message || 'Could not copy that lesson.');
+            }
+        };
+
+        window.startLessonDrag = (event, day, idx) => {
+            const block = window.appState.weekData[day]?.[idx];
+            if (!block || block.type !== 'lesson') return;
+            block.id = block.id || createLessonId();
+            window.appState.draggedLesson = {
+                term: window.appState.term,
+                week: window.appState.week,
+                day,
+                index: idx,
+                lessonId: block.id,
+                subject: block.subject || 'Untitled lesson',
+                time: block.time
+            };
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', block.id);
+            const ghost = document.createElement('div');
+            ghost.className = 'lesson-drag-ghost';
+            ghost.innerHTML = `<div class="text-[9px] font-black uppercase tracking-widest text-cyan-300 mb-1">Moving lesson</div><div class="font-black text-sm">${block.subject || 'Untitled lesson'}</div><div class="text-xs text-slate-300 mt-1"><i class="fa-regular fa-clock mr-1"></i>${block.time}</div>`;
+            document.body.appendChild(ghost);
+            event.dataTransfer.setDragImage(ghost, 135, 35);
+            window.appState.dragGhost = ghost;
+            document.body.classList.add('lesson-dragging');
+            requestAnimationFrame(() => event.currentTarget.classList.add('is-dragging'));
+        };
+
+        const clearLessonDragVisuals = () => {
+            document.body.classList.remove('lesson-dragging');
+            document.querySelectorAll('.is-dragging, .drop-before, .drop-after, .drop-before-break, .drop-after-break, .drag-target-active').forEach(element => {
+                element.classList.remove('is-dragging', 'drop-before', 'drop-after', 'drop-before-break', 'drop-after-break', 'drag-target-active');
+            });
+            if (window.appState.dragGhost) window.appState.dragGhost.remove();
+            window.appState.dragGhost = null;
+        };
+
+        window.endLessonDrag = event => {
+            event.currentTarget.classList.remove('is-dragging');
+            clearLessonDragVisuals();
+            window.appState.draggedLesson = null;
+        };
+
+        window.allowLessonDrop = event => {
+            if (!window.appState.draggedLesson) return;
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+            const target = event.currentTarget;
+            document.querySelectorAll('.drop-before, .drop-after, .drop-before-break, .drop-after-break, .drag-target-active').forEach(element => {
+                if (element !== target) element.classList.remove('drop-before', 'drop-after', 'drop-before-break', 'drop-after-break', 'drag-target-active');
+            });
+            const bounds = target.getBoundingClientRect();
+            const lowerHalf = event.clientY > bounds.top + bounds.height / 2;
+            if (target.classList.contains('schedule-lesson-card')) {
+                event.stopPropagation();
+                target.classList.toggle('drop-before', !lowerHalf);
+                target.classList.toggle('drop-after', lowerHalf);
+            } else if (target.classList.contains('schedule-break')) {
+                event.stopPropagation();
+                target.classList.toggle('drop-before-break', !lowerHalf);
+                target.classList.toggle('drop-after-break', lowerHalf);
+            } else if (target.classList.contains('day-drop-zone')) {
+                target.classList.add('drag-target-active');
+            }
+        };
+
+        window.clearLessonDropCue = event => {
+            const related = event.relatedTarget;
+            if (related && event.currentTarget.contains(related)) return;
+            event.currentTarget.classList.remove('drop-before', 'drop-after', 'drop-before-break', 'drop-after-break', 'drag-target-active');
+        };
+
+        const getDropPosition = (targetDay, sectionKey, targetBlock, placeAfter) => {
+            const lessons = splitDayIntoSections(window.appState.weekData[targetDay] || [])[sectionKey]
+                .filter(lesson => lesson.id !== window.appState.draggedLesson?.lessonId || targetDay !== window.appState.draggedLesson?.day);
+            if (!targetBlock) return lessons.length;
+            const targetIndex = lessons.findIndex(lesson => lesson.id === targetBlock.id);
+            if (targetIndex === -1) return lessons.length;
+            return targetIndex + (placeAfter ? 1 : 0);
+        };
+
+        window.dropLessonOnCard = async (event, targetDay, targetIdx) => {
+            const source = window.appState.draggedLesson;
+            if (!source) return;
+            event.preventDefault();
+            event.stopPropagation();
+            const targetBlock = window.appState.weekData[targetDay]?.[targetIdx];
+            if (!targetBlock || targetBlock.type !== 'lesson') return;
+            const bounds = event.currentTarget.getBoundingClientRect();
+            const placeAfter = event.clientY > bounds.top + bounds.height / 2;
+            const section = getLessonSection(targetBlock);
+            const position = getDropPosition(targetDay, section, targetBlock, placeAfter);
+            try {
+                const destinationId = await performLessonTransfer({
+                    source,
+                    target: { term: window.appState.term, week: window.appState.week, day: targetDay },
+                    mode: 'move',
+                    section,
+                    position
                 });
-                
-                const destinationTime = window.appState.weekData[day][idx].time;
-                const blockToMove = { 
-                    ...window.appState.weekData[day][idx], 
-                    time: destinationTime,
-                    id: 'copied_' + Date.now() + Math.random() 
-                };
+                markLessonLanding(destinationId);
+                showToast(`Moved lesson to ${targetDay}`);
+            } catch (error) {
+                showToast(error.message || 'Could not move that lesson.');
+            } finally {
+                clearLessonDragVisuals();
+                window.appState.draggedLesson = null;
+            }
+        };
 
-                const processMove = (targetData) => {
-                    if (!targetData || targetData.length === 0 || targetData[0].type === 'cancelled') {
-                        targetData = getSkeleton(targetDay);
-                    }
-                    const startMins = window.parseTimeStrToMins(blockToMove.time.split('-')[0]);
-                    const matchIdx = targetData.findIndex(b => b.type !== 'break' && window.parseTimeStrToMins(b.time.split('-')[0]) === startMins);
-                    
-                    if (matchIdx !== -1) {
-                        targetData[matchIdx] = blockToMove; 
-                    } else {
-                        targetData.push(blockToMove);
-                    }
-                    return window.sortDayBlocks(targetData);
-                };
+        window.dropLessonOnBreak = async (event, targetDay, breakIdx) => {
+            const source = window.appState.draggedLesson;
+            if (!source) return;
+            event.preventDefault();
+            event.stopPropagation();
+            const breakBlock = window.appState.weekData[targetDay]?.[breakIdx];
+            if (!breakBlock || breakBlock.type !== 'break') return;
+            const bounds = event.currentTarget.getBoundingClientRect();
+            const belowBreak = event.clientY > bounds.top + bounds.height / 2;
+            const isBreak1 = String(breakBlock.topic || '').includes('Break 1');
+            const section = isBreak1
+                ? (belowBreak ? 'betweenBreaks' : 'beforeBreak1')
+                : (belowBreak ? 'afterBreak2' : 'betweenBreaks');
+            const lessons = splitDayIntoSections(window.appState.weekData[targetDay] || [])[section]
+                .filter(lesson => lesson.id !== source.lessonId || targetDay !== source.day);
+            const position = belowBreak ? 0 : lessons.length;
+            try {
+                const destinationId = await performLessonTransfer({
+                    source,
+                    target: { term: window.appState.term, week: window.appState.week, day: targetDay },
+                    mode: 'move',
+                    section,
+                    position
+                });
+                markLessonLanding(destinationId);
+                showToast(`Moved lesson ${belowBreak ? 'after' : 'before'} ${breakBlock.topic}`);
+            } catch (error) {
+                showToast(error.message || 'Could not move that lesson.');
+            } finally {
+                clearLessonDragVisuals();
+                window.appState.draggedLesson = null;
+            }
+        };
 
-                if (!isDiffWeek) {
-                    let updatedWeekData = { ...window.appState.weekData };
-                    updatedWeekData[targetDay] = processMove(updatedWeekData[targetDay]);
-                    setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: updatedWeekData }, { merge: true });
-                    showToast(`Lesson copied exactly to ${targetDay}`);
-                } else {
-                    const diffWeekDocRef = doc(db, "timetables", `2026_${targetTerm.replace(' ', '')}_${targetWeek.replace(' ', '')}`);
-                    const diffWeekSnap = await getDoc(diffWeekDocRef);
-                    let diffWeekData = { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] };
-                    if (diffWeekSnap.exists() && diffWeekSnap.data().days) diffWeekData = diffWeekSnap.data().days;
-                    
-                    diffWeekData[targetDay] = processMove(diffWeekData[targetDay]);
-                    await setDoc(diffWeekDocRef, { days: diffWeekData }, { merge: true });
-                    showToast(`Lesson copied exactly to ${targetTerm}, ${targetWeek} ${targetDay}`);
-                }
-            } else {
-                btn.dataset.confirmed = "true";
-                const originalHTML = btn.innerHTML;
-                btn.innerHTML = '<i class="fa-solid fa-check"></i>';
-                btn.classList.add('bg-amber-200', 'dark:bg-amber-700', 'text-amber-700', 'dark:text-amber-200');
-                setTimeout(() => {
-                    if (btn && btn.dataset) {
-                        btn.dataset.confirmed = "false";
-                        btn.innerHTML = originalHTML;
-                        btn.classList.remove('bg-amber-200', 'dark:bg-amber-700', 'text-amber-700', 'dark:text-amber-200');
-                    }
-                }, 3000);
+        window.dropLessonAtDayEnd = async (event, targetDay) => {
+            const source = window.appState.draggedLesson;
+            if (!source) return;
+            event.preventDefault();
+            const sourceBlock = window.appState.weekData[source.day]?.find(block => block.id === source.lessonId);
+            const section = sourceBlock ? getLessonSection(sourceBlock) : 'beforeBreak1';
+            const position = splitDayIntoSections(window.appState.weekData[targetDay] || [])[section]
+                .filter(lesson => lesson.id !== source.lessonId || targetDay !== source.day).length;
+            try {
+                const destinationId = await performLessonTransfer({
+                    source,
+                    target: { term: window.appState.term, week: window.appState.week, day: targetDay },
+                    mode: 'move',
+                    section,
+                    position
+                });
+                markLessonLanding(destinationId);
+                showToast(`Moved lesson to ${targetDay}`);
+            } catch (error) {
+                showToast(error.message || 'Could not move that lesson.');
+            } finally {
+                clearLessonDragVisuals();
+                window.appState.draggedLesson = null;
             }
         };
 
@@ -1397,19 +1804,16 @@
         };
 
         window.addLessonDirectly = (day) => {
-            let data = [...(window.appState.weekData[day] || [])];
-            let lastTimeStr = '2:30pm - 3:00pm';
-            if (data.length > 0) {
-                lastTimeStr = data[data.length - 1].time;
-            }
-            let endPart = lastTimeStr.split('-')[1]?.trim() || '3:00pm';
-            let newEndMins = window.parseTimeStrToMins(endPart) + 30;
-            let newTimeStr = `${endPart} - ${window.formatMinsToTimeStr(newEndMins)}`;
-            
-            data.push({
-                id: 'custom_' + Date.now(),
+            const data = window.appState.weekData[day] || [];
+            const sections = splitDayIntoSections(data.length === 1 && data[0].type === 'cancelled' ? [] : data);
+            const existingLessons = Object.values(sections).flat();
+            const lastLesson = existingLessons[existingLessons.length - 1];
+            const section = lastLesson ? getLessonSection(lastLesson) : 'beforeBreak1';
+            const start = lastLesson ? (getBlockTimeRange(lastLesson)?.end ?? SCHEDULE_SECTIONS[section].start) : SCHEDULE_SECTIONS[section].start;
+            sections[section].push({
+                id: createLessonId('custom'),
                 type: 'lesson',
-                time: newTimeStr,
+                time: `${window.formatMinsToTimeStr(start)} - ${window.formatMinsToTimeStr(start + 30)}`,
                 subject: 'New Lesson',
                 topic: '',
                 unitOutlineLink: '',
@@ -1417,16 +1821,10 @@
                 printLink: [],
                 lessonPlanLink: ''
             });
-            
-            data = window.sortDayBlocks(data);
-            
-            window.appState.weekData[day] = data;
-            setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [day]: data } }, { merge: true });
-            
-            if (window.appState.view === 'day') renderDayBlocks();
-            if (window.appState.view === 'week') renderWeekGrid();
-            if (window.appState.view === 'start-day') renderStartDay();
-            showToast(`New lesson block added to ${day}`);
+            const newData = composeScheduledDay(sections, data);
+            window.appState.weekData[day] = newData;
+            setDoc(timetableDocRef(window.appState.term, window.appState.week), { days: { ...window.appState.weekData, [day]: newData }, schemaVersion: 2 }, { merge: true });
+            showToast(`New lesson added at ${window.formatMinsToTimeStr(start)}`);
         };
 
         window.deleteLesson = (day, idx, btn) => {
@@ -1544,6 +1942,7 @@
             }
 
             const data = window.appState.weekData[window.appState.day] || [];
+            const clashIndexes = getTimingClashIndexes(data);
             
             if (data.length === 0) {
                 scheduleContainer.className = "flex-1 h-full flex flex-col w-full min-w-[300px] mx-auto pt-[3px]";
@@ -1584,9 +1983,10 @@
                 } else {
                     const theme = getTheme(block.subject, block.topic);
                     const startTime = block.time.split(' - ')[0] || block.time;
+                    const hasClash = clashIndexes.has(idx);
 
                     scheduleContainer.innerHTML += `
-                        <div onclick="openLessonDetail(${idx})" class="cursor-pointer flex-1 min-h-[3rem] md:min-h-[3.5rem] bg-white dark:bg-slate-800 ${theme.cardExtra} rounded-xl md:rounded-2xl px-3 md:px-4 py-1.5 md:py-2 flex flex-col justify-center shadow-sm hover:shadow-md border border-slate-200/60 dark:border-slate-700/50 transition-all hover:scale-[1.01] relative overflow-hidden group">
+                        <div onclick="openLessonDetail(${idx})" class="cursor-pointer flex-1 min-h-[3rem] md:min-h-[3.5rem] bg-white dark:bg-slate-800 ${theme.cardExtra} rounded-xl md:rounded-2xl px-3 md:px-4 py-1.5 md:py-2 flex flex-col justify-center shadow-sm hover:shadow-md border border-slate-200/60 dark:border-slate-700/50 transition-all hover:scale-[1.01] relative overflow-hidden group ${hasClash ? 'timing-clash-card' : ''}">
                             <div class="absolute left-0 top-0 bottom-0 w-1.5 md:w-2 ${theme.bar}"></div>
                             <div class="absolute -right-2 -bottom-2 md:-bottom-4 text-[4rem] md:text-[5rem] opacity-[0.03] dark:opacity-[0.05] transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-12 ${theme.iconColor} pointer-events-none">
                                 <i class="fa-solid ${theme.icon}"></i>
@@ -1604,6 +2004,7 @@
                                     <h3 class="text-sm md:text-xl font-black text-slate-800 dark:text-white leading-none drop-shadow-sm whitespace-nowrap">${block.subject}</h3>
                                     ${block.topic ? `<p class="text-slate-500 dark:text-slate-400 text-[9px] md:text-[11px] font-semibold whitespace-nowrap mt-0">${block.topic}</p>` : ''}
                                 </div>
+                                ${timingClashBadge(hasClash)}
                             </div>
                         </div>
                     `;
@@ -1618,6 +2019,7 @@
             
             ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].forEach(day => {
                 const data = window.appState.weekData[day] || [];
+                const clashIndexes = getTimingClashIndexes(data);
                 const isCovered = window.appState.coverData[day];
                 const isCurrentDay = (window.appState.term === curTime.term && window.appState.week === curTime.week && day === curTime.day);
                 
@@ -1628,6 +2030,7 @@
                     <div class="flex items-center gap-2">
                         <h2 class="text-base md:text-lg font-black ${isCovered ? 'text-purple-700 dark:text-purple-300' : 'text-slate-800 dark:text-slate-100 group-hover:text-cyan-600 dark:group-hover:text-cyan-400'} transition-colors">${day}</h2>
                         ${isCovered ? '<i class="fa-solid fa-chalkboard-user text-purple-500 dark:text-purple-400 text-xs" title="Cover Teacher"></i>' : ''}
+                        ${clashIndexes.size ? `<span class="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300 text-[8px] font-black border border-rose-200 dark:border-rose-800"><i class="fa-solid fa-triangle-exclamation mr-1"></i>${clashIndexes.size}</span>` : ''}
                     </div>
                     <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 group-hover:bg-cyan-500 group-hover:text-white dark:group-hover:bg-cyan-600 transition-colors shadow-sm">
                         <i class="fa-solid fa-arrow-right text-[10px]"></i>
@@ -1635,7 +2038,7 @@
                 </div>`;
                 
                 let colBgClass = isCovered ? 'bg-stripes-purple' : '';
-                let bodyHTML = `<div class="p-2.5 md:p-3.5 flex flex-col overflow-y-auto no-scrollbar flex-1 min-h-0 rounded-b-[2rem] relative transition-colors duration-300 ${colBgClass}">`;
+                let bodyHTML = `<div class="day-drop-zone p-2.5 md:p-3.5 flex flex-col overflow-y-auto no-scrollbar flex-1 min-h-0 rounded-b-[2rem] relative transition-colors duration-300 ${colBgClass}" ondragover="allowLessonDrop(event)" ondragleave="clearLessonDropCue(event)" ondrop="dropLessonAtDayEnd(event, '${day}')">`;
                 
                 if (data.length === 0) {
                     bodyHTML += `<div class="flex flex-col items-center justify-center h-full min-h-[120px] gap-2 p-2">
@@ -1656,7 +2059,7 @@
                         if(block.type === 'break') {
                             const isDuty = block.isDuty;
                             bodyHTML += `
-                            <div class="relative flex items-center justify-center py-2.5 my-1.5 group w-full cursor-pointer" onclick="toggleDuty('${day}', ${idx})">
+                            <div class="schedule-break relative flex items-center justify-center py-2.5 my-1.5 group w-full cursor-pointer" onclick="toggleDuty('${day}', ${idx})" ondragover="allowLessonDrop(event)" ondragleave="clearLessonDropCue(event)" ondrop="dropLessonOnBreak(event, '${day}', ${idx})">
                                 <div class="absolute inset-0 flex items-center px-2">
                                     <div class="w-full border-t border-dashed ${isDuty ? 'border-amber-500' : 'border-amber-300/60 dark:border-amber-700/60'}"></div>
                                 </div>
@@ -1667,6 +2070,8 @@
                             </div>`;
                         } else {
                             const theme = getTheme(block.subject, block.topic);
+                            const hasClash = clashIndexes.has(idx);
+                            const justDropped = block.id === window.appState.recentlyDroppedLessonId;
                             
                             let printLinks = getPrintLinks(block.printLink);
                             let printBtnHTML = '';
@@ -1688,24 +2093,11 @@
                             }
 
                             bodyHTML += `
-                            <div class="bg-white dark:bg-slate-800 p-3 pt-3.5 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 ${theme.weekCardBorder} ${theme.cardExtra} shadow-sm hover:shadow-md transition-all duration-300 group relative flex flex-col gap-2 z-10 hover:z-50">
+                            <div data-lesson-id="${block.id}" draggable="true" ondragstart="startLessonDrag(event, '${day}', ${idx})" ondragend="endLessonDrag(event)" ondragover="allowLessonDrop(event)" ondragleave="clearLessonDropCue(event)" ondrop="dropLessonOnCard(event, '${day}', ${idx})" class="schedule-lesson-card ${hasClash ? 'timing-clash-card' : ''} ${justDropped ? 'lesson-just-dropped' : ''} bg-white dark:bg-slate-800 p-3 pt-3.5 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 ${theme.weekCardBorder} ${theme.cardExtra} shadow-sm hover:shadow-md group relative flex flex-col gap-2 z-10 hover:z-50 cursor-grab active:cursor-grabbing">
                                 <div class="flex justify-between items-center relative z-[60]">
-                                    <span class="${theme.badgeBg} ${theme.badgeText} border ${theme.badgeBorder} px-2 py-0.5 rounded text-[9px] md:text-[10px] font-bold tracking-wide">${block.time}</span>
+                                    <div class="flex items-center gap-1.5"><span class="${theme.badgeBg} ${theme.badgeText} border ${theme.badgeBorder} px-2 py-0.5 rounded text-[9px] md:text-[10px] font-bold tracking-wide">${block.time}</span>${timingClashBadge(hasClash)}</div>
                                     <div class="opacity-0 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex relative z-20">
-                                        <button onclick="event.stopPropagation(); moveLesson('${day}', ${idx}, -1, this)" class="bg-slate-50 dark:bg-slate-700 hover:bg-amber-50 dark:hover:bg-amber-900/30 text-slate-400 hover:text-amber-500 p-1.5 rounded-l text-[9px] transition-colors border border-slate-200 dark:border-slate-600 cursor-pointer border-r-0" title="Copy to prev day"><i class="fa-solid fa-reply"></i></button>
-                                        
-                                        <div class="relative inline-flex" onclick="event.stopPropagation()">
-                                            <button onclick="toggleDropdown(event, this)" class="bg-slate-50 dark:bg-slate-700 hover:bg-amber-50 dark:hover:bg-amber-900/30 text-slate-400 hover:text-amber-500 p-1.5 text-[9px] transition-colors border-y border-r border-slate-200 dark:border-slate-600 cursor-pointer" title="Copy lesson..."><i class="fa-solid fa-share"></i></button>
-                                            <div class="copy-dropdown absolute top-full right-0 mt-1 hidden flex-col bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-amber-200 dark:border-amber-700/50 z-[100] overflow-hidden min-w-[130px] text-left">
-                                                <button onclick="moveLesson('${day}', ${idx}, 1, this)" class="w-full text-left px-3 py-2 hover:bg-amber-50 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-400 text-[10px] font-bold transition-colors border-b border-amber-100 dark:border-amber-800/50 whitespace-nowrap">Next Day</button>
-                                                <div class="px-3 py-1.5 bg-slate-50 dark:bg-slate-900/50 text-[8px] font-black text-slate-400 tracking-widest uppercase border-b border-slate-100 dark:border-slate-700">Next Week</div>
-                                                <button onclick="moveLesson('${day}', ${idx}, 'next_week_Monday', this)" class="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 text-[10px] font-bold transition-colors border-b border-slate-100 dark:border-slate-700">Monday</button>
-                                                <button onclick="moveLesson('${day}', ${idx}, 'next_week_Tuesday', this)" class="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 text-[10px] font-bold transition-colors border-b border-slate-100 dark:border-slate-700">Tuesday</button>
-                                                <button onclick="moveLesson('${day}', ${idx}, 'next_week_Wednesday', this)" class="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 text-[10px] font-bold transition-colors border-b border-slate-100 dark:border-slate-700">Wednesday</button>
-                                                <button onclick="moveLesson('${day}', ${idx}, 'next_week_Thursday', this)" class="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 text-[10px] font-bold transition-colors border-b border-slate-100 dark:border-slate-700">Thursday</button>
-                                                <button onclick="moveLesson('${day}', ${idx}, 'next_week_Friday', this)" class="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 text-[10px] font-bold transition-colors">Friday</button>
-                                            </div>
-                                        </div>
+                                        <button onclick="event.stopPropagation(); openTransferModal('${day}', ${idx})" class="bg-slate-50 dark:bg-slate-700 hover:bg-amber-50 dark:hover:bg-amber-900/30 text-slate-400 hover:text-amber-500 p-1.5 rounded-l text-[9px] transition-colors border border-slate-200 dark:border-slate-600 cursor-pointer border-r-0" title="Copy lesson"><i class="fa-solid fa-copy"></i></button>
 
                                         <button onclick="event.stopPropagation(); deleteLesson('${day}', ${idx}, this)" class="bg-slate-50 dark:bg-slate-700 hover:bg-rose-50 dark:hover:bg-rose-900/30 text-slate-400 hover:text-rose-500 p-1.5 text-[9px] transition-colors border-r border-y border-slate-200 dark:border-slate-600 cursor-pointer" title="Delete lesson"><i class="fa-solid fa-trash"></i></button>
                                         <button onclick="event.stopPropagation(); initEdit('${day}', ${idx})" class="bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-r text-[9px] transition-colors border border-slate-200 dark:border-slate-600 cursor-pointer border-l-0" title="Edit lesson"><i class="fa-solid fa-pen"></i></button>
@@ -1728,7 +2120,6 @@
                     
                     bodyHTML += `<div class="mt-auto pt-3 shrink-0 flex flex-col gap-1.5">
                         <button onclick="addLessonDirectly('${day}')" class="w-full flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-emerald-500 dark:hover:text-emerald-400 py-1.5 border border-transparent hover:border-emerald-200 dark:hover:border-emerald-900/50 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all text-[10px] md:text-xs font-semibold"><i class="fa-solid fa-plus mr-1.5"></i> Add Lesson</button>
-                        <button onclick="swapBlocks('${day}')" class="w-full flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-indigo-500 dark:hover:text-indigo-400 py-1.5 border border-transparent hover:border-indigo-200 dark:hover:border-indigo-900/50 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all text-[10px] md:text-xs font-semibold"><i class="fa-solid fa-arrow-right-arrow-left mr-1.5"></i> Swap Breaks Layout</button>
                         <button onclick="clearDay('${day}', this)" class="w-full flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 py-1.5 border border-transparent hover:border-rose-200 dark:hover:border-rose-900/50 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all text-[10px] md:text-xs font-semibold"><i class="fa-solid fa-eraser mr-1.5"></i> Clear Day</button>
                     </div>`;
                 }
@@ -1736,12 +2127,14 @@
                 col.innerHTML = headerHTML + bodyHTML;
                 grid.appendChild(col);
             });
+            if (window.appState.recentlyDroppedLessonId) setTimeout(() => { window.appState.recentlyDroppedLessonId = null; }, 650);
         };
 
         const renderDayBlocks = () => {
             const container = document.getElementById('day-blocks');
             container.innerHTML = '';
             const data = window.appState.weekData[window.appState.day] || [];
+            const clashIndexes = getTimingClashIndexes(data);
             const isCovered = window.appState.coverData[window.appState.day];
             
             const toggleCoverBtn = document.getElementById('header-toggle-cover-btn');
@@ -1757,7 +2150,7 @@
                 if (blocksContainer) blocksContainer.classList.remove('bg-stripes-purple', 'px-2', 'py-1');
             }
             
-            let html = '<div class="w-full max-w-3xl mx-auto flex flex-col pb-8 pt-2 md:pt-4">';
+            let html = `<div class="day-drop-zone w-full max-w-3xl mx-auto flex flex-col pb-8 pt-2 md:pt-4" ondragover="allowLessonDrop(event)" ondragleave="clearLessonDropCue(event)" ondrop="dropLessonAtDayEnd(event, '${window.appState.day}')">`;
 
             if (data.length === 1 && data[0].type === 'cancelled') {
                 html += `
@@ -1777,7 +2170,7 @@
                 if(block.type === 'break') {
                     const isDuty = block.isDuty;
                     html += `
-                    <div class="flex items-center justify-center gap-4 my-2 opacity-80 relative z-10 cursor-pointer group" onclick="toggleDuty('${window.appState.day}', ${idx})">
+                    <div class="schedule-break flex items-center justify-center gap-4 my-2 opacity-80 relative z-10 cursor-pointer group" onclick="toggleDuty('${window.appState.day}', ${idx})" ondragover="allowLessonDrop(event)" ondragleave="clearLessonDropCue(event)" ondrop="dropLessonOnBreak(event, '${window.appState.day}', ${idx})">
                         <div class="h-px ${isDuty ? 'bg-amber-400 dark:bg-amber-500' : 'bg-amber-200 dark:bg-amber-800/50'} flex-1 transition-colors"></div>
                         <div class="px-5 py-2 rounded-full text-[10px] md:text-xs font-black tracking-widest uppercase shadow-sm flex items-center transition-all duration-300 ${isDuty ? 'bg-amber-500 text-white border-2 border-amber-400 scale-105 shadow-amber-500/40' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-900/40'}">
                             <i class="fa-solid ${isDuty ? 'fa-user-shield animate-pulse' : 'fa-' + block.icon} mr-2 text-sm"></i> ${block.topic} ${isDuty ? '(DUTY)' : ''} (${block.time})
@@ -1787,6 +2180,8 @@
                 } else {
                     const theme = getTheme(block.subject, block.topic);
                     const hasNote = block.note && block.note.trim() !== "";
+                    const hasClash = clashIndexes.has(idx);
+                    const justDropped = block.id === window.appState.recentlyDroppedLessonId;
                     
                     let printLinks = getPrintLinks(block.printLink);
                     let printBtnHTML = '';
@@ -1802,30 +2197,16 @@
                     }
 
                     html += `
-                    <div class="relative bg-white dark:bg-slate-800/80 ${theme.cardExtra} backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 rounded-2xl md:rounded-[1.5rem] shadow-sm hover:shadow-xl transition-all duration-300 group mb-5 flex flex-col z-10 hover:z-20">
+                    <div data-lesson-id="${block.id}" draggable="true" ondragstart="startLessonDrag(event, '${window.appState.day}', ${idx})" ondragend="endLessonDrag(event)" ondragover="allowLessonDrop(event)" ondragleave="clearLessonDropCue(event)" ondrop="dropLessonOnCard(event, '${window.appState.day}', ${idx})" class="schedule-lesson-card ${hasClash ? 'timing-clash-card' : ''} ${justDropped ? 'lesson-just-dropped' : ''} relative bg-white dark:bg-slate-800/80 ${theme.cardExtra} backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 rounded-2xl md:rounded-[1.5rem] shadow-sm hover:shadow-xl group mb-5 flex flex-col z-10 hover:z-20 cursor-grab active:cursor-grabbing">
                         <div class="absolute left-0 top-0 bottom-0 w-2 md:w-3 ${theme.bar} rounded-l-2xl md:rounded-l-[1.5rem]"></div>
                         <div class="p-4 md:p-6 pl-6 md:pl-8 flex flex-col flex-1">
                             <div class="flex justify-between items-center mb-4 relative z-[60]">
-                                <span class="px-3 py-1.5 ${theme.badgeBg} ${theme.badgeText} rounded-full text-[10px] md:text-xs font-bold border ${theme.badgeBorder} shadow-sm flex items-center tracking-wide"><i class="fa-regular fa-clock mr-1.5"></i> ${block.time}</span>
+                                <div class="flex items-center gap-2"><span class="px-3 py-1.5 ${theme.badgeBg} ${theme.badgeText} rounded-full text-[10px] md:text-xs font-bold border ${theme.badgeBorder} shadow-sm flex items-center tracking-wide"><i class="fa-regular fa-clock mr-1.5"></i> ${block.time}</span>${timingClashBadge(hasClash)}</div>
                                 <div class="flex items-center z-20 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all">
-                                    <button onclick="event.stopPropagation(); moveLesson('${window.appState.day}', ${idx}, -1, this)" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none rounded-l-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="Copy to prev day"><i class="fa-solid fa-reply text-xs md:text-sm"></i></button>
-                                    
-                                    <div class="relative group/action flex" onclick="event.stopPropagation()">
-                                        <button onclick="toggleDropdown(event, this)" class="flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="Copy lesson..."><i class="fa-solid fa-share text-xs md:text-sm"></i></button>
-                                        <div class="copy-dropdown absolute top-full right-0 mt-2 hidden flex-col bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-amber-200 dark:border-amber-700/50 z-[100] overflow-hidden min-w-[140px] text-left">
-                                            <button onclick="moveLesson('${window.appState.day}', ${idx}, 1, this)" class="w-full text-left px-4 py-2.5 hover:bg-amber-50 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-400 text-[10px] md:text-xs font-bold transition-colors border-b border-amber-100 dark:border-amber-800/50">Next Day</button>
-                                            <div class="px-4 py-2 bg-slate-50 dark:bg-slate-900/50 text-[9px] font-black text-slate-400 tracking-widest uppercase border-b border-slate-100 dark:border-slate-700">Next Week</div>
-                                            <button onclick="moveLesson('${window.appState.day}', ${idx}, 'next_week_Monday', this)" class="w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 text-[10px] md:text-xs font-bold transition-colors border-b border-slate-100 dark:border-slate-700">Monday</button>
-                                            <button onclick="moveLesson('${window.appState.day}', ${idx}, 'next_week_Tuesday', this)" class="w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 text-[10px] md:text-xs font-bold transition-colors border-b border-slate-100 dark:border-slate-700">Tuesday</button>
-                                            <button onclick="moveLesson('${window.appState.day}', ${idx}, 'next_week_Wednesday', this)" class="w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 text-[10px] md:text-xs font-bold transition-colors border-b border-slate-100 dark:border-slate-700">Wednesday</button>
-                                            <button onclick="moveLesson('${window.appState.day}', ${idx}, 'next_week_Thursday', this)" class="w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 text-[10px] md:text-xs font-bold transition-colors border-b border-slate-100 dark:border-slate-700">Thursday</button>
-                                            <button onclick="moveLesson('${window.appState.day}', ${idx}, 'next_week_Friday', this)" class="w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 text-[10px] md:text-xs font-bold transition-colors">Friday</button>
-                                        </div>
-                                    </div>
+                                    <button onclick="event.stopPropagation(); openTransferModal('${window.appState.day}', ${idx})" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none rounded-l-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="Copy lesson"><i class="fa-solid fa-copy text-xs md:text-sm"></i></button>
 
                                     <button onclick="event.stopPropagation(); shiftLesson('${window.appState.day}', ${idx}, -1)" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="Move Up"><i class="fa-solid fa-arrow-up text-xs md:text-sm"></i></button>
                                     <button onclick="event.stopPropagation(); shiftLesson('${window.appState.day}', ${idx}, 1)" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="Move Down"><i class="fa-solid fa-arrow-down text-xs md:text-sm"></i></button>
-                                    <button onclick="event.stopPropagation(); splitLesson('${window.appState.day}', ${idx})" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="Split into two lessons"><i class="fa-solid fa-divide text-xs md:text-sm"></i></button>
 
                                     <button onclick="event.stopPropagation(); deleteLesson('${window.appState.day}', ${idx}, this)" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 hover:text-rose-600 dark:hover:text-rose-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="Delete lesson"><i class="fa-solid fa-trash text-xs md:text-sm"></i></button>
                                     <button onclick="event.stopPropagation(); initEdit('${window.appState.day}', ${idx}); closeModals(); setTimeout(() => document.getElementById('modal-edit').classList.replace('hidden', 'flex'), 100);" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none rounded-r-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer" title="Edit lesson"><i class="fa-solid fa-pen text-xs md:text-sm"></i></button>
@@ -1861,11 +2242,11 @@
             html += `
                 <div class="flex flex-col sm:flex-row justify-center gap-3 mt-4 border-t border-slate-200 dark:border-slate-700/50 pt-5 pb-2">
                     <button onclick="addLessonDirectly('${window.appState.day}')" class="flex items-center justify-center px-4 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-bold rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors text-xs md:text-sm shadow-sm border border-emerald-200 dark:border-emerald-800/50"><i class="fa-solid fa-plus mr-2"></i> Add Lesson</button>
-                    <button onclick="swapBlocks('${window.appState.day}')" class="flex items-center justify-center px-4 py-2.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-bold rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors text-xs md:text-sm shadow-sm border border-indigo-200 dark:border-indigo-800/50"><i class="fa-solid fa-arrow-right-arrow-left mr-2"></i> Swap Breaks Layout</button>
                     <button onclick="clearDay('${window.appState.day}', this)" class="flex items-center justify-center px-4 py-2.5 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 font-bold rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors text-xs md:text-sm shadow-sm border border-rose-200 dark:border-rose-800/50"><i class="fa-solid fa-eraser mr-2"></i> Clear Day</button>
                 </div>`;
             html += '</div>';
             container.innerHTML = html;
+            if (window.appState.recentlyDroppedLessonId) setTimeout(() => { window.appState.recentlyDroppedLessonId = null; }, 650);
         };
 
         window.openLessonDetail = (idx) => {
@@ -1873,6 +2254,7 @@
             const container = document.getElementById('lesson-detail-container');
             const theme = getTheme(block.subject, block.topic);
             const hasNote = block.note && block.note.trim() !== "";
+            const hasClash = getTimingClashIndexes(window.appState.weekData[window.appState.day] || []).has(idx);
             
             let printLinks = getPrintLinks(block.printLink); let printBtnHTML = '';
             if (printLinks.length === 1) {
@@ -1887,30 +2269,16 @@
             }
 
             container.innerHTML = `
-            <div class="relative bg-white dark:bg-slate-800/90 ${theme.cardExtra} backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 rounded-2xl md:rounded-[1.5rem] shadow-2xl transition-all duration-300 group flex flex-col z-10 w-full">
+            <div class="relative bg-white dark:bg-slate-800/90 ${theme.cardExtra} ${hasClash ? 'timing-clash-card' : ''} backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 rounded-2xl md:rounded-[1.5rem] shadow-2xl transition-all duration-300 group flex flex-col z-10 w-full">
                 <div class="absolute left-0 top-0 bottom-0 w-2 md:w-3 ${theme.bar} rounded-l-2xl md:rounded-l-[1.5rem]"></div>
                 <div class="p-4 md:p-6 pl-6 md:pl-8 flex flex-col flex-1">
                     <div class="flex justify-between items-center mb-4 relative z-[60]">
-                        <span class="px-3 py-1.5 ${theme.badgeBg} ${theme.badgeText} rounded-full text-[10px] md:text-xs font-bold border ${theme.badgeBorder} shadow-sm flex items-center tracking-wide"><i class="fa-regular fa-clock mr-1.5"></i> ${block.time}</span>
+                        <div class="flex items-center gap-2"><span class="px-3 py-1.5 ${theme.badgeBg} ${theme.badgeText} rounded-full text-[10px] md:text-xs font-bold border ${theme.badgeBorder} shadow-sm flex items-center tracking-wide"><i class="fa-regular fa-clock mr-1.5"></i> ${block.time}</span>${timingClashBadge(hasClash)}</div>
                         <div class="flex items-center z-20 transition-all pr-8 md:pr-0">
-                            <button onclick="event.stopPropagation(); moveLesson('${window.appState.day}', ${idx}, -1, this)" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none rounded-l-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="Copy to prev day"><i class="fa-solid fa-reply text-xs md:text-sm"></i></button>
-                            
-                            <div class="relative group/action flex" onclick="event.stopPropagation()">
-                                <button onclick="toggleDropdown(event, this)" class="flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="Copy lesson..."><i class="fa-solid fa-share text-xs md:text-sm"></i></button>
-                                <div class="copy-dropdown absolute top-full right-0 mt-2 hidden flex-col bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-amber-200 dark:border-amber-700/50 z-[120] overflow-hidden min-w-[140px] text-left">
-                                    <button onclick="moveLesson('${window.appState.day}', ${idx}, 1, this)" class="w-full text-left px-4 py-2.5 hover:bg-amber-50 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-400 text-[10px] md:text-xs font-bold transition-colors border-b border-amber-100 dark:border-amber-800/50">Next Day</button>
-                                    <div class="px-4 py-2 bg-slate-50 dark:bg-slate-900/50 text-[9px] font-black text-slate-400 tracking-widest uppercase border-b border-slate-100 dark:border-slate-700">Next Week</div>
-                                    <button onclick="moveLesson('${window.appState.day}', ${idx}, 'next_week_Monday', this)" class="w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 text-[10px] md:text-xs font-bold transition-colors border-b border-slate-100 dark:border-slate-700">Monday</button>
-                                    <button onclick="moveLesson('${window.appState.day}', ${idx}, 'next_week_Tuesday', this)" class="w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 text-[10px] md:text-xs font-bold transition-colors border-b border-slate-100 dark:border-slate-700">Tuesday</button>
-                                    <button onclick="moveLesson('${window.appState.day}', ${idx}, 'next_week_Wednesday', this)" class="w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 text-[10px] md:text-xs font-bold transition-colors border-b border-slate-100 dark:border-slate-700">Wednesday</button>
-                                    <button onclick="moveLesson('${window.appState.day}', ${idx}, 'next_week_Thursday', this)" class="w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 text-[10px] md:text-xs font-bold transition-colors border-b border-slate-100 dark:border-slate-700">Thursday</button>
-                                    <button onclick="moveLesson('${window.appState.day}', ${idx}, 'next_week_Friday', this)" class="w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 text-[10px] md:text-xs font-bold transition-colors">Friday</button>
-                                </div>
-                            </div>
+                            <button onclick="event.stopPropagation(); openTransferModal('${window.appState.day}', ${idx})" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none rounded-l-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="Copy lesson"><i class="fa-solid fa-copy text-xs md:text-sm"></i></button>
 
                             <button onclick="event.stopPropagation(); shiftLesson('${window.appState.day}', ${idx}, -1)" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="Move Up"><i class="fa-solid fa-arrow-up text-xs md:text-sm"></i></button>
                             <button onclick="event.stopPropagation(); shiftLesson('${window.appState.day}', ${idx}, 1)" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="Move Down"><i class="fa-solid fa-arrow-down text-xs md:text-sm"></i></button>
-                            <button onclick="event.stopPropagation(); splitLesson('${window.appState.day}', ${idx})" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="Split into two lessons"><i class="fa-solid fa-divide text-xs md:text-sm"></i></button>
 
                             <button onclick="event.stopPropagation(); deleteLesson('${window.appState.day}', ${idx}, this)" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 hover:text-rose-600 dark:hover:text-rose-400 transition-colors border-r border-slate-300/50 dark:border-slate-600/50 cursor-pointer" title="Delete lesson"><i class="fa-solid fa-trash text-xs md:text-sm"></i></button>
                             <button onclick="event.stopPropagation(); initEdit('${window.appState.day}', ${idx}); closeModals(); setTimeout(() => document.getElementById('modal-edit').classList.replace('hidden', 'flex'), 100);" class="relative group/action flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-none rounded-r-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer" title="Edit lesson"><i class="fa-solid fa-pen text-xs md:text-sm"></i></button>
@@ -2006,23 +2374,30 @@
             const idx = window.appState.editingBlock.index;
             const printInputs = Array.from(document.querySelectorAll('.edit-print-input')).map(inp => inp.value.trim()).filter(val => val !== '');
 
-            updated[idx].time = document.getElementById('edit-time').value;
+            const newTime = document.getElementById('edit-time').value;
+            updated[idx].time = newTime;
             updated[idx].subject = document.getElementById('edit-subject').value;
             updated[idx].topic = document.getElementById('edit-topic').value;
             updated[idx].unitOutlineLink = document.getElementById('edit-outline').value;
             updated[idx].lessonPlanLink = document.getElementById('edit-plan').value;
             updated[idx].slidesLink = document.getElementById('edit-slides').value;
             updated[idx].printLink = printInputs;
-            
-            updated = window.sortDayBlocks(updated); // Resort in case time changed
-            
-            setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [window.appState.day]: updated } }, { merge: true });
+            if (newTime !== window.appState.editingBlock.time) {
+                delete updated[idx].scheduleSection;
+                delete updated[idx].scheduleOrder;
+            }
+
+            updated = composeOrEmptyDay(splitDayIntoSections(updated), updated);
+            window.appState.weekData[window.appState.day] = updated;
+
+            setDoc(timetableDocRef(window.appState.term, window.appState.week), { days: { ...window.appState.weekData, [window.appState.day]: updated }, schemaVersion: 2 }, { merge: true });
             
             if (window.appState.view === 'day') renderDayBlocks();
             if (window.appState.view === 'week') renderWeekGrid();
             if (window.appState.view === 'start-day') renderStartDay();
             
             closeModals();
+            showToast(getTimingClashIndexes(updated).size ? 'Lesson saved. Timing clashes are highlighted.' : 'Lesson saved.');
         };
 
         window.initCancelDay = (day) => {
@@ -2306,9 +2681,14 @@
                 return { ...b, printLink: cleanedPrint };
             });
 
-            cleanedForm = window.sortDayBlocks(cleanedForm); 
+            try {
+                cleanedForm = composeOrEmptyDay(splitDayIntoSections(cleanedForm), cleanedForm);
+            } catch (error) {
+                showToast(error.message || 'The lessons do not fit around the fixed breaks.');
+                return;
+            }
 
-            setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [window.appState.addingDay]: cleanedForm } }, { merge: true });
+            setDoc(timetableDocRef(window.appState.term, window.appState.week), { days: { ...window.appState.weekData, [window.appState.addingDay]: cleanedForm }, schemaVersion: 2 }, { merge: true });
             
             showToast(`${window.appState.addingDay} populated successfully!`);
             closeModals();
