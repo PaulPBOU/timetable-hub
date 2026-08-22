@@ -346,8 +346,16 @@
             <div id="week-grid-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 w-full max-w-6xl custom-scrollbar overflow-y-auto pb-4 pt-2 flex-1 px-1 md:px-4 mx-auto"></div>
         </div>
 
-        <div id="view-week" class="hidden flex-col h-full animate-in fade-in duration-300 min-h-0">
-            <div id="week-grid" class="flex flex-row gap-3 md:gap-4 flex-1 overflow-x-auto overflow-y-hidden pb-4 min-w-full pt-1 min-h-0 snap-x snap-mandatory no-scrollbar"></div>
+        <div id="view-week" onmousemove="handleWeekScrollHover(event)" onmouseleave="hideWeekScrollButton()" class="hidden relative flex-col h-full animate-in fade-in duration-300 min-h-0">
+            <div id="week-grid" onscroll="updateWeekScrollControls()" class="flex flex-row gap-3 md:gap-4 flex-1 overflow-x-auto overflow-y-hidden pb-4 min-w-full pt-1 min-h-0 snap-x snap-mandatory no-scrollbar scroll-smooth"></div>
+            <div id="week-scroll-fade-left" class="pointer-events-none absolute inset-y-0 left-0 z-[65] w-16 bg-gradient-to-r from-slate-100/80 dark:from-slate-950/70 to-transparent opacity-0 transition-opacity duration-200"></div>
+            <div id="week-scroll-fade-right" class="pointer-events-none absolute inset-y-0 right-0 z-[65] w-16 bg-gradient-to-l from-slate-100/80 dark:from-slate-950/70 to-transparent opacity-0 transition-opacity duration-200"></div>
+            <button id="week-scroll-left" type="button" onclick="scrollWeekGrid(-1)" aria-label="Scroll to the previous day" disabled class="absolute left-1.5 md:left-2.5 top-1/2 -translate-y-1/2 z-[70] w-10 h-14 rounded-2xl bg-white/90 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-600/80 text-slate-600 dark:text-slate-200 shadow-xl backdrop-blur-md flex items-center justify-center opacity-0 pointer-events-none focus:opacity-100 focus:pointer-events-auto hover:bg-cyan-500 hover:border-cyan-400 hover:text-white hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 transition-all duration-200 disabled:opacity-0 disabled:pointer-events-none" title="Previous day">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button id="week-scroll-right" type="button" onclick="scrollWeekGrid(1)" aria-label="Scroll to the next day" disabled class="absolute right-1.5 md:right-2.5 top-1/2 -translate-y-1/2 z-[70] w-10 h-14 rounded-2xl bg-white/90 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-600/80 text-slate-600 dark:text-slate-200 shadow-xl backdrop-blur-md flex items-center justify-center opacity-0 pointer-events-none focus:opacity-100 focus:pointer-events-auto hover:bg-cyan-500 hover:border-cyan-400 hover:text-white hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 transition-all duration-200 disabled:opacity-0 disabled:pointer-events-none" title="Next day">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
         </div>
 
         <div id="view-day" class="hidden flex-col h-full animate-in slide-in-from-right-8 duration-300 min-h-0">
@@ -419,6 +427,26 @@
                     <span class="w-11 h-11 rounded-xl bg-cyan-500 text-white flex items-center justify-center shrink-0 shadow-md"><i class="fa-solid fa-copy"></i></span>
                     <span class="flex-1"><span class="block text-sm font-black text-cyan-800 dark:text-cyan-300">Copy, then navigate and paste</span><span class="block text-[10px] text-cyan-700/70 dark:text-cyan-400/70 font-semibold mt-0.5">A paste bar will follow you to any day.</span></span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Duty Location Picker -->
+    <div id="modal-duty-location" class="hidden fixed z-[140] w-[min(20rem,calc(100vw-1.5rem))]" onclick="event.stopPropagation()">
+        <div class="w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div class="flex items-start justify-between gap-3 p-3.5 border-b border-slate-200 dark:border-slate-800">
+                <div>
+                    <div class="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 text-[8px] font-black uppercase tracking-[0.16em] mb-1"><i class="fa-solid fa-user-shield"></i> Duty location</div>
+                    <h2 id="duty-picker-title" class="text-base font-black text-slate-800 dark:text-white">Choose an area</h2>
+                    <p id="duty-picker-current" class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5">No duty selected</p>
+                </div>
+                <button onclick="closeModals()" class="w-7 h-7 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-900/30 transition-colors"><i class="fa-solid fa-xmark text-xs"></i></button>
+            </div>
+            <div class="p-3 grid grid-cols-1 gap-1.5">
+                <button data-duty-location="AREA A" onclick="selectDutyLocation('AREA A')" class="duty-location-option flex items-center gap-2.5 w-full p-2.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 hover:bg-amber-500 hover:text-white hover:border-amber-400 transition-all active:scale-[.98] text-left"><span class="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center shadow-sm text-xs"><i class="fa-solid fa-a"></i></span><span class="text-xs font-black">AREA A</span><i class="fa-solid fa-check ml-auto opacity-0 duty-option-check text-xs"></i></button>
+                <button data-duty-location="AREA B" onclick="selectDutyLocation('AREA B')" class="duty-location-option flex items-center gap-2.5 w-full p-2.5 rounded-xl bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800/60 text-cyan-800 dark:text-cyan-300 hover:bg-cyan-500 hover:text-white hover:border-cyan-400 transition-all active:scale-[.98] text-left"><span class="w-7 h-7 rounded-lg bg-cyan-500 text-white flex items-center justify-center shadow-sm text-xs"><i class="fa-solid fa-b"></i></span><span class="text-xs font-black">AREA B</span><i class="fa-solid fa-check ml-auto opacity-0 duty-option-check text-xs"></i></button>
+                <button data-duty-location="GRASS" onclick="selectDutyLocation('GRASS')" class="duty-location-option flex items-center gap-2.5 w-full p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-500 hover:text-white hover:border-emerald-400 transition-all active:scale-[.98] text-left"><span class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center shadow-sm text-xs"><i class="fa-solid fa-seedling"></i></span><span class="text-xs font-black">GRASS</span><i class="fa-solid fa-check ml-auto opacity-0 duty-option-check text-xs"></i></button>
+                <button id="duty-remove-button" onclick="selectDutyLocation('')" class="hidden items-center justify-center gap-2 mt-0.5 p-2 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 border border-transparent hover:border-rose-200 dark:hover:border-rose-800/60 text-[10px] font-black transition-colors"><i class="fa-solid fa-xmark"></i> Remove duty</button>
             </div>
         </div>
     </div>
@@ -587,6 +615,7 @@
             view: 'landing', 
             term: '', week: '', day: '', 
             weekData: { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] }, 
+            dutyData: { Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {} },
             coverData: {}, 
             todosData: { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] },
             soundPlayed: false,
@@ -596,7 +625,8 @@
             lessonTransfer: null,
             draggedLesson: null,
             lessonClipboard: null,
-            recentlyDroppedLessonId: null
+            recentlyDroppedLessonId: null,
+            activeDutySelection: null
         };
 
         const SCHOOL_YEAR = 2026;
@@ -612,8 +642,10 @@
             break1: { id: 'br1', type: 'break', time: '11:00am - 11:30am', topic: 'Break 1', icon: 'mug-hot', isDuty: false },
             break2: { id: 'br2', type: 'break', time: '1:30pm - 2:00pm', topic: 'Break 2', icon: 'apple-whole', isDuty: false }
         };
+        const DUTY_LOCATIONS = ['AREA A', 'AREA B', 'GRASS'];
 
         const emptyWeekDays = () => Object.fromEntries(SCHOOL_DAYS.map(day => [day, []]));
+        const emptyDutyDays = () => Object.fromEntries(SCHOOL_DAYS.map(day => [day, {}]));
         const timetableDocId = (term, week) => `${SCHOOL_YEAR}_${term.replaceAll(' ', '')}_${week.replaceAll(' ', '')}`;
         const timetableDocRef = (term, week) => doc(db, 'timetables', timetableDocId(term, week));
         const createLessonId = (prefix = 'lesson') => `${prefix}_${Date.now()}_${crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)}`;
@@ -627,9 +659,28 @@
             return 'afterBreak2';
         };
 
-        const getBreakDuty = (blocks, breakNumber) => {
+        const getBreakDutyState = (blocks, breakNumber) => {
             const existing = (blocks || []).find(block => block.type === 'break' && String(block.topic || '').includes(`Break ${breakNumber}`));
-            return Boolean(existing && existing.isDuty);
+            return {
+                isDuty: Boolean(existing && existing.isDuty),
+                dutyLocation: existing?.dutyLocation || ''
+            };
+        };
+
+        const normalizeDutyLocation = location => DUTY_LOCATIONS.includes(location) || location === 'UNASSIGNED' ? location : '';
+
+        const normalizeDutyDay = (storedDutyDay = {}, blocks = []) => {
+            const normalized = { morning: normalizeDutyLocation(storedDutyDay.morning) };
+            [1, 2].forEach(number => {
+                const key = `break${number}`;
+                if (Object.prototype.hasOwnProperty.call(storedDutyDay, key)) {
+                    normalized[key] = normalizeDutyLocation(storedDutyDay[key]);
+                    return;
+                }
+                const legacy = getBreakDutyState(blocks, number);
+                normalized[key] = legacy.isDuty ? (normalizeDutyLocation(legacy.dutyLocation) || 'UNASSIGNED') : '';
+            });
+            return normalized;
         };
 
         const composeScheduledDay = (sections, originalBlocks = []) => {
@@ -644,8 +695,8 @@
                     return copy;
                 });
                 output.push(...lessons);
-                if (sectionKey === 'beforeBreak1') output.push({ ...FIXED_BREAKS.break1, isDuty: getBreakDuty(originalBlocks, 1) });
-                if (sectionKey === 'betweenBreaks') output.push({ ...FIXED_BREAKS.break2, isDuty: getBreakDuty(originalBlocks, 2) });
+                if (sectionKey === 'beforeBreak1') output.push({ ...FIXED_BREAKS.break1, ...getBreakDutyState(originalBlocks, 1) });
+                if (sectionKey === 'betweenBreaks') output.push({ ...FIXED_BREAKS.break2, ...getBreakDutyState(originalBlocks, 2) });
             }
             return output;
         };
@@ -701,6 +752,27 @@
         const timingClashBadge = hasClash => hasClash
             ? '<span class="timing-clash-badge inline-flex items-center gap-1 px-2 py-1 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300 border border-rose-300 dark:border-rose-700 text-[8px] md:text-[9px] font-black uppercase tracking-wider"><i class="fa-solid fa-triangle-exclamation"></i> Time clash</span>'
             : '';
+
+        const getDutyInfo = (day, dutyKey) => {
+            const location = normalizeDutyLocation(window.appState.dutyData?.[day]?.[dutyKey]);
+            return {
+                active: Boolean(location),
+                location,
+                displayLocation: location === 'UNASSIGNED' ? 'Choose area' : location
+            };
+        };
+
+        const dutySelectorHTML = (day, dutyKey, label, icon, { compact = false, time = '' } = {}) => {
+            const duty = getDutyInfo(day, dutyKey);
+            const sizing = compact ? 'px-3 py-1 text-[8.5px]' : 'px-4 md:px-5 py-2 text-[10px] md:text-xs';
+            return `
+                <button type="button" onclick="event.stopPropagation(); openDutyPicker(event, '${day}', '${dutyKey}')" class="relative inline-flex items-center justify-center gap-1.5 md:gap-2 ${sizing} rounded-full font-black tracking-widest uppercase shadow-sm transition-all duration-300 ${duty.active ? 'bg-amber-500 text-white border-2 border-amber-400 scale-[1.03] shadow-amber-500/30' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60 hover:bg-amber-100 dark:hover:bg-amber-900/40 hover:scale-[1.03]'}" title="Choose duty location">
+                    <i class="fa-solid ${duty.active ? 'fa-user-shield' : icon}"></i>
+                    <span>${label}</span>
+                    ${time ? `<span class="opacity-65 tracking-normal normal-case">${time}</span>` : ''}
+                    ${duty.active ? `<span class="inline-flex items-center gap-1 ml-0.5 px-1.5 py-0.5 rounded-full bg-white/20 border border-white/25 tracking-normal"><i class="fa-solid fa-location-dot text-[8px]"></i>${duty.displayLocation}</span>` : ''}
+                </button>`;
+        };
 
         window.parseTimeStrToMins = (tStr) => {
             if(!tStr) return 0;
@@ -975,6 +1047,7 @@
 
         window.loadWeekData = (term, week) => {
             window.appState.weekData = emptyWeekDays();
+            window.appState.dutyData = emptyDutyDays();
             window.appState.coverData = {};
             window.appState.todosData = emptyWeekDays();
             
@@ -984,10 +1057,12 @@
                 if (docSnap.exists()) {
                     const storedDays = docSnap.data().days || {};
                     window.appState.weekData = Object.fromEntries(SCHOOL_DAYS.map(day => [day, normalizeStoredDay(storedDays[day] || [])]));
+                    const storedDuties = docSnap.data().duties || {};
+                    window.appState.dutyData = Object.fromEntries(SCHOOL_DAYS.map(day => [day, normalizeDutyDay(storedDuties[day] || {}, window.appState.weekData[day])]));
                     window.appState.coverData = docSnap.data().cover || {};
                     window.appState.todosData = docSnap.data().todos || emptyWeekDays();
                 } else {
-                    setDoc(docRef, { days: window.appState.weekData, cover: {}, todos: window.appState.todosData }, { merge: true });
+                    setDoc(docRef, { days: window.appState.weekData, duties: window.appState.dutyData, cover: {}, todos: window.appState.todosData }, { merge: true });
                 }
                 
                 if (window.appState.view === 'week') renderWeekGrid();
@@ -1238,7 +1313,7 @@
         };
 
         window.closeModals = () => {
-            ['modal-add', 'modal-edit', 'modal-cancel', 'modal-lesson-detail', 'modal-todos', 'modal-transfer'].forEach(id => {
+            ['modal-add', 'modal-edit', 'modal-cancel', 'modal-lesson-detail', 'modal-todos', 'modal-transfer', 'modal-duty-location'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) { el.classList.add('hidden'); el.classList.remove('flex'); }
             });
@@ -1871,16 +1946,85 @@
             showToast(newState ? `Marked ${day} as Covered` : `Removed Cover for ${day}`);
         };
 
-        window.toggleDuty = (day, idx) => {
-            const data = window.appState.weekData[day];
-            if (!data || !data[idx]) return;
-            data[idx].isDuty = !data[idx].isDuty;
-            window.appState.weekData[day] = data;
-            setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [day]: data } }, { merge: true });
+        window.openDutyPicker = (event, day, dutyKey) => {
+            if (!SCHOOL_DAYS.includes(day) || !['morning', 'break1', 'break2'].includes(dutyKey)) return;
+            window.appState.activeDutySelection = { day, dutyKey };
+            const labels = { morning: 'Morning Duty', break1: 'Break 1 Duty', break2: 'Break 2 Duty' };
+            const duty = getDutyInfo(day, dutyKey);
+            document.getElementById('duty-picker-title').textContent = labels[dutyKey];
+            document.getElementById('duty-picker-current').textContent = duty.active
+                ? (duty.location === 'UNASSIGNED' ? 'Choose a location for this duty' : `Currently ${duty.location}`)
+                : 'Choose an area to activate this duty';
+            document.querySelectorAll('.duty-location-option').forEach(option => {
+                const selected = option.dataset.dutyLocation === duty.location;
+                option.classList.toggle('ring-2', selected);
+                option.classList.toggle('ring-offset-2', selected);
+                option.classList.toggle('ring-amber-400', selected);
+                option.querySelector('.duty-option-check')?.classList.toggle('opacity-0', !selected);
+            });
+            const removeButton = document.getElementById('duty-remove-button');
+            removeButton.classList.toggle('hidden', !duty.active);
+            removeButton.classList.toggle('flex', duty.active);
+            const popup = document.getElementById('modal-duty-location');
+            popup.style.visibility = 'hidden';
+            popup.classList.replace('hidden', 'flex');
+
+            const anchorBounds = event.currentTarget.getBoundingClientRect();
+            const pointerX = event.clientX || anchorBounds.left + anchorBounds.width / 2;
+            const pointerY = event.clientY || anchorBounds.top;
+            const popupBounds = popup.getBoundingClientRect();
+            const margin = 10;
+            const gap = 12;
+            const left = Math.min(window.innerWidth - popupBounds.width - margin, Math.max(margin, pointerX - popupBounds.width / 2));
+            let top = pointerY - popupBounds.height - gap;
+            let opensAbove = true;
+            if (top < margin) {
+                top = Math.min(window.innerHeight - popupBounds.height - margin, pointerY + gap);
+                opensAbove = false;
+            }
+            popup.style.left = `${left}px`;
+            popup.style.top = `${Math.max(margin, top)}px`;
+            popup.style.transformOrigin = opensAbove ? 'bottom center' : 'top center';
+            popup.style.visibility = '';
+        };
+
+        document.addEventListener('click', event => {
+            const popup = document.getElementById('modal-duty-location');
+            if (popup && !popup.classList.contains('hidden') && !popup.contains(event.target)) {
+                popup.classList.add('hidden');
+                popup.classList.remove('flex');
+            }
+        });
+
+        window.selectDutyLocation = async location => {
+            const selection = window.appState.activeDutySelection;
+            if (!selection || (location && !DUTY_LOCATIONS.includes(location))) return;
+            const { day, dutyKey } = selection;
+            const dayDutyData = { ...(window.appState.dutyData[day] || {}), [dutyKey]: location };
+            window.appState.dutyData = { ...window.appState.dutyData, [day]: dayDutyData };
+
+            const payload = { duties: window.appState.dutyData };
+            if (dutyKey !== 'morning') {
+                const breakNumber = dutyKey === 'break1' ? 1 : 2;
+                const updatedBlocks = (window.appState.weekData[day] || []).map(block => {
+                    const isSelectedBreak = block.type === 'break' && String(block.topic || '').includes(`Break ${breakNumber}`);
+                    return isSelectedBreak ? { ...block, isDuty: Boolean(location), dutyLocation: location } : block;
+                });
+                window.appState.weekData[day] = updatedBlocks;
+                payload.days = { ...window.appState.weekData, [day]: updatedBlocks };
+            }
+
+            closeModals();
             if (window.appState.view === 'day') renderDayBlocks();
             if (window.appState.view === 'week') renderWeekGrid();
             if (window.appState.view === 'start-day') renderStartDay();
-            showToast(data[idx].isDuty ? `${data[idx].topic} marked as Duty` : `Duty removed for ${data[idx].topic}`);
+            try {
+                await setDoc(timetableDocRef(window.appState.term, window.appState.week), payload, { merge: true });
+                const label = dutyKey === 'morning' ? 'Morning Duty' : dutyKey === 'break1' ? 'Break 1 Duty' : 'Break 2 Duty';
+                showToast(location ? `${label} set to ${location}` : `${label} removed`);
+            } catch (error) {
+                showToast('Could not save the duty location. Please try again.');
+            }
         };
 
         const getTheme = (sub, topic) => {
@@ -1943,10 +2087,14 @@
 
             const data = window.appState.weekData[window.appState.day] || [];
             const clashIndexes = getTimingClashIndexes(data);
+            const morningDutyHTML = getDutyInfo(window.appState.day, 'morning').active
+                ? `<div class="shrink-0 flex items-center justify-center pb-2 mb-1 border-b border-amber-200/60 dark:border-amber-800/40">${dutySelectorHTML(window.appState.day, 'morning', 'Morning Duty', 'fa-sun', { compact: true })}</div>`
+                : '';
             
             if (data.length === 0) {
                 scheduleContainer.className = "flex-1 h-full flex flex-col w-full min-w-[300px] mx-auto pt-[3px]";
                 scheduleContainer.innerHTML = `
+                    ${morningDutyHTML}
                     <div class="flex-1 flex flex-col items-center justify-center p-12 text-center rounded-[2.5rem] bg-slate-100 dark:bg-slate-800/50 shadow-sm border border-slate-200 dark:border-slate-800">
                         <i class="fa-solid fa-ghost text-6xl text-slate-300 dark:text-slate-600 mb-4"></i>
                         <h3 class="text-slate-500 dark:text-slate-400 font-black text-3xl">No schedule populated</h3>
@@ -1957,6 +2105,7 @@
             if (data.length === 1 && data[0].type === 'cancelled') {
                 scheduleContainer.className = "flex-1 h-full flex flex-col w-full min-w-[300px] mx-auto pt-[3px]";
                 scheduleContainer.innerHTML = `
+                    ${morningDutyHTML}
                     <div class="flex-1 flex flex-col items-center justify-center p-12 md:p-16 text-center rounded-[3rem] bg-stripes-red border-2 border-rose-200 dark:border-rose-900/50 shadow-lg">
                         <i class="fa-solid fa-face-smile-wink text-7xl text-rose-400 dark:text-rose-500 mb-6 drop-shadow-sm"></i>
                         <h3 class="text-rose-700 dark:text-rose-300 font-black text-4xl md:text-5xl uppercase tracking-wider mb-2">No School Today!</h3>
@@ -1966,19 +2115,18 @@
             }
             
             scheduleContainer.className = "flex flex-col gap-1.5 md:gap-2 h-full min-h-0 w-fit pb-2 md:pb-4 overflow-y-auto custom-scrollbar pr-2 md:pr-4 mx-auto pt-[3px]";
+            scheduleContainer.innerHTML = morningDutyHTML;
 
             data.forEach((block, idx) => {
                 if (block.type === 'break') {
-                    const isDuty = block.isDuty;
+                    const dutyKey = String(block.topic || '').includes('Break 1') ? 'break1' : 'break2';
+                    const isDuty = getDutyInfo(window.appState.day, dutyKey).active;
                     scheduleContainer.innerHTML += `
-                        <div class="relative flex items-center justify-center w-full py-0 -my-1 cursor-pointer group hover:scale-[1.02] transition-transform" onclick="toggleDuty('${window.appState.day}', ${idx})">
+                        <div class="relative flex items-center justify-center w-full py-0 -my-1 group transition-transform">
                             <div class="absolute inset-0 flex items-center">
                                 <div class="w-full border-t border-dashed ${isDuty ? 'border-amber-500' : 'border-amber-400/60 dark:border-amber-600/50'}"></div>
                             </div>
-                            <div class="relative flex items-center gap-2 px-3 py-1 text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${isDuty ? 'bg-amber-500 text-white rounded-full shadow-md border border-amber-400' : 'bg-slate-50 dark:bg-slate-900 text-amber-600 dark:text-amber-500'}">
-                                <i class="fa-solid ${isDuty ? 'fa-user-shield' : 'fa-' + block.icon}"></i>
-                                <span>${block.topic} ${isDuty ? 'DUTY' : ''}</span>
-                            </div>
+                            ${dutySelectorHTML(window.appState.day, dutyKey, block.topic, `fa-${block.icon}`, { compact: true })}
                         </div>`;
                 } else {
                     const theme = getTheme(block.subject, block.topic);
@@ -2011,6 +2159,60 @@
                 }
             });
         };
+
+        const setWeekScrollButtonVisible = (side, visible) => {
+            const button = document.getElementById(`week-scroll-${side}`);
+            if (!button) return;
+            button.classList.toggle('opacity-0', !visible);
+            button.classList.toggle('opacity-100', visible);
+            button.classList.toggle('pointer-events-none', !visible);
+            button.classList.toggle('pointer-events-auto', visible);
+        };
+
+        window.handleWeekScrollHover = event => {
+            const bounds = event.currentTarget.getBoundingClientRect();
+            const leftButton = document.getElementById('week-scroll-left');
+            const rightButton = document.getElementById('week-scroll-right');
+            setWeekScrollButtonVisible('left', Boolean(leftButton && !leftButton.disabled && event.clientX - bounds.left <= 110));
+            setWeekScrollButtonVisible('right', Boolean(rightButton && !rightButton.disabled && bounds.right - event.clientX <= 110));
+        };
+
+        window.hideWeekScrollButton = () => {
+            setWeekScrollButtonVisible('left', false);
+            setWeekScrollButtonVisible('right', false);
+        };
+
+        const updateWeekScrollControls = () => {
+            const grid = document.getElementById('week-grid');
+            const leftButton = document.getElementById('week-scroll-left');
+            const rightButton = document.getElementById('week-scroll-right');
+            if (!grid || !leftButton || !rightButton) return;
+
+            const maxScrollLeft = Math.max(0, grid.scrollWidth - grid.clientWidth);
+            const hasOverflow = maxScrollLeft > 2;
+            const canScrollLeft = hasOverflow && grid.scrollLeft > 2;
+            const canScrollRight = hasOverflow && grid.scrollLeft < maxScrollLeft - 2;
+
+            leftButton.disabled = !canScrollLeft;
+            rightButton.disabled = !canScrollRight;
+            if (!canScrollLeft) setWeekScrollButtonVisible('left', false);
+            if (!canScrollRight) setWeekScrollButtonVisible('right', false);
+            document.getElementById('week-scroll-fade-left')?.classList.toggle('opacity-0', !canScrollLeft);
+            document.getElementById('week-scroll-fade-right')?.classList.toggle('opacity-0', !canScrollRight);
+        };
+        window.updateWeekScrollControls = updateWeekScrollControls;
+
+        window.scrollWeekGrid = direction => {
+            const grid = document.getElementById('week-grid');
+            const firstDay = grid?.firstElementChild;
+            if (!grid || !firstDay) return;
+
+            const gridStyles = window.getComputedStyle(grid);
+            const gap = parseFloat(gridStyles.columnGap || gridStyles.gap) || 0;
+            const oneDay = firstDay.getBoundingClientRect().width + gap;
+            grid.scrollBy({ left: direction * oneDay, behavior: 'smooth' });
+        };
+        window.addEventListener('resize', updateWeekScrollControls);
 
         const renderWeekGrid = () => {
             const grid = document.getElementById('week-grid');
@@ -2057,16 +2259,14 @@
                     bodyHTML += `<div class="space-y-2.5">`;
                     data.forEach((block, idx) => {
                         if(block.type === 'break') {
-                            const isDuty = block.isDuty;
+                            const dutyKey = String(block.topic || '').includes('Break 1') ? 'break1' : 'break2';
+                            const isDuty = getDutyInfo(day, dutyKey).active;
                             bodyHTML += `
-                            <div class="schedule-break relative flex items-center justify-center py-2.5 my-1.5 group w-full cursor-pointer" onclick="toggleDuty('${day}', ${idx})" ondragover="allowLessonDrop(event)" ondragleave="clearLessonDropCue(event)" ondrop="dropLessonOnBreak(event, '${day}', ${idx})">
+                            <div class="schedule-break relative flex items-center justify-center py-2.5 my-1.5 group w-full" ondragover="allowLessonDrop(event)" ondragleave="clearLessonDropCue(event)" ondrop="dropLessonOnBreak(event, '${day}', ${idx})">
                                 <div class="absolute inset-0 flex items-center px-2">
                                     <div class="w-full border-t border-dashed ${isDuty ? 'border-amber-500' : 'border-amber-300/60 dark:border-amber-700/60'}"></div>
                                 </div>
-                                <div class="relative flex items-center gap-1.5 px-3 py-1 rounded-full text-[8.5px] font-black uppercase tracking-widest shadow-sm transition-all duration-300 ${isDuty ? 'bg-amber-500 text-white border-2 border-amber-400 scale-105' : 'bg-slate-50 dark:bg-slate-900 border border-amber-200 dark:border-amber-800/80 text-amber-500 group-hover:scale-105 group-hover:bg-amber-50 dark:group-hover:bg-amber-900/30'}">
-                                    <i class="fa-solid ${isDuty ? 'fa-user-shield' : 'fa-' + block.icon}"></i>
-                                    <span>${block.topic} ${isDuty ? 'DUTY' : ''}</span>
-                                </div>
+                                ${dutySelectorHTML(day, dutyKey, block.topic, `fa-${block.icon}`, { compact: true })}
                             </div>`;
                         } else {
                             const theme = getTheme(block.subject, block.topic);
@@ -2123,11 +2323,13 @@
                         <button onclick="clearDay('${day}', this)" class="w-full flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 py-1.5 border border-transparent hover:border-rose-200 dark:hover:border-rose-900/50 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all text-[10px] md:text-xs font-semibold"><i class="fa-solid fa-eraser mr-1.5"></i> Clear Day</button>
                     </div>`;
                 }
+                bodyHTML += `<div class="shrink-0 flex items-center justify-center pt-2 mt-2 border-t border-amber-200/60 dark:border-amber-800/40">${dutySelectorHTML(day, 'morning', 'Morning Duty', 'fa-sun', { compact: true })}</div>`;
                 bodyHTML += '</div>';
                 col.innerHTML = headerHTML + bodyHTML;
                 grid.appendChild(col);
             });
             if (window.appState.recentlyDroppedLessonId) setTimeout(() => { window.appState.recentlyDroppedLessonId = null; }, 650);
+            requestAnimationFrame(updateWeekScrollControls);
         };
 
         const renderDayBlocks = () => {
@@ -2150,6 +2352,7 @@
                 if (blocksContainer) blocksContainer.classList.remove('bg-stripes-purple', 'px-2', 'py-1');
             }
             
+            const morningDutyHTML = `<div class="shrink-0 flex items-center justify-center pt-3 mt-3 border-t border-amber-200/60 dark:border-amber-800/40">${dutySelectorHTML(window.appState.day, 'morning', 'Morning Duty', 'fa-sun')}</div>`;
             let html = `<div class="day-drop-zone w-full max-w-3xl mx-auto flex flex-col pb-8 pt-2 md:pt-4" ondragover="allowLessonDrop(event)" ondragleave="clearLessonDropCue(event)" ondrop="dropLessonAtDayEnd(event, '${window.appState.day}')">`;
 
             if (data.length === 1 && data[0].type === 'cancelled') {
@@ -2161,6 +2364,7 @@
                         <h3 class="text-rose-700 dark:text-rose-300 font-black text-2xl md:text-4xl uppercase tracking-widest mb-3">No Learning</h3>
                         <p class="text-rose-600 dark:text-rose-400 text-base md:text-xl font-semibold bg-white/50 dark:bg-slate-900/50 px-6 py-2 rounded-full border border-rose-200 dark:border-rose-800/50 shadow-sm">${data[0].note || 'Day Cancelled'}</p>
                     </div>`;
+                html += morningDutyHTML;
                 html += '</div>';
                 container.innerHTML = html;
                 return;
@@ -2168,13 +2372,12 @@
 
             data.forEach((block, idx) => {
                 if(block.type === 'break') {
-                    const isDuty = block.isDuty;
+                    const dutyKey = String(block.topic || '').includes('Break 1') ? 'break1' : 'break2';
+                    const isDuty = getDutyInfo(window.appState.day, dutyKey).active;
                     html += `
-                    <div class="schedule-break flex items-center justify-center gap-4 my-2 opacity-80 relative z-10 cursor-pointer group" onclick="toggleDuty('${window.appState.day}', ${idx})" ondragover="allowLessonDrop(event)" ondragleave="clearLessonDropCue(event)" ondrop="dropLessonOnBreak(event, '${window.appState.day}', ${idx})">
+                    <div class="schedule-break flex items-center justify-center gap-4 my-2 relative z-10 group" ondragover="allowLessonDrop(event)" ondragleave="clearLessonDropCue(event)" ondrop="dropLessonOnBreak(event, '${window.appState.day}', ${idx})">
                         <div class="h-px ${isDuty ? 'bg-amber-400 dark:bg-amber-500' : 'bg-amber-200 dark:bg-amber-800/50'} flex-1 transition-colors"></div>
-                        <div class="px-5 py-2 rounded-full text-[10px] md:text-xs font-black tracking-widest uppercase shadow-sm flex items-center transition-all duration-300 ${isDuty ? 'bg-amber-500 text-white border-2 border-amber-400 scale-105 shadow-amber-500/40' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-900/40'}">
-                            <i class="fa-solid ${isDuty ? 'fa-user-shield animate-pulse' : 'fa-' + block.icon} mr-2 text-sm"></i> ${block.topic} ${isDuty ? '(DUTY)' : ''} (${block.time})
-                        </div>
+                        ${dutySelectorHTML(window.appState.day, dutyKey, block.topic, `fa-${block.icon}`, { time: block.time })}
                         <div class="h-px ${isDuty ? 'bg-amber-400 dark:bg-amber-500' : 'bg-amber-200 dark:bg-amber-800/50'} flex-1 transition-colors"></div>
                     </div>`;
                 } else {
@@ -2244,6 +2447,7 @@
                     <button onclick="addLessonDirectly('${window.appState.day}')" class="flex items-center justify-center px-4 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-bold rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors text-xs md:text-sm shadow-sm border border-emerald-200 dark:border-emerald-800/50"><i class="fa-solid fa-plus mr-2"></i> Add Lesson</button>
                     <button onclick="clearDay('${window.appState.day}', this)" class="flex items-center justify-center px-4 py-2.5 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 font-bold rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors text-xs md:text-sm shadow-sm border border-rose-200 dark:border-rose-800/50"><i class="fa-solid fa-eraser mr-2"></i> Clear Day</button>
                 </div>`;
+            html += morningDutyHTML;
             html += '</div>';
             container.innerHTML = html;
             if (window.appState.recentlyDroppedLessonId) setTimeout(() => { window.appState.recentlyDroppedLessonId = null; }, 650);
