@@ -64,86 +64,122 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* --- Space Theme Background --- */
+        /* --- Cosmic Celebration Background --- */
         .space-bg {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: radial-gradient(circle at 50% 50%, #1a1c2c 0%, #0B0E14 100%);
-            z-index: -2;
+            inset: 0;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 14% 18%, rgba(236,72,153,.34), transparent 28%),
+                radial-gradient(circle at 86% 22%, rgba(34,211,238,.28), transparent 30%),
+                radial-gradient(circle at 76% 86%, rgba(139,92,246,.34), transparent 32%),
+                linear-gradient(135deg, #070a18 0%, #10132a 48%, #090b18 100%);
+            background-size: 130% 130%;
+            animation: cosmic-palette 13s ease-in-out infinite alternate;
+            z-index: -4;
+        }
+
+        .space-bg::before {
+            content: '';
+            position: absolute;
+            width: 85vmax;
+            height: 85vmax;
+            top: -48vmax;
+            left: -24vmax;
+            border-radius: 50%;
+            background: conic-gradient(from 30deg, transparent 0 16%, rgba(251,191,36,.2) 25%, transparent 37% 54%, rgba(217,70,239,.22) 64%, transparent 76% 100%);
+            filter: blur(55px);
+            animation: aurora-orbit 22s linear infinite;
+            opacity: .75;
+        }
+
+        .space-bg::after {
+            content: '';
+            position: absolute;
+            inset: 8% -15%;
+            background:
+                radial-gradient(ellipse at 25% 70%, rgba(16,185,129,.17), transparent 29%),
+                radial-gradient(ellipse at 70% 32%, rgba(59,130,246,.18), transparent 27%),
+                radial-gradient(ellipse at 52% 82%, rgba(245,158,11,.13), transparent 25%);
+            filter: blur(24px);
+            animation: aurora-drift 9s ease-in-out infinite alternate;
         }
 
         .stars {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-image: 
-                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 160px 120px, #ddd, rgba(0,0,0,0));
+            inset: -220px;
+            background-image:
+                radial-gradient(2px 2px at 30px 40px, rgba(255,255,255,.95), transparent),
+                radial-gradient(1px 1px at 92px 118px, rgba(125,211,252,.95), transparent),
+                radial-gradient(2px 2px at 155px 74px, rgba(253,224,71,.8), transparent),
+                radial-gradient(1px 1px at 210px 185px, rgba(244,114,182,.9), transparent),
+                radial-gradient(1px 1px at 260px 32px, rgba(255,255,255,.8), transparent),
+                radial-gradient(2px 2px at 320px 144px, rgba(196,181,253,.85), transparent);
             background-repeat: repeat;
-            background-size: 200px 200px;
-            animation: twinkle 4s infinite alternate;
-            z-index: -1;
-            opacity: 0.5;
+            background-size: 350px 230px;
+            animation: star-parallax 30s linear infinite, twinkle 2.8s ease-in-out infinite alternate;
+            z-index: -2;
+            opacity: .68;
         }
 
         .shooting-star {
-            position: absolute;
-            width: 100px;
-            height: 2px;
-            background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,1));
-            animation: shoot 3s linear infinite;
-            z-index: -1;
-            opacity: 0;
-            transform: rotate(-45deg);
-        }
-
-        .shooting-star:nth-child(1) { top: 10%; left: 80%; animation-delay: 0s; }
-        .shooting-star:nth-child(2) { top: 30%; left: 100%; animation-delay: 1.5s; }
-        .shooting-star:nth-child(3) { top: 60%; left: 90%; animation-delay: 2.5s; background: linear-gradient(90deg, rgba(0,0,0,0), rgba(139, 92, 246, 1)); }
-
-        @keyframes twinkle {
-            0% { opacity: 0.3; }
-            100% { opacity: 0.8; }
-        }
-
-        .shooting-star {
-            position: absolute;
-            height: 2px;
-            background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,1));
-            animation: shoot 3s linear infinite;
-            z-index: -1;
-            opacity: 0;
-            transform: rotate(-45deg);
+            --comet-color: 255,255,255;
+            position: fixed;
+            left: 106%;
+            width: 150px;
+            height: 3px;
             border-radius: 999px;
+            background: linear-gradient(90deg, rgba(var(--comet-color),1), rgba(var(--comet-color),.65) 14%, rgba(var(--comet-color),0) 100%);
+            box-shadow: 0 0 12px rgba(var(--comet-color),.45);
+            animation: comet-dash 7s cubic-bezier(.2,.6,.35,1) infinite;
+            z-index: -1;
+            opacity: 0;
         }
-        
-        .shooting-star::after {
+
+        .shooting-star::before {
             content: '';
             position: absolute;
-            right: 0;
+            left: -2px;
             top: 50%;
+            width: 6px;
+            height: 6px;
             transform: translateY(-50%);
-            width: 3px;
-            height: 3px;
-            background: #fff;
             border-radius: 50%;
-            box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.8);
+            background: rgb(var(--comet-color));
+            box-shadow: 0 0 16px 4px rgba(var(--comet-color),.75);
         }
 
-        .shooting-star:nth-child(1) { top: 10%; left: 80%; width: 100px; animation-delay: 0s; animation-duration: 3s; }
-        .shooting-star:nth-child(2) { top: 30%; left: 100%; width: 150px; animation-delay: 1.5s; animation-duration: 4s; background: linear-gradient(90deg, rgba(0,0,0,0), rgba(56, 189, 248, 1)); }
-        .shooting-star:nth-child(3) { top: 60%; left: 90%; width: 80px; animation-delay: 2.8s; animation-duration: 2.5s; background: linear-gradient(90deg, rgba(0,0,0,0), rgba(139, 92, 246, 1)); }
-        .shooting-star:nth-child(4) { top: -10%; left: 50%; width: 120px; animation-delay: 4.1s; animation-duration: 3.5s; background: linear-gradient(90deg, rgba(0,0,0,0), rgba(251, 191, 36, 1)); }
-        .shooting-star:nth-child(5) { top: 80%; left: 70%; width: 90px; animation-delay: 5.5s; animation-duration: 3s; }
-        .shooting-star:nth-child(6) { top: 40%; left: 60%; width: 140px; animation-delay: 7s; animation-duration: 4.5s; }
-        .shooting-star:nth-child(7) { top: 15%; left: 30%; width: 110px; animation-delay: 8.2s; animation-duration: 3.2s; background: linear-gradient(90deg, rgba(0,0,0,0), rgba(244, 114, 182, 1)); }
+        .shooting-star:nth-of-type(3) { top: 8%; --comet-color: 56,189,248; animation-delay: -1s; animation-duration: 6.5s; }
+        .shooting-star:nth-of-type(4) { top: 26%; --comet-color: 244,114,182; animation-delay: -4.8s; animation-duration: 8s; width: 190px; }
+        .shooting-star:nth-of-type(5) { top: 48%; --comet-color: 251,191,36; animation-delay: -2.7s; animation-duration: 7.5s; width: 120px; }
+        .shooting-star:nth-of-type(6) { top: 67%; --comet-color: 167,139,250; animation-delay: -6.3s; animation-duration: 9s; width: 175px; }
+        .shooting-star:nth-of-type(7) { top: 84%; --comet-color: 52,211,153; animation-delay: -3.8s; animation-duration: 7s; width: 135px; }
+        .shooting-star:nth-of-type(8) { top: 16%; --comet-color: 251,113,133; animation-delay: -7.5s; animation-duration: 10s; width: 110px; }
+        .shooting-star:nth-of-type(9) { top: 58%; --comet-color: 255,255,255; animation-delay: -8.8s; animation-duration: 11s; width: 205px; }
 
-        @keyframes shoot {
-            0% { transform: translateX(0) translateY(0) rotate(-45deg); opacity: 1; }
-            100% { transform: translateX(-1500px) translateY(1500px) rotate(-45deg); opacity: 0; }
+        @keyframes cosmic-palette {
+            0% { background-position: 0% 20%; }
+            100% { background-position: 100% 80%; }
+        }
+        @keyframes aurora-orbit { to { transform: rotate(360deg); } }
+        @keyframes aurora-drift {
+            0% { transform: translate3d(-2%, -2%, 0) scale(1); }
+            100% { transform: translate3d(3%, 3%, 0) scale(1.08); }
+        }
+        @keyframes star-parallax { to { transform: translate3d(-175px, 115px, 0); } }
+        @keyframes twinkle {
+            0% { opacity: .42; filter: brightness(.85); }
+            100% { opacity: .82; filter: brightness(1.25); }
+        }
+        @keyframes comet-dash {
+            0%, 7% { transform: translate3d(0, -12vh, 0) rotate(-28deg) scaleX(.45); opacity: 0; }
+            12% { opacity: 1; }
+            54%, 100% { transform: translate3d(-145vw, 88vh, 0) rotate(-28deg) scaleX(1); opacity: 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .space-bg, .space-bg::before, .space-bg::after, .stars { animation: none; }
+            .shooting-star { display: none; }
         }
 
         /* --- FLIP Animation --- */
@@ -359,6 +395,10 @@
             <button onclick="applyCustomUpdate('add')" class="bg-emerald-500 hover:bg-emerald-400 text-white px-2.5 py-1.5 rounded-lg font-bold transition-all shadow-sm shadow-emerald-500/20" title="Add"><i class="fa-solid fa-plus"></i></button>
             <button onclick="applyCustomUpdate('set')" class="bg-amber-500 hover:bg-amber-400 text-white px-2.5 py-1.5 rounded-lg font-bold transition-all shadow-sm shadow-amber-500/20" title="Set exact score"><i class="fa-solid fa-check"></i></button>
         </div>
+
+        <button onclick="openDeleteModal()" class="mt-2 w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 hover:border-rose-400 font-bold transition-all" title="Delete this name">
+            <i class="fa-solid fa-user-minus"></i> Delete name
+        </button>
     </div>
 
     <!-- Reset Confirmation Modal -->
@@ -376,6 +416,22 @@
             <div class="flex gap-3 justify-center">
                 <button onclick="closeResetModal()" class="px-5 py-2.5 rounded-xl font-bold text-slate-300 bg-slate-700 hover:bg-slate-600 border border-slate-500 transition-colors w-full">Cancel</button>
                 <button onclick="confirmReset()" class="px-5 py-2.5 rounded-xl font-bold text-white bg-red-500 hover:bg-red-400 shadow-lg shadow-red-500/30 transition-colors w-full">Yes, Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Student Confirmation Modal -->
+    <div id="deleteStudentModal" class="hidden fixed inset-0 z-[110] items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm transition-opacity">
+        <div class="bg-slate-800 border border-rose-500/40 rounded-3xl p-6 max-w-sm w-full text-center shadow-[0_24px_80px_rgba(0,0,0,.65)] relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-36 h-36 bg-rose-500/15 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="w-16 h-16 bg-rose-500/15 rounded-full flex items-center justify-center mx-auto mb-4 border border-rose-500/35 text-rose-400 text-2xl">
+                <i class="fa-solid fa-user-minus"></i>
+            </div>
+            <h2 class="text-2xl font-display text-white mb-2">Delete this name?</h2>
+            <p class="text-slate-300 mb-6 font-semibold">Remove <span id="deleteStudentName" class="text-rose-300 font-black"></span> and their points from this week?</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeDeleteModal()" class="px-5 py-2.5 rounded-xl font-bold text-slate-300 bg-slate-700 hover:bg-slate-600 border border-slate-500 transition-colors w-full">Cancel</button>
+                <button onclick="confirmDeleteStudent()" class="px-5 py-2.5 rounded-xl font-bold text-white bg-rose-500 hover:bg-rose-400 shadow-lg shadow-rose-500/30 transition-colors w-full"><i class="fa-solid fa-trash-can mr-1.5"></i>Delete</button>
             </div>
         </div>
     </div>
@@ -401,6 +457,7 @@
         // State
         let students = [];
         let currentlyEditingId = null;
+        let studentPendingDeletionId = null;
         let previousTopStudentId = null;
         let topWinnersCount = 0; // Defines how many top students get highlighted
         let previousStudentOrder = []; 
@@ -641,6 +698,38 @@
             closePopover();
         }
 
+        function openDeleteModal() {
+            if (!currentlyEditingId) return;
+            const student = students.find(s => s.id === currentlyEditingId);
+            if (!student) return;
+
+            studentPendingDeletionId = student.id;
+            document.getElementById('deleteStudentName').innerText = student.name;
+            document.getElementById('deleteStudentModal').classList.remove('hidden');
+            document.getElementById('deleteStudentModal').classList.add('flex');
+            closePopover();
+        }
+
+        function closeDeleteModal() {
+            const modal = document.getElementById('deleteStudentModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            studentPendingDeletionId = null;
+        }
+
+        function confirmDeleteStudent() {
+            if (!studentPendingDeletionId) return;
+
+            students = students.filter(student => student.id !== studentPendingDeletionId);
+            topWinnersCount = Math.min(topWinnersCount, students.length);
+            sortStudents();
+            previousTopStudentId = students[0]?.id || null;
+            updateTopXUI(topWinnersCount);
+            closeDeleteModal();
+            renderLeaderboard();
+            saveData();
+        }
+
         function getRankClass(index) {
             if (index === 0) return 'rank-1 bg-gradient-to-r from-amber-900/40 to-amber-900/10 border-amber-400/50 shadow-[0_0_20px_rgba(251,191,36,0.15)]';
             return 'bg-gradient-to-r from-slate-800/80 to-slate-900/60 border-indigo-500/30';
@@ -816,6 +905,9 @@
         window.closePopover = closePopover;
         window.quickAddPoints = quickAddPoints;
         window.applyCustomUpdate = applyCustomUpdate;
+        window.openDeleteModal = openDeleteModal;
+        window.closeDeleteModal = closeDeleteModal;
+        window.confirmDeleteStudent = confirmDeleteStudent;
         window.toggleTrophyMenu = toggleTrophyMenu;
         window.selectTopX = selectTopX;
 
