@@ -506,6 +506,28 @@
         <button onclick="clearLessonClipboard()" class="w-9 h-9 rounded-full hover:bg-white/10 dark:hover:bg-slate-900/10 text-white/70 dark:text-slate-600 transition-colors"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
+    <!-- Compact lesson time popover for the weekly view -->
+    <div id="modal-time-edit" class="hidden fixed z-[135] w-[min(22rem,calc(100vw-1rem))] bg-white/98 dark:bg-slate-900/98 rounded-2xl shadow-2xl shadow-slate-900/25 border border-slate-200 dark:border-slate-700 overflow-hidden backdrop-blur-xl" onclick="event.stopPropagation()">
+        <div class="flex items-start justify-between gap-3 px-3.5 py-3 border-b border-slate-200 dark:border-slate-800">
+            <div class="min-w-0">
+                <div class="flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400 text-[9px] font-black uppercase tracking-widest"><i class="fa-regular fa-clock"></i> Change time</div>
+                <div id="time-edit-title" class="text-sm font-black text-slate-800 dark:text-white truncate mt-0.5">Lesson time</div>
+                <div id="time-edit-day" class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5"></div>
+            </div>
+            <button type="button" onclick="closeModals()" class="w-7 h-7 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-900/30 transition-colors" aria-label="Close time editor"><i class="fa-solid fa-xmark text-xs"></i></button>
+        </div>
+        <div class="p-3.5 space-y-3">
+            <div id="inline-time-presets" class="grid grid-cols-2 gap-1.5"></div>
+            <div class="pt-2.5 border-t border-slate-200 dark:border-slate-800">
+                <label for="inline-time-input" class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Custom time</label>
+                <div class="flex gap-2">
+                    <input id="inline-time-input" type="text" oninput="refreshInlineTimePresets()" onkeydown="if(event.key === 'Enter') saveInlineLessonTime(); if(event.key === 'Escape') closeModals()" class="min-w-0 flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 font-bold" />
+                    <button type="button" onclick="saveInlineLessonTime()" class="px-3 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-black shadow-sm transition-colors">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Edit Single Block Modal -->
     <div id="modal-edit" class="hidden fixed inset-0 z-[100] items-center justify-center p-4 bg-slate-900/95 backdrop-blur-sm">
         <div class="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden">
@@ -525,7 +547,11 @@
                             <button onclick="setQuickEditDuration(60)" class="text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded font-bold hover:bg-cyan-500 hover:text-white transition-colors">60m</button>
                         </div>
                     </div>
-                    <input id="edit-time" type="text" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500 font-bold" />
+                    <input id="edit-time" type="text" oninput="refreshEditTimePresets()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500 font-bold" />
+                    <div class="mt-3">
+                        <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Common lesson times</div>
+                        <div id="edit-time-presets" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5"></div>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Subject / Header</label>
@@ -679,6 +705,7 @@
             lessonTransfer: null,
             draggedLesson: null,
             lessonClipboard: null,
+            timeEditing: null,
             recentlyDroppedLessonId: null,
             activeDutySelection: null
         };
@@ -696,6 +723,15 @@
             break1: { id: 'br1', type: 'break', time: '11:00am - 11:30am', topic: 'Break 1', icon: 'mug-hot', isDuty: false },
             break2: { id: 'br2', type: 'break', time: '1:30pm - 2:00pm', topic: 'Break 2', icon: 'apple-whole', isDuty: false }
         };
+        const COMMON_LESSON_TIMES = [
+            '9:00am - 9:20am',
+            '9:20am - 10:00am',
+            '10:00am - 10:50am',
+            '11:30am - 12:30pm',
+            '12:30pm - 1:30pm',
+            '2:00pm - 2:30pm',
+            '2:30pm - 3:00pm'
+        ];
         const DUTY_LOCATIONS = ['AREA A', 'AREA B', 'GRASS'];
 
         const emptyWeekDays = () => Object.fromEntries(SCHOOL_DAYS.map(day => [day, []]));
@@ -704,6 +740,12 @@
         const timetableDocRef = (term, week) => doc(db, 'timetables', timetableDocId(term, week));
         const createLessonId = (prefix = 'lesson') => `${prefix}_${Date.now()}_${crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)}`;
         const cloneBlock = block => ({ ...block, printLink: Array.isArray(block.printLink) ? [...block.printLink] : block.printLink });
+
+        const compareLessonsByStartTime = (a, b) => {
+            const timeDifference = window.parseTimeStrToMins(String(a.time || '').split('-')[0]) - window.parseTimeStrToMins(String(b.time || '').split('-')[0]);
+            if (timeDifference !== 0) return timeDifference;
+            return (Number.isFinite(a.scheduleOrder) ? a.scheduleOrder : Number.MAX_SAFE_INTEGER) - (Number.isFinite(b.scheduleOrder) ? b.scheduleOrder : Number.MAX_SAFE_INTEGER);
+        };
 
         const getLessonSection = block => {
             if (SCHEDULE_SECTIONS[block.scheduleSection]) return block.scheduleSection;
@@ -740,7 +782,7 @@
         const composeScheduledDay = (sections, originalBlocks = []) => {
             const output = [];
             for (const sectionKey of Object.keys(SCHEDULE_SECTIONS)) {
-                const lessons = (sections[sectionKey] || []).map((lesson, index) => {
+                const lessons = [...(sections[sectionKey] || [])].sort(compareLessonsByStartTime).map((lesson, index) => {
                     const copy = cloneBlock(lesson);
                     copy.id = copy.id || createLessonId();
                     copy.type = 'lesson';
@@ -761,11 +803,7 @@
                 sections[getLessonSection(block)].push(cloneBlock(block));
             });
             Object.keys(sections).forEach(sectionKey => {
-                sections[sectionKey].sort((a, b) => {
-                    const orderDifference = (Number.isFinite(a.scheduleOrder) ? a.scheduleOrder : Number.MAX_SAFE_INTEGER) - (Number.isFinite(b.scheduleOrder) ? b.scheduleOrder : Number.MAX_SAFE_INTEGER);
-                    if (orderDifference !== 0) return orderDifference;
-                    return window.parseTimeStrToMins(String(a.time || '').split('-')[0]) - window.parseTimeStrToMins(String(b.time || '').split('-')[0]);
-                });
+                sections[sectionKey].sort(compareLessonsByStartTime);
             });
             return sections;
         };
@@ -869,10 +907,38 @@
             return `${parts[0].trim()} - ${window.formatMinsToTimeStr(endMins)}`;
         };
 
+        const normalizedTimeValue = value => String(value || '').replace(/\s+/g, '').toLowerCase();
+
+        const renderTimePresetButtons = (containerId, handlerName, currentValue) => {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const selectedValue = normalizedTimeValue(currentValue);
+            container.innerHTML = COMMON_LESSON_TIMES.map(time => {
+                const selected = normalizedTimeValue(time) === selectedValue;
+                return `<button type="button" aria-pressed="${selected}" onclick="${handlerName}('${time}')" class="px-2.5 py-2 rounded-xl border text-[10px] font-black leading-tight transition-all ${selected ? 'bg-cyan-500 border-cyan-400 text-white shadow-md shadow-cyan-500/20' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-cyan-400 hover:text-cyan-600 dark:hover:text-cyan-400'}">${time}</button>`;
+            }).join('');
+        };
+
+        const isValidLessonTime = time => {
+            const parts = String(time || '').split('-');
+            if (parts.length !== 2) return false;
+            const timePattern = /^\s*\d{1,2}:\d{2}\s*(am|pm)\s*$/i;
+            if (!timePattern.test(parts[0]) || !timePattern.test(parts[1])) return false;
+            return window.parseTimeStrToMins(parts[1]) > window.parseTimeStrToMins(parts[0]);
+        };
+
         window.setQuickEditDuration = (mins) => {
             const timeInput = document.getElementById('edit-time');
             timeInput.value = calculateNewTimeString(timeInput.value, mins);
+            window.refreshEditTimePresets();
         };
+
+        window.setEditTimePreset = time => {
+            document.getElementById('edit-time').value = time;
+            window.refreshEditTimePresets();
+        };
+
+        window.refreshEditTimePresets = () => renderTimePresetButtons('edit-time-presets', 'setEditTimePreset', document.getElementById('edit-time')?.value);
 
         window.toggleTheme = () => {
             const html = document.documentElement;
@@ -1367,10 +1433,11 @@
         };
 
         window.closeModals = () => {
-            ['modal-add', 'modal-edit', 'modal-cancel', 'modal-lesson-detail', 'modal-todos', 'modal-transfer', 'modal-duty-location'].forEach(id => {
+            ['modal-add', 'modal-edit', 'modal-time-edit', 'modal-cancel', 'modal-lesson-detail', 'modal-todos', 'modal-transfer', 'modal-duty-location'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) { el.classList.add('hidden'); el.classList.remove('flex'); }
             });
+            if (window.detachTimeEditorOutsideClick) window.detachTimeEditorOutsideClick();
         };
 
         const getSkeleton = (day = '') => {
@@ -1566,6 +1633,7 @@
             localStorage.setItem('lessonClipboard', JSON.stringify(window.appState.lessonClipboard));
             closeModals();
             updateLessonClipboardUI();
+            if (window.appState.view === 'week') renderWeekGrid();
             showToast('Lesson copied. Navigate to any day and paste it.');
         };
 
@@ -1573,6 +1641,7 @@
             window.appState.lessonClipboard = null;
             localStorage.removeItem('lessonClipboard');
             updateLessonClipboardUI();
+            if (window.appState.view === 'week') renderWeekGrid();
         };
 
         window.updateLessonClipboardUI = () => {
@@ -1596,10 +1665,10 @@
         }
         updateLessonClipboardUI();
 
-        window.pasteCopiedLesson = async () => {
+        const pasteCopiedLessonIntoDay = async day => {
             const clipboard = window.appState.lessonClipboard;
-            if (!clipboard || window.appState.view !== 'day') return;
-            const target = { term: window.appState.term, week: window.appState.week, day: window.appState.day };
+            if (!clipboard || !SCHOOL_DAYS.includes(day)) return;
+            const target = { term: window.appState.term, week: window.appState.week, day };
             try {
                 const destinationId = await insertLessonCopyExact(clipboard.lesson, target);
                 markLessonLanding(destinationId);
@@ -1608,6 +1677,15 @@
             } catch (error) {
                 showToast(error.message || 'Could not paste that lesson.');
             }
+        };
+
+        window.pasteCopiedLesson = async () => {
+            if (window.appState.view !== 'day') return;
+            await pasteCopiedLessonIntoDay(window.appState.day);
+        };
+
+        window.pasteCopiedLessonToDay = async day => {
+            await pasteCopiedLessonIntoDay(day);
         };
 
         const findLessonIndex = (blocks, source) => {
@@ -2315,6 +2393,13 @@
                         <i class="fa-solid fa-arrow-right text-[10px]"></i>
                     </div>
                 </div>`;
+
+                const pasteHTML = window.appState.lessonClipboard ? `
+                    <div class="shrink-0 px-2.5 pt-2.5 bg-slate-50/80 dark:bg-slate-900/40">
+                        <button type="button" onclick="event.stopPropagation(); pasteCopiedLessonToDay('${day}')" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-white text-[10px] md:text-xs font-black shadow-sm shadow-cyan-900/15 transition-all active:scale-[.98]" title="Paste copied lesson into ${day}">
+                            <i class="fa-solid fa-paste"></i><span>Paste into ${day}</span>
+                        </button>
+                    </div>` : '';
                 
                 let colBgClass = isCovered ? 'bg-stripes-purple' : '';
                 let bodyHTML = `<div class="day-drop-zone p-2.5 md:p-3.5 flex flex-col overflow-y-auto no-scrollbar flex-1 min-h-0 rounded-b-[2rem] relative transition-colors duration-300 ${colBgClass}" ondragover="allowLessonDrop(event)" ondragleave="clearLessonDropCue(event)" ondrop="dropLessonAtDayEnd(event, '${day}')">`;
@@ -2374,7 +2459,7 @@
                             bodyHTML += `
                             <div data-lesson-id="${block.id}" draggable="true" ondragstart="startLessonDrag(event, '${day}', ${idx})" ondragend="endLessonDrag(event)" ondragover="allowLessonDrop(event)" ondragleave="clearLessonDropCue(event)" ondrop="dropLessonOnCard(event, '${day}', ${idx})" class="schedule-lesson-card ${hasClash ? 'timing-clash-card' : ''} ${justDropped ? 'lesson-just-dropped' : ''} bg-white dark:bg-slate-800 p-3 pt-3.5 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 ${theme.weekCardBorder} ${theme.cardExtra} shadow-sm hover:shadow-md group relative flex flex-col gap-2 z-10 hover:z-50 cursor-grab active:cursor-grabbing">
                                 <div class="flex justify-between items-center relative z-[60]">
-                                    <div class="flex items-center gap-1.5"><span class="${theme.badgeBg} ${theme.badgeText} border ${theme.badgeBorder} px-2 py-0.5 rounded text-[9px] md:text-[10px] font-bold tracking-wide">${block.time}</span>${timingClashBadge(hasClash)}</div>
+                                    <div class="flex items-center gap-1.5"><button type="button" data-time-editor-trigger draggable="false" onclick="event.stopPropagation(); openLessonTimeEditor(event, '${day}', ${idx})" ondragstart="event.preventDefault()" class="${theme.badgeBg} ${theme.badgeText} border ${theme.badgeBorder} px-2 py-0.5 rounded text-[9px] md:text-[10px] font-bold tracking-wide hover:ring-2 hover:ring-cyan-400/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 transition-shadow cursor-pointer" title="Change lesson time"><i class="fa-regular fa-clock mr-1 opacity-70"></i>${block.time}</button>${timingClashBadge(hasClash)}</div>
                                     <div class="opacity-0 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex relative z-20">
                                         <button onclick="event.stopPropagation(); openTransferModal('${day}', ${idx})" class="bg-slate-50 dark:bg-slate-700 hover:bg-amber-50 dark:hover:bg-amber-900/30 text-slate-400 hover:text-amber-500 p-1.5 rounded-l text-[9px] transition-colors border border-slate-200 dark:border-slate-600 cursor-pointer border-r-0" title="Copy lesson"><i class="fa-solid fa-copy"></i></button>
 
@@ -2405,7 +2490,7 @@
                 }
                 bodyHTML += `<div class="shrink-0 flex items-center justify-center pt-2 mt-2 border-t border-amber-200/60 dark:border-amber-800/40">${dutySelectorHTML(day, 'morning', 'Morning Duty', 'fa-sun', { compact: true })}</div>`;
                 bodyHTML += '</div>';
-                col.innerHTML = headerHTML + bodyHTML;
+                col.innerHTML = headerHTML + pasteHTML + bodyHTML;
                 grid.appendChild(col);
             });
             if (window.appState.recentlyDroppedLessonId) setTimeout(() => { window.appState.recentlyDroppedLessonId = null; }, 650);
@@ -2620,6 +2705,87 @@
             toggleNote(idx); 
         };
 
+        window.detachTimeEditorOutsideClick = () => {
+            if (!window.timeEditorOutsideClickHandler) return;
+            document.removeEventListener('pointerdown', window.timeEditorOutsideClickHandler);
+            window.timeEditorOutsideClickHandler = null;
+        };
+
+        window.openLessonTimeEditor = (event, day, idx) => {
+            const lesson = window.appState.weekData[day]?.[idx];
+            if (!lesson || lesson.type !== 'lesson') return;
+            const anchor = event.currentTarget;
+            lesson.id = lesson.id || createLessonId();
+            window.appState.timeEditing = { day, lessonId: lesson.id, index: idx, originalTime: lesson.time || '' };
+            document.getElementById('time-edit-title').textContent = lesson.subject || 'Untitled lesson';
+            document.getElementById('time-edit-day').textContent = `${day} · ${lesson.time || 'No time set'}`;
+            document.getElementById('inline-time-input').value = lesson.time || '';
+            window.refreshInlineTimePresets();
+            closeModals();
+            const popover = document.getElementById('modal-time-edit');
+            popover.style.visibility = 'hidden';
+            popover.style.left = '8px';
+            popover.style.top = '8px';
+            popover.classList.remove('hidden');
+
+            const anchorRect = anchor.getBoundingClientRect();
+            const popoverRect = popover.getBoundingClientRect();
+            const left = Math.min(Math.max(8, anchorRect.left), Math.max(8, window.innerWidth - popoverRect.width - 8));
+            const belowTop = anchorRect.bottom + 7;
+            const top = belowTop + popoverRect.height <= window.innerHeight - 8
+                ? belowTop
+                : Math.max(8, anchorRect.top - popoverRect.height - 7);
+            popover.style.left = `${left}px`;
+            popover.style.top = `${top}px`;
+            popover.style.visibility = '';
+
+            window.timeEditorOutsideClickHandler = outsideEvent => {
+                if (!popover.contains(outsideEvent.target) && !outsideEvent.target.closest('[data-time-editor-trigger]')) closeModals();
+            };
+            setTimeout(() => document.addEventListener('pointerdown', window.timeEditorOutsideClickHandler), 0);
+        };
+
+        window.selectInlineTimePreset = time => {
+            document.getElementById('inline-time-input').value = time;
+            window.saveInlineLessonTime();
+        };
+
+        window.refreshInlineTimePresets = () => renderTimePresetButtons('inline-time-presets', 'selectInlineTimePreset', document.getElementById('inline-time-input')?.value);
+
+        window.saveInlineLessonTime = () => {
+            const editor = window.appState.timeEditing;
+            if (!editor) return;
+            const newTime = document.getElementById('inline-time-input').value.trim();
+            if (!isValidLessonTime(newTime)) {
+                showToast('Enter a time like 9:00am - 9:20am.');
+                return;
+            }
+
+            let updated = [...(window.appState.weekData[editor.day] || [])];
+            const idx = updated.findIndex(block => block.id === editor.lessonId);
+            const lessonIndex = idx !== -1 ? idx : editor.index;
+            if (!updated[lessonIndex] || updated[lessonIndex].type !== 'lesson') {
+                showToast('That lesson changed or was removed.');
+                closeModals();
+                return;
+            }
+
+            const oldSection = getLessonSection(updated[lessonIndex]);
+            if (newTime !== updated[lessonIndex].time) {
+                updated[lessonIndex] = { ...updated[lessonIndex], time: newTime };
+                delete updated[lessonIndex].scheduleSection;
+                delete updated[lessonIndex].scheduleOrder;
+            }
+            const newSection = getLessonSection(updated[lessonIndex]);
+            updated = composeOrEmptyDay(splitDayIntoSections(updated), updated);
+            window.appState.weekData[editor.day] = updated;
+            setDoc(timetableDocRef(window.appState.term, window.appState.week), { days: { ...window.appState.weekData, [editor.day]: updated }, schemaVersion: 2 }, { merge: true });
+            if (window.appState.view === 'week') renderWeekGrid();
+            if (window.appState.view === 'day' && window.appState.day === editor.day) renderDayBlocks();
+            closeModals();
+            showToast(oldSection === newSection ? 'Lesson time updated and schedule reordered.' : `Lesson time updated and moved to ${SCHEDULE_SECTIONS[newSection].label}.`);
+        };
+
         window.initEdit = (day, idx) => {
             window.appState.day = day; window.appState.editingBlock = { ...window.appState.weekData[day][idx], index: idx };
             document.getElementById('edit-badge').innerText = day + ' | ' + window.appState.editingBlock.time;
@@ -2631,6 +2797,7 @@
             document.getElementById('edit-plan').value = window.appState.editingBlock.lessonPlanLink || '';
             document.getElementById('edit-slides').value = window.appState.editingBlock.slidesLink || '';
             document.getElementById('edit-low-dif').value = window.appState.editingBlock.lowDifLink || '';
+            window.refreshEditTimePresets();
             
             const printLinks = getPrintLinks(window.appState.editingBlock.printLink);
             if (printLinks.length === 0) printLinks.push(''); 
@@ -2661,7 +2828,11 @@
             const idx = window.appState.editingBlock.index;
             const printInputs = Array.from(document.querySelectorAll('.edit-print-input')).map(inp => inp.value.trim()).filter(val => val !== '');
 
-            const newTime = document.getElementById('edit-time').value;
+            const newTime = document.getElementById('edit-time').value.trim();
+            if (!isValidLessonTime(newTime)) {
+                showToast('Enter a time like 9:00am - 9:20am.');
+                return;
+            }
             updated[idx].time = newTime;
             updated[idx].subject = document.getElementById('edit-subject').value;
             updated[idx].topic = document.getElementById('edit-topic').value;
@@ -2774,9 +2945,10 @@
                 <div class="mb-6 pb-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
                     <div class="w-full">
                         <h2 class="text-2xl md:text-3xl font-black text-slate-800 dark:text-white leading-tight mb-3">Edit Lesson Details</h2>
-                        <div class="flex flex-col gap-1.5 w-full max-w-sm">
+                        <div class="flex flex-col gap-1.5 w-full max-w-2xl">
                             <label class="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest"><i class="fa-regular fa-clock text-cyan-500 mr-1"></i> Time Slot</label>
-                            <input type="text" value="${activeBlock.time}" oninput="handlePopulateInput('time', this)" placeholder="e.g. 9:00am - 10:00am" class="w-full bg-cyan-50/50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800/50 rounded-xl px-4 py-2.5 text-sm md:text-base font-bold text-cyan-700 dark:text-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all shadow-sm" />
+                            <input id="pop-time-input" type="text" value="${activeBlock.time}" oninput="handlePopulateInput('time', this)" placeholder="e.g. 9:00am - 10:00am" class="w-full max-w-sm bg-cyan-50/50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800/50 rounded-xl px-4 py-2.5 text-sm md:text-base font-bold text-cyan-700 dark:text-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all shadow-sm" />
+                            <div id="populate-time-presets" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 mt-1"></div>
                         </div>
                     </div>
                 </div>
@@ -2848,6 +3020,7 @@
             `;
             
             renderPopulatePrintLinks();
+            window.refreshPopulateTimePresets();
         };
 
         window.setPopulateActiveBlock = (idx) => {
@@ -2870,18 +3043,32 @@
             setTimeout(() => { document.getElementById('populate-sidebar-list').parentElement.scrollTop = scrollPos; }, 0);
         };
 
+        window.setPopulateTimePreset = time => {
+            const input = document.getElementById('pop-time-input');
+            if (!input) return;
+            input.value = time;
+            window.handlePopulateInput('time', input);
+        };
+
+        window.refreshPopulateTimePresets = () => renderTimePresetButtons('populate-time-presets', 'setPopulateTimePreset', document.getElementById('pop-time-input')?.value);
+
         window.handlePopulateInput = (field, el) => {
             const val = el.value;
             const idx = window.appState.activeBlockIndex;
+            const oldValue = window.appState.newDayForm[idx][field];
             window.appState.newDayForm[idx][field] = val;
 
             if(field === 'subject') {
                 const sideLabel = document.getElementById(`pop-side-sub-${idx}`);
                 if(sideLabel) sideLabel.innerText = val || 'Empty Block';
             } else if (field === 'time') {
-                // Instantly sync time field in the sidebar display
+                if (val !== oldValue) {
+                    delete window.appState.newDayForm[idx].scheduleSection;
+                    delete window.appState.newDayForm[idx].scheduleOrder;
+                }
                 const sideTime = document.getElementById(`pop-side-time-${idx}`);
                 if (sideTime) sideTime.innerHTML = `<i class="fa-regular fa-clock mr-1 opacity-70"></i>${val}`;
+                window.refreshPopulateTimePresets();
             }
         };
 
@@ -2974,8 +3161,13 @@
             let cleanedForm = window.appState.newDayForm.map(b => {
                 if(b.type === 'break') return b;
                 const cleanedPrint = Array.isArray(b.printLink) ? b.printLink.filter(l => l.trim() !== '') : [];
-                return { ...b, printLink: cleanedPrint };
+                return { ...b, time: String(b.time || '').trim(), printLink: cleanedPrint };
             });
+
+            if (cleanedForm.some(block => block.type !== 'break' && !isValidLessonTime(block.time))) {
+                showToast('Check each lesson time uses a range like 9:00am - 9:20am.');
+                return;
+            }
 
             try {
                 cleanedForm = composeOrEmptyDay(splitDayIntoSections(cleanedForm), cleanedForm);
