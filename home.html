@@ -292,8 +292,133 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+
+        const createTodoId = () => {
+            const suffix = globalThis.crypto?.randomUUID
+                ? globalThis.crypto.randomUUID()
+                : Math.random().toString(36).slice(2);
+            return `todo_${Date.now()}_${suffix}`;
+        };
+        const todoTextKey = todo => `text:${String(todo?.text || '').trim().toLowerCase()}`;
+        const todoCarryKey = todo => todo?.carryKey || (todo?.id ? `id:${todo.id}` : todoTextKey(todo));
+        const normalizeTodo = todo => ({
+            ...todo,
+            id: todo?.id || createTodoId(),
+            text: String(todo?.text || '').trim(),
+            done: Boolean(todo?.done)
+        });
+        const findTodoIndex = (todos, target, fallbackIndex) => {
+            if (target?.id) {
+                const idMatch = todos.findIndex(todo => todo?.id === target.id);
+                if (idMatch !== -1) return idMatch;
+            }
+            if (Number.isInteger(fallbackIndex) && fallbackIndex >= 0 && fallbackIndex < todos.length) {
+                const candidate = todos[fallbackIndex];
+                if (String(candidate?.text || '') === String(target?.text || '') && Boolean(candidate?.done) === Boolean(target?.done)) return fallbackIndex;
+            }
+            return todos.findIndex(todo =>
+                String(todo?.text || '') === String(target?.text || '') && Boolean(todo?.done) === Boolean(target?.done)
+            );
+        };
+        const escapeTodoText = value => String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+        const createTodoBackend = ({ db, doc, runTransaction }) => {
+            const timetableRef = documentId => doc(db, 'timetables', documentId);
+            let operationQueue = Promise.resolve();
+            const enqueue = operation => {
+                const result = operationQueue.then(operation, operation);
+                operationQueue = result.catch(() => undefined);
+                return result;
+            };
+            const mutateDay = async ({ documentId, day, target, index, mutation, dismiss = false }) => {
+                const ref = timetableRef(documentId);
+                return enqueue(() => runTransaction(db, async transaction => {
+                    const snapshot = await transaction.get(ref);
+                    const data = snapshot.exists() ? snapshot.data() : {};
+                    const todosByDay = { ...(data.todos || {}) };
+                    const storedTodos = Array.isArray(todosByDay[day]) ? todosByDay[day] : [];
+                    const todos = storedTodos.map(normalizeTodo);
+                    const targetIndex = target ? findTodoIndex(storedTodos, target, index) : -1;
+                    const result = mutation(todos, targetIndex);
+                    const nextTodos = result?.todos || todos;
+                    todosByDay[day] = nextTodos;
+                    const update = { todos: todosByDay };
+                    if (dismiss && targetIndex !== -1) {
+                        const removedTodo = storedTodos[targetIndex];
+                        const dismissalsByDay = { ...(data.todoDismissals || {}) };
+                        const dismissals = new Set(Array.isArray(dismissalsByDay[day]) ? dismissalsByDay[day] : []);
+                        dismissals.add(todoCarryKey(removedTodo));
+                        dismissals.add(todoTextKey(removedTodo));
+                        dismissalsByDay[day] = [...dismissals];
+                        update.todoDismissals = dismissalsByDay;
+                    }
+                    transaction.set(ref, update, { merge: true });
+                    return nextTodos;
+                }));
+            };
+            return {
+                create(text) {
+                    return { id: createTodoId(), text: String(text).trim(), done: false };
+                },
+                add({ documentId, day, text, todo = this.create(text) }) {
+                    return mutateDay({ documentId, day, mutation: todos => ({ todos: [...todos, todo] }) });
+                },
+                toggle({ documentId, day, todo, index, done }) {
+                    return mutateDay({
+                        documentId, day, target: todo, index,
+                        mutation: (todos, targetIndex) => {
+                            if (targetIndex !== -1) todos[targetIndex] = { ...todos[targetIndex], done: Boolean(done) };
+                            return { todos };
+                        }
+                    });
+                },
+                remove({ documentId, day, todo, index }) {
+                    return mutateDay({
+                        documentId, day, target: todo, index, dismiss: true,
+                        mutation: (todos, targetIndex) => {
+                            if (targetIndex !== -1) todos.splice(targetIndex, 1);
+                            return { todos };
+                        }
+                    });
+                },
+                carryOver({ currentDocumentId, previousDocumentId, currentDay, previousDay }) {
+                    const currentRef = timetableRef(currentDocumentId);
+                    const previousRef = timetableRef(previousDocumentId);
+                    return enqueue(() => runTransaction(db, async transaction => {
+                        const currentSnapshot = await transaction.get(currentRef);
+                        const previousSnapshot = currentDocumentId === previousDocumentId
+                            ? currentSnapshot
+                            : await transaction.get(previousRef);
+                        const currentData = currentSnapshot.exists() ? currentSnapshot.data() : {};
+                        const previousData = previousSnapshot.exists() ? previousSnapshot.data() : {};
+                        const todosByDay = { ...(currentData.todos || {}) };
+                        const currentTodos = (Array.isArray(todosByDay[currentDay]) ? todosByDay[currentDay] : []).map(normalizeTodo);
+                        const previousTodos = Array.isArray(previousData.todos?.[previousDay]) ? previousData.todos[previousDay] : [];
+                        const dismissals = new Set(Array.isArray(currentData.todoDismissals?.[currentDay]) ? currentData.todoDismissals[currentDay] : []);
+                        let changed = false;
+                        previousTodos.filter(todo => !todo?.done && String(todo?.text || '').trim()).forEach(todo => {
+                            const carryKey = todoCarryKey(todo);
+                            const textKey = todoTextKey(todo);
+                            const alreadyPresent = currentTodos.some(current => todoCarryKey(current) === carryKey || todoTextKey(current) === textKey);
+                            if (alreadyPresent || dismissals.has(carryKey) || dismissals.has(textKey)) return;
+                            currentTodos.push({ id: createTodoId(), text: String(todo.text).trim(), done: false, carryKey });
+                            changed = true;
+                        });
+                        if (changed) {
+                            todosByDay[currentDay] = currentTodos;
+                            transaction.set(currentRef, { todos: todosByDay }, { merge: true });
+                        }
+                        return currentTodos;
+                    }));
+                }
+            };
+        };
 
         const firebaseConfig = {
             apiKey: "AIzaSyCEGrh2SIC20vJj_nLm4x34ok01srxip7I",
@@ -308,18 +433,43 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const storage = getStorage(app);
+        const todoBackend = createTodoBackend({ db, doc, runTransaction });
+
+        const authenticateWithRetry = async (maxAttempts = 5) => {
+            let lastError;
+            for (let attempt = 0; attempt < maxAttempts; attempt++) {
+                if (auth.currentUser) return auth.currentUser;
+                try {
+                    return (await signInAnonymously(auth)).user;
+                } catch (error) {
+                    lastError = error;
+                    const retryable = error?.code === 'auth/network-request-failed' || error?.code === 'auth/internal-error';
+                    if (!retryable || attempt === maxAttempts - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, 500 * (2 ** attempt)));
+                }
+            }
+            throw lastError;
+        };
 
         // Core Time Logic
         window.getCurrentSchoolTime = () => {
             const now = new Date();
             now.setHours(0, 0, 0, 0);
-            const term3Start = new Date(2026, 6, 20); // July 20, 2026
-            let weekNum = 0, curDay = 'Monday', isTerm3 = false;
+            const terms = [
+                { name: 'Term 1', start: new Date(2026, 0, 28) },
+                { name: 'Term 2', start: new Date(2026, 3, 20) },
+                { name: 'Term 3', start: new Date(2026, 6, 20) },
+                { name: 'Term 4', start: new Date(2026, 9, 12) }
+            ];
+            let term = terms[0].name, weekNum = 1, curDay = 'Monday';
 
-            if (now >= term3Start) {
-                const daysDiff = Math.floor((now - term3Start) / (1000 * 60 * 60 * 24));
-                weekNum = Math.floor(daysDiff / 7) + 1;
-                if(weekNum >= 1 && weekNum <= 10) isTerm3 = true;
+            for (let i = terms.length - 1; i >= 0; i--) {
+                if (now >= terms[i].start) {
+                    term = terms[i].name;
+                    const daysDiff = Math.round((now - terms[i].start) / (1000 * 60 * 60 * 24));
+                    weekNum = Math.floor(daysDiff / 7) + 1;
+                    break;
+                }
             }
 
             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -331,15 +481,18 @@
                 weekNum += 1;
             }
 
-            return { isTerm3, week: weekNum, day: curDay };
+            return { term, week: Math.min(Math.max(weekNum, 1), 12), day: curDay };
         };
 
         const schoolTime = window.getCurrentSchoolTime();
-        window.currentWeekNum = schoolTime.isTerm3 ? schoolTime.week : -1;
+        window.currentWeekNum = schoolTime.term === 'Term 3' && schoolTime.week <= 10 ? schoolTime.week : -1;
         window.currentDayStr = schoolTime.day;
 
-        window.activeTodoWeek = (window.currentWeekNum >= 1 && window.currentWeekNum <= 10) ? window.currentWeekNum : 1;
+        window.activeTodoTerm = schoolTime.term;
+        window.activeTodoWeek = schoolTime.week;
         window.activeTodoDay = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].includes(window.currentDayStr) ? window.currentDayStr : 'Monday';
+        const todoDocumentId = (term, week) => `2026_${term.replaceAll(' ', '')}_Week${week}`;
+        window.activeTodoDocumentId = todoDocumentId(window.activeTodoTerm, window.activeTodoWeek);
         
         window.allWeekTodos = {}; // Global tracker for all todos in the week to prevent overwriting
         window.todosData = [];
@@ -481,38 +634,26 @@
             const currentWeek = window.activeTodoWeek;
             const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
             const curIdx = days.indexOf(currentDay);
-            let prevDay = '', prevWeek = currentWeek;
+            let prevDay = '', prevWeek = currentWeek, prevTerm = window.activeTodoTerm;
             
             if (curIdx > 0) prevDay = days[curIdx - 1];
             else if (curIdx === 0 && currentWeek > 1) { prevDay = 'Friday'; prevWeek = currentWeek - 1; }
+            else if (curIdx === 0) {
+                const termNumber = Number(window.activeTodoTerm.replace('Term ', ''));
+                if (termNumber <= 1) return;
+                prevDay = 'Friday';
+                prevWeek = 12;
+                prevTerm = `Term ${termNumber - 1}`;
+            }
             else return;
 
             try {
-                const prevDocRef = doc(db, "timetables", `2026_Term3_Week${prevWeek}`);
-                const prevSnap = await getDoc(prevDocRef);
-                let prevTodos = [];
-                if (prevSnap.exists() && prevSnap.data().todos && prevSnap.data().todos[prevDay]) prevTodos = prevSnap.data().todos[prevDay];
-
-                const undone = prevTodos.filter(t => !t.done);
-                if (undone.length === 0) return;
-
-                const curDocRef = doc(db, "timetables", `2026_Term3_Week${currentWeek}`);
-                const curSnap = await getDoc(curDocRef);
-                let allCurrentWeekTodos = (curSnap.exists() && curSnap.data().todos) ? curSnap.data().todos : {};
-                let currentTodos = allCurrentWeekTodos[currentDay] || [];
-
-                let added = false;
-                undone.forEach(ut => {
-                    if (!currentTodos.find(ct => ct.text.toLowerCase() === ut.text.toLowerCase())) {
-                        currentTodos.push({ text: ut.text, done: false });
-                        added = true;
-                    }
+                await todoBackend.carryOver({
+                    currentDocumentId: window.activeTodoDocumentId,
+                    previousDocumentId: todoDocumentId(prevTerm, prevWeek),
+                    currentDay,
+                    previousDay: prevDay
                 });
-
-                if (added) {
-                    allCurrentWeekTodos[currentDay] = currentTodos;
-                    await setDoc(curDocRef, { todos: allCurrentWeekTodos }, { merge: true });
-                }
             } catch (e) { console.error("Error carrying over todos:", e); }
         };
 
@@ -789,15 +930,21 @@
                 if (docSnap.exists() && docSnap.data().events) window.termEvents = docSnap.data().events;
                 else syncToFirebase(); 
                 renderGrid();
+            }, (error) => {
+                console.error('Unable to load calendar events:', error);
+                showToast('Unable to load calendar data');
             });
         };
 
         const loadTodosFromFirebase = () => {
             if (unsubscribeTodos) unsubscribeTodos();
-            unsubscribeTodos = onSnapshot(doc(db, "timetables", `2026_Term3_Week${window.activeTodoWeek}`), (docSnap) => {
+            unsubscribeTodos = onSnapshot(doc(db, "timetables", window.activeTodoDocumentId), (docSnap) => {
                 window.allWeekTodos = (docSnap.exists() && docSnap.data().todos) ? docSnap.data().todos : {};
                 window.todosData = window.allWeekTodos[window.activeTodoDay] || [];
                 renderSidebarTodos();
+            }, (error) => {
+                console.error('Unable to load todos:', error);
+                showToast('Unable to load tasks');
             });
         };
 
@@ -816,9 +963,9 @@
                         <i class="fa-solid fa-check text-white text-[8px] scale-0 opacity-0 check-icon transition-all duration-200"></i>
                     </div>
                     <label for="todo-${idx}" class="flex-1 min-w-0 text-xs font-medium ${todo.done ? 'text-slate-400 dark:text-zinc-600 line-through decoration-slate-300 dark:decoration-zinc-700' : 'text-slate-700 dark:text-slate-300'} cursor-pointer leading-snug pr-5 transition-all duration-300">
-                        ${todo.text}
+                        ${escapeTodoText(todo.text)}
                     </label>
-                    <button onclick="deleteTodo(${idx})" class="absolute right-2 top-2.5 w-5 h-5 rounded flex items-center justify-center text-slate-400 dark:text-zinc-600 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/20 opacity-0 group-hover:opacity-100 transition-all duration-200 shrink-0">
+                    <button type="button" onclick="event.stopPropagation(); deleteTodo(${idx})" aria-label="Delete ${escapeTodoText(todo.text)}" class="absolute right-2 top-2.5 w-5 h-5 rounded flex items-center justify-center text-slate-400 dark:text-zinc-600 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/20 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200 shrink-0">
                         <i class="fa-solid fa-xmark text-xs"></i>
                     </button>
                 </div>
@@ -848,28 +995,58 @@
             }
         };
 
-        window.addTodo = () => {
+        window.addTodo = async () => {
             const input = document.getElementById('new-todo-input');
             const text = input.value.trim();
             if (!text) return;
-            window.todosData.push({ text, done: false });
-            saveTodosToFirebase();
+            const todo = todoBackend.create(text);
+            window.todosData = [...window.todosData, todo];
+            renderSidebarTodos();
             input.value = '';
-            input.focus(); 
+            input.focus();
+            try {
+                await todoBackend.add({ documentId: window.activeTodoDocumentId, day: window.activeTodoDay, todo });
+            } catch (error) {
+                console.error('Unable to add todo:', error);
+                window.todosData = window.todosData.filter(item => item.id !== todo.id);
+                renderSidebarTodos();
+                showToast('Unable to save task');
+            }
         };
 
-        window.toggleTodo = (idx, isDone) => {
-            if(window.todosData[idx]) { window.todosData[idx].done = isDone; saveTodosToFirebase(); }
+        window.toggleTodo = async (idx, isDone) => {
+            const todo = window.todosData[idx];
+            if (!todo) return;
+            window.todosData = window.todosData.map((item, itemIndex) => itemIndex === idx ? { ...item, done: isDone } : item);
+            renderSidebarTodos();
+            try {
+                await todoBackend.toggle({ documentId: window.activeTodoDocumentId, day: window.activeTodoDay, todo, index: idx, done: isDone });
+            } catch (error) {
+                console.error('Unable to update todo:', error);
+                window.todosData = window.todosData.map((item, itemIndex) =>
+                    (todo.id ? item.id === todo.id : itemIndex === idx) ? todo : item
+                );
+                renderSidebarTodos();
+                showToast('Unable to update task');
+            }
         };
 
-        window.deleteTodo = (idx) => {
-            window.todosData.splice(idx, 1);
-            saveTodosToFirebase();
-        };
-
-        const saveTodosToFirebase = () => {
-            window.allWeekTodos[window.activeTodoDay] = window.todosData;
-            setDoc(doc(db, "timetables", `2026_Term3_Week${window.activeTodoWeek}`), { todos: window.allWeekTodos }, { merge: true });
+        window.deleteTodo = async (idx) => {
+            const todo = window.todosData[idx];
+            if (!todo) return;
+            window.todosData = window.todosData.filter((_, itemIndex) => itemIndex !== idx);
+            renderSidebarTodos();
+            try {
+                await todoBackend.remove({ documentId: window.activeTodoDocumentId, day: window.activeTodoDay, todo, index: idx });
+            } catch (error) {
+                console.error('Unable to delete todo:', error);
+                const alreadyPresent = window.todosData.some(item => todo.id
+                    ? item.id === todo.id
+                    : item.text === todo.text && Boolean(item.done) === Boolean(todo.done));
+                if (!alreadyPresent) window.todosData.splice(Math.min(idx, window.todosData.length), 0, todo);
+                renderSidebarTodos();
+                showToast('Unable to delete task');
+            }
         };
 
         window.toggleTheme = () => {
@@ -887,6 +1064,7 @@
         };
 
         document.addEventListener("DOMContentLoaded", () => {
+            renderGrid();
             const isDark = document.documentElement.classList.contains('dark');
             const icons = document.querySelectorAll('.theme-icon-class');
             icons.forEach(icon => {
@@ -902,7 +1080,7 @@
             document.documentElement.classList.remove('dark');
         }
 
-        signInAnonymously(auth).then(async () => {
+        authenticateWithRetry().then(async () => {
             await window.autoCarryOverTodos();
             loadEventsFromFirebase();
             loadTodosFromFirebase();
