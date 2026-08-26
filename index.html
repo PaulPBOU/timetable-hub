@@ -267,11 +267,6 @@
             </div>
 
             <div class="flex items-center justify-end shrink-0 gap-2 md:gap-3 z-10">
-                <button id="header-todo-btn" onclick="openTodoModal()" class="hidden items-center justify-center h-8 md:h-9 px-3 rounded-full bg-cyan-50 dark:bg-cyan-900/30 border border-cyan-200 dark:border-cyan-700/50 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 transition-all shadow-sm gap-2" title="Manage Daily Tasks">
-                    <i class="fa-solid fa-list-check text-xs"></i>
-                    <span id="header-todo-count" class="text-[10px] md:text-xs font-bold">Tasks</span>
-                </button>
-
                 <button id="header-toggle-cover-btn" onclick="toggleCoverDay(window.appState.day)" class="hidden items-center justify-center h-8 w-8 md:h-9 md:w-9 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all shadow-sm" title="Toggle Class Cover">
                     <i class="fa-solid fa-chalkboard-user text-xs md:text-sm"></i>
                 </button>
@@ -411,23 +406,6 @@
             </div>
         </div>
 
-    </div>
-
-    <!-- Daily Tasks / Todo Modal -->
-    <div id="modal-todos" class="hidden fixed inset-0 z-[100] items-center justify-center p-4 bg-slate-900/95 backdrop-blur-sm">
-        <div class="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden">
-            <div class="flex justify-between items-center p-4 md:p-5 border-b border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-                <h3 class="text-lg md:text-xl font-bold text-slate-800 dark:text-white flex items-center"><i class="fa-solid fa-list-check text-cyan-500 mr-2"></i> Daily Tasks</h3>
-                <button onclick="closeModals()" class="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white"><i class="fa-solid fa-xmark text-2xl"></i></button>
-            </div>
-            <div class="p-4 md:p-6 flex flex-col gap-4 max-h-[60vh]">
-                <div class="flex gap-2">
-                    <input type="text" id="modal-new-todo-input" placeholder="e.g. Print worksheets..." class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 shadow-inner" onkeypress="if(event.key === 'Enter') addTodo()">
-                    <button onclick="addTodo()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md shadow-cyan-900/20 transition-all active:scale-95"><i class="fa-solid fa-plus"></i></button>
-                </div>
-                <div id="modal-todo-list" class="flex flex-col gap-2 overflow-y-auto custom-scrollbar pr-1 flex-1"></div>
-            </div>
-        </div>
     </div>
 
     <!-- Lesson Detail Modal -->
@@ -866,6 +844,19 @@
         const timetableDocRef = (term, week) => doc(db, 'timetables', timetableDocId(term, week));
         const createLessonId = (prefix = 'lesson') => `${prefix}_${Date.now()}_${crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)}`;
         const cloneBlock = block => ({ ...block, printLink: Array.isArray(block.printLink) ? [...block.printLink] : block.printLink });
+        const persistTimetableDay = (day, blocks, term = window.appState.term, week = window.appState.week) => {
+            if (!SCHOOL_DAYS.includes(day)) return Promise.reject(new Error(`Invalid school day: ${day}`));
+            const ref = timetableDocRef(term, week);
+            const nextBlocks = (blocks || []).map(cloneBlock);
+            return runTransaction(db, async transaction => {
+                const snapshot = await transaction.get(ref);
+                const storedDays = snapshot.exists() ? snapshot.data().days || {} : {};
+                transaction.set(ref, {
+                    days: { ...storedDays, [day]: nextBlocks },
+                    schemaVersion: 2
+                }, { merge: true });
+            });
+        };
 
         const compareLessonsByStartTime = (a, b) => {
             const timeDifference = window.parseTimeStrToMins(String(a.time || '').split('-')[0]) - window.parseTimeStrToMins(String(b.time || '').split('-')[0]);
@@ -1319,30 +1310,28 @@
         };
 
         window.autoCarryOverTodos = async (currentDay) => {
-            if (!currentDay) return;
-            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-            const curIdx = days.indexOf(currentDay);
-            let previousTerm = window.appState.term;
-            let previousWeek = window.appState.week;
-            let previousDay = '';
-
-            if (curIdx > 0) {
-                previousDay = days[curIdx - 1];
-            } else if (curIdx === 0) {
-                const prevTime = getPreviousSchoolWeek(window.appState.term, window.appState.week);
-                if (!prevTime) return;
-                previousTerm = prevTime.term;
-                previousWeek = prevTime.week;
-                previousDay = 'Friday';
-            }
-
-            try {
-                await todoBackend.carryOver({
+            const currentDayIndex = SCHOOL_DAYS.indexOf(currentDay);
+            if (currentDayIndex === -1) return;
+            const transitions = [];
+            const previousSchoolWeek = getPreviousSchoolWeek(window.appState.term, window.appState.week);
+            if (previousSchoolWeek) {
+                transitions.push({
                     currentDocumentId: timetableDocId(window.appState.term, window.appState.week),
-                    previousDocumentId: timetableDocId(previousTerm, previousWeek),
-                    currentDay,
-                    previousDay
+                    previousDocumentId: timetableDocId(previousSchoolWeek.term, previousSchoolWeek.week),
+                    currentDay: 'Monday',
+                    previousDay: 'Friday'
                 });
+            }
+            for (let dayIndex = 1; dayIndex <= currentDayIndex; dayIndex++) {
+                transitions.push({
+                    currentDocumentId: timetableDocId(window.appState.term, window.appState.week),
+                    previousDocumentId: timetableDocId(window.appState.term, window.appState.week),
+                    currentDay: SCHOOL_DAYS[dayIndex],
+                    previousDay: SCHOOL_DAYS[dayIndex - 1]
+                });
+            }
+            try {
+                for (const transition of transitions) await todoBackend.carryOver(transition);
             } catch (error) {
                 console.error('Error carrying over todos:', error);
             }
@@ -1359,44 +1348,6 @@
                 animWrapper.classList.add('grid-rows-[0fr]', 'opacity-0');
                 animWrapper.classList.remove('grid-rows-[1fr]', 'opacity-100');
                 chevron.classList.add('-rotate-90');
-            }
-        };
-
-        window.openTodoModal = () => {
-            document.getElementById('modal-todos').classList.replace('hidden', 'flex');
-            window.updateTodoUI();
-            setTimeout(() => {
-                const input = document.getElementById('modal-new-todo-input');
-                if (input) input.focus();
-            }, 100);
-        };
-
-        window.addTodo = async () => {
-            const input = document.getElementById('modal-new-todo-input');
-            const text = input.value.trim();
-            if (!text) return;
-
-            const day = window.appState.day;
-            const currentTodos = window.appState.todosData[day] || [];
-            const todo = todoBackend.create(text);
-            const newTodos = [...currentTodos, todo];
-            
-            window.appState.todosData[day] = newTodos;
-            window.updateTodoUI();
-            input.value = '';
-            input.focus();
-
-            try {
-                await todoBackend.add({
-                    documentId: timetableDocId(window.appState.term, window.appState.week),
-                    day,
-                    todo
-                });
-            } catch (error) {
-                console.error('Unable to add todo:', error);
-                window.appState.todosData[day] = (window.appState.todosData[day] || []).filter(item => item.id !== todo.id);
-                window.updateTodoUI();
-                showToast('Unable to save task');
             }
         };
 
@@ -1458,39 +1409,8 @@
 
         window.updateTodoUI = () => {
             const day = window.appState.day;
-            const todos = window.appState.todosData[day] || [];
-            
-            const countEl = document.getElementById('header-todo-count');
-            if (countEl) {
-                const pending = todos.filter(t => !t.done).length;
-                countEl.innerText = pending > 0 ? `${pending} Pending` : (todos.length > 0 ? 'All Done!' : 'Tasks');
-                if (pending > 0) {
-                    countEl.parentElement.classList.remove('text-cyan-600', 'dark:text-cyan-400');
-                    countEl.parentElement.classList.add('text-rose-500', 'dark:text-rose-400');
-                } else {
-                    countEl.parentElement.classList.add('text-cyan-600', 'dark:text-cyan-400');
-                    countEl.parentElement.classList.remove('text-rose-500', 'dark:text-rose-400');
-                }
-            }
-
+            window.appState.todosData[day] ||= [];
             if (window.appState.view === 'start-day') renderStartDay();
-
-            const modalList = document.getElementById('modal-todo-list');
-            if (modalList) {
-                if (todos.length === 0) {
-                    modalList.innerHTML = '<p class="text-xs text-slate-400 dark:text-slate-500 italic text-center py-4">No tasks added yet.</p>';
-                } else {
-                    modalList.innerHTML = todos.map((todo, idx) => `
-                        <div class="flex items-center justify-between group bg-slate-50 dark:bg-slate-900/50 px-3 py-2.5 rounded-xl border border-slate-100 dark:border-slate-800 transition-colors">
-                            <label class="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
-                                <input type="checkbox" ${todo.done ? 'checked' : ''} onchange="toggleTodo(${idx}, this.checked)" class="w-4 h-4 rounded text-cyan-600 focus:ring-cyan-500 bg-white border-slate-300 dark:bg-slate-700 dark:border-slate-600 accent-cyan-500 cursor-pointer">
-                                <span class="text-xs md:text-sm font-semibold truncate ${todo.done ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-200'}">${escapeTodoText(todo.text)}</span>
-                            </label>
-                            <button type="button" onclick="event.stopPropagation(); deleteTodo(${idx})" aria-label="Delete ${escapeTodoText(todo.text)}" class="text-slate-400 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity p-1.5 ml-2 rounded hover:bg-red-50 dark:hover:bg-red-900/20"><i class="fa-solid fa-trash text-xs"></i></button>
-                        </div>
-                    `).join('');
-                }
-            }
         };
 
         window.handleGlobalBack = () => {
@@ -1519,12 +1439,10 @@
             const backText = document.getElementById('global-back-text');
             const divider = document.getElementById('global-divider');
             const coverBtn = document.getElementById('header-toggle-cover-btn');
-            const todoBtn = document.getElementById('header-todo-btn');
             
             if (view === 'landing' || view === 'start-day') {
                 header.classList.add('hidden'); header.classList.remove('flex');
                 if(coverBtn) { coverBtn.classList.add('hidden'); coverBtn.classList.remove('flex'); }
-                if(todoBtn) { todoBtn.classList.add('hidden'); todoBtn.classList.remove('flex'); }
                 
                 if (view === 'start-day') {
                     renderStartDay();
@@ -1546,7 +1464,6 @@
                     subtitleEl.className = 'text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-widest';
                     navEl.classList.add('hidden'); liveDot.classList.add('hidden');
                     if(coverBtn) { coverBtn.classList.add('hidden'); coverBtn.classList.remove('flex'); }
-                    if(todoBtn) { todoBtn.classList.add('hidden'); todoBtn.classList.remove('flex'); }
                 }
                 if (view === 'week-select') {
                     backText.innerText = 'Terms'; titleEl.innerText = window.appState.term;
@@ -1554,7 +1471,6 @@
                     subtitleEl.className = 'text-slate-500 dark:text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-widest';
                     navEl.classList.add('hidden'); liveDot.classList.add('hidden');
                     if(coverBtn) { coverBtn.classList.add('hidden'); coverBtn.classList.remove('flex'); }
-                    if(todoBtn) { todoBtn.classList.add('hidden'); todoBtn.classList.remove('flex'); }
                     renderWeekSelector();
                 }
                 if (view === 'week') {
@@ -1564,7 +1480,6 @@
                     navEl.classList.remove('hidden'); liveDot.classList.remove('hidden');
                     liveDot.innerHTML = `<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>`;
                     if(coverBtn) { coverBtn.classList.add('hidden'); coverBtn.classList.remove('flex'); }
-                    if(todoBtn) { todoBtn.classList.add('hidden'); todoBtn.classList.remove('flex'); }
                     renderWeekGrid();
                 }
                 if (view === 'day') {
@@ -1574,17 +1489,14 @@
                     navEl.classList.remove('hidden'); liveDot.classList.remove('hidden');
                     liveDot.innerHTML = `<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>`;
                     if(coverBtn) { coverBtn.classList.remove('hidden'); coverBtn.classList.add('flex'); }
-                    if(todoBtn) { todoBtn.classList.remove('hidden'); todoBtn.classList.add('flex'); }
-                    window.updateTodoUI(); 
                     renderDayBlocks();
-                    window.autoCarryOverTodos(window.appState.day);
                 }
             }
             if (window.updateLessonClipboardUI) window.updateLessonClipboardUI();
         };
 
         window.closeModals = () => {
-            ['modal-add', 'modal-edit', 'modal-time-edit', 'modal-cancel', 'modal-lesson-detail', 'modal-todos', 'modal-transfer', 'modal-duty-location'].forEach(id => {
+            ['modal-add', 'modal-edit', 'modal-time-edit', 'modal-cancel', 'modal-lesson-detail', 'modal-transfer', 'modal-duty-location'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) { el.classList.add('hidden'); el.classList.remove('flex'); }
             });
@@ -2142,13 +2054,19 @@
                         lowDifLink: ''
                     };
                 });
-                setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [day]: newDayData } }, { merge: true });
+                persistTimetableDay(day, newDayData).catch(error => {
+                    console.error('Unable to copy the previous day:', error);
+                    showToast('Could not copy the previous day.');
+                });
             } else { showToast("No lessons found in the previous day to copy from."); }
         };
 
         window.clearDay = (day, btn) => {
             if (btn.dataset.confirmed === "true") {
-                setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [day]: [] } }, { merge: true });
+                persistTimetableDay(day, []).catch(error => {
+                    console.error('Unable to clear the day:', error);
+                    showToast('Could not clear the day.');
+                });
             } else {
                 btn.dataset.confirmed = "true";
                 btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Click to confirm';
@@ -2183,7 +2101,10 @@
             });
             const newData = composeScheduledDay(sections, data);
             window.appState.weekData[day] = newData;
-            setDoc(timetableDocRef(window.appState.term, window.appState.week), { days: { ...window.appState.weekData, [day]: newData }, schemaVersion: 2 }, { merge: true });
+            persistTimetableDay(day, newData).catch(error => {
+                console.error('Unable to add the lesson:', error);
+                showToast('Could not add the lesson.');
+            });
             showToast(`New lesson added at ${window.formatMinsToTimeStr(start)}`);
         };
 
@@ -2193,9 +2114,10 @@
                 currentData.splice(idx, 1);
                 
                 window.appState.weekData[day] = currentData;
-                setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { 
-                    days: { ...window.appState.weekData, [day]: currentData } 
-                }, { merge: true });
+                persistTimetableDay(day, currentData).catch(error => {
+                    console.error('Unable to delete the lesson:', error);
+                    showToast('Could not delete the lesson.');
+                });
                 
                 if (window.appState.view === 'day') renderDayBlocks();
                 if (window.appState.view === 'week') renderWeekGrid();
@@ -2288,7 +2210,6 @@
             const dayDutyData = { ...(window.appState.dutyData[day] || {}), [dutyKey]: location };
             window.appState.dutyData = { ...window.appState.dutyData, [day]: dayDutyData };
 
-            const payload = { duties: window.appState.dutyData };
             if (dutyKey !== 'morning') {
                 const breakNumber = dutyKey === 'break1' ? 1 : 2;
                 const updatedBlocks = (window.appState.weekData[day] || []).map(block => {
@@ -2296,7 +2217,6 @@
                     return isSelectedBreak ? { ...block, isDuty: Boolean(location), dutyLocation: location } : block;
                 });
                 window.appState.weekData[day] = updatedBlocks;
-                payload.days = { ...window.appState.weekData, [day]: updatedBlocks };
             }
 
             closeModals();
@@ -2304,7 +2224,31 @@
             if (window.appState.view === 'week') renderWeekGrid();
             if (window.appState.view === 'start-day') renderStartDay();
             try {
-                await setDoc(timetableDocRef(window.appState.term, window.appState.week), payload, { merge: true });
+                const ref = timetableDocRef(window.appState.term, window.appState.week);
+                await runTransaction(db, async transaction => {
+                    const snapshot = await transaction.get(ref);
+                    const storedData = snapshot.exists() ? snapshot.data() : {};
+                    const storedDuties = storedData.duties || {};
+                    const payload = {
+                        duties: {
+                            ...storedDuties,
+                            [day]: { ...(storedDuties[day] || {}), [dutyKey]: location }
+                        }
+                    };
+                    if (dutyKey !== 'morning') {
+                        const breakNumber = dutyKey === 'break1' ? 1 : 2;
+                        const storedDays = storedData.days || {};
+                        const storedBlocks = storedDays[day] || [];
+                        payload.days = {
+                            ...storedDays,
+                            [day]: storedBlocks.map(block => {
+                                const isSelectedBreak = block.type === 'break' && String(block.topic || '').includes(`Break ${breakNumber}`);
+                                return isSelectedBreak ? { ...block, isDuty: Boolean(location), dutyLocation: location } : block;
+                            })
+                        };
+                    }
+                    transaction.set(ref, payload, { merge: true });
+                });
                 const label = dutyKey === 'morning' ? 'Morning Duty' : dutyKey === 'break1' ? 'Break 1 Duty' : 'Break 2 Duty';
                 showToast(location ? `${label} set to ${location}` : `${label} removed`);
             } catch (error) {
@@ -2841,7 +2785,10 @@
         window.saveModalNote = (idx) => {
             const updated = [...window.appState.weekData[window.appState.day]];
             updated[idx].note = document.getElementById(`note-input-modal-${idx}`).value;
-            setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [window.appState.day]: updated } }, { merge: true });
+            persistTimetableDay(window.appState.day, updated).catch(error => {
+                console.error('Unable to save the lesson note:', error);
+                showToast('Could not save the note.');
+            });
             toggleModalNote(idx); 
         };
         window.toggleNote = (idx) => {
@@ -2852,7 +2799,10 @@
         window.saveNote = (idx) => {
             const updated = [...window.appState.weekData[window.appState.day]];
             updated[idx].note = document.getElementById(`note-input-${idx}`).value;
-            setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [window.appState.day]: updated } }, { merge: true });
+            persistTimetableDay(window.appState.day, updated).catch(error => {
+                console.error('Unable to save the lesson note:', error);
+                showToast('Could not save the note.');
+            });
             toggleNote(idx); 
         };
 
@@ -2930,7 +2880,10 @@
             const newSection = getLessonSection(updated[lessonIndex]);
             updated = composeOrEmptyDay(splitDayIntoSections(updated), updated);
             window.appState.weekData[editor.day] = updated;
-            setDoc(timetableDocRef(window.appState.term, window.appState.week), { days: { ...window.appState.weekData, [editor.day]: updated }, schemaVersion: 2 }, { merge: true });
+            persistTimetableDay(editor.day, updated).catch(error => {
+                console.error('Unable to save the lesson time:', error);
+                showToast('Could not save the lesson time.');
+            });
             if (window.appState.view === 'week') renderWeekGrid();
             if (window.appState.view === 'day' && window.appState.day === editor.day) renderDayBlocks();
             closeModals();
@@ -3000,7 +2953,10 @@
             updated = composeOrEmptyDay(splitDayIntoSections(updated), updated);
             window.appState.weekData[window.appState.day] = updated;
 
-            setDoc(timetableDocRef(window.appState.term, window.appState.week), { days: { ...window.appState.weekData, [window.appState.day]: updated }, schemaVersion: 2 }, { merge: true });
+            persistTimetableDay(window.appState.day, updated).catch(error => {
+                console.error('Unable to save the lesson:', error);
+                showToast('Could not save the lesson.');
+            });
             
             if (window.appState.view === 'day') renderDayBlocks();
             if (window.appState.view === 'week') renderWeekGrid();
@@ -3018,7 +2974,10 @@
 
         window.saveCancelDay = () => {
             const note = document.getElementById('cancel-day-note').value.trim();
-            setDoc(doc(db, "timetables", `2026_${window.appState.term.replace(' ', '')}_${window.appState.week.replace(' ', '')}`), { days: { ...window.appState.weekData, [window.appState.cancellingDay]: [{ type: 'cancelled', note: note }] } }, { merge: true });
+            persistTimetableDay(window.appState.cancellingDay, [{ type: 'cancelled', note }]).catch(error => {
+                console.error('Unable to cancel the day:', error);
+                showToast('Could not cancel the day.');
+            });
             closeModals();
         };
 
@@ -3327,7 +3286,10 @@
                 return;
             }
 
-            setDoc(timetableDocRef(window.appState.term, window.appState.week), { days: { ...window.appState.weekData, [window.appState.addingDay]: cleanedForm }, schemaVersion: 2 }, { merge: true });
+            persistTimetableDay(window.appState.addingDay, cleanedForm).catch(error => {
+                console.error('Unable to populate the day:', error);
+                showToast('Could not populate the day.');
+            });
             
             showToast(`${window.appState.addingDay} populated successfully!`);
             closeModals();

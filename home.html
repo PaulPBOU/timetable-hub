@@ -633,27 +633,35 @@
             const currentDay = window.activeTodoDay;
             const currentWeek = window.activeTodoWeek;
             const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-            const curIdx = days.indexOf(currentDay);
-            let prevDay = '', prevWeek = currentWeek, prevTerm = window.activeTodoTerm;
-            
-            if (curIdx > 0) prevDay = days[curIdx - 1];
-            else if (curIdx === 0 && currentWeek > 1) { prevDay = 'Friday'; prevWeek = currentWeek - 1; }
-            else if (curIdx === 0) {
+            const currentDayIndex = days.indexOf(currentDay);
+            if (currentDayIndex === -1) return;
+            const transitions = [];
+            let previousTerm = window.activeTodoTerm;
+            let previousWeek = currentWeek - 1;
+            if (previousWeek < 1) {
                 const termNumber = Number(window.activeTodoTerm.replace('Term ', ''));
-                if (termNumber <= 1) return;
-                prevDay = 'Friday';
-                prevWeek = 12;
-                prevTerm = `Term ${termNumber - 1}`;
+                previousTerm = termNumber > 1 ? `Term ${termNumber - 1}` : '';
+                previousWeek = 12;
             }
-            else return;
+            if (previousTerm) {
+                transitions.push({
+                    currentDocumentId: window.activeTodoDocumentId,
+                    previousDocumentId: todoDocumentId(previousTerm, previousWeek),
+                    currentDay: 'Monday',
+                    previousDay: 'Friday'
+                });
+            }
+            for (let dayIndex = 1; dayIndex <= currentDayIndex; dayIndex++) {
+                transitions.push({
+                    currentDocumentId: window.activeTodoDocumentId,
+                    previousDocumentId: window.activeTodoDocumentId,
+                    currentDay: days[dayIndex],
+                    previousDay: days[dayIndex - 1]
+                });
+            }
 
             try {
-                await todoBackend.carryOver({
-                    currentDocumentId: window.activeTodoDocumentId,
-                    previousDocumentId: todoDocumentId(prevTerm, prevWeek),
-                    currentDay,
-                    previousDay: prevDay
-                });
+                for (const transition of transitions) await todoBackend.carryOver(transition);
             } catch (e) { console.error("Error carrying over todos:", e); }
         };
 
