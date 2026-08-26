@@ -843,20 +843,19 @@
         const timetableDocId = (term, week) => `${SCHOOL_YEAR}_${term.replaceAll(' ', '')}_${week.replaceAll(' ', '')}`;
         const timetableDocRef = (term, week) => doc(db, 'timetables', timetableDocId(term, week));
         const createLessonId = (prefix = 'lesson') => `${prefix}_${Date.now()}_${crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)}`;
-        const cloneBlock = block => ({ ...block, printLink: Array.isArray(block.printLink) ? [...block.printLink] : block.printLink });
-        const persistTimetableDay = (day, blocks, term = window.appState.term, week = window.appState.week) => {
-            if (!SCHOOL_DAYS.includes(day)) return Promise.reject(new Error(`Invalid school day: ${day}`));
-            const ref = timetableDocRef(term, week);
-            const nextBlocks = (blocks || []).map(cloneBlock);
-            return runTransaction(db, async transaction => {
-                const snapshot = await transaction.get(ref);
-                const storedDays = snapshot.exists() ? snapshot.data().days || {} : {};
-                transaction.set(ref, {
-                    days: { ...storedDays, [day]: nextBlocks },
-                    schemaVersion: 2
-                }, { merge: true });
-            });
+        const sanitizeFirestoreData = value => {
+            if (Array.isArray(value)) return value.filter(item => item !== undefined).map(sanitizeFirestoreData);
+            if (value && Object.getPrototypeOf(value) === Object.prototype) {
+                return Object.fromEntries(Object.entries(value)
+                    .filter(([, item]) => item !== undefined)
+                    .map(([key, item]) => [key, sanitizeFirestoreData(item)]));
+            }
+            return value;
         };
+        const cloneBlock = block => sanitizeFirestoreData({
+            ...block,
+            ...(Array.isArray(block.printLink) ? { printLink: [...block.printLink] } : {})
+        });
 
         const compareLessonsByStartTime = (a, b) => {
             const timeDifference = window.parseTimeStrToMins(String(a.time || '').split('-')[0]) - window.parseTimeStrToMins(String(b.time || '').split('-')[0]);
@@ -929,6 +928,43 @@
             if (!blocks || blocks.length === 0) return [];
             if (blocks.length === 1 && blocks[0].type === 'cancelled') return blocks.map(cloneBlock);
             return composeScheduledDay(splitDayIntoSections(blocks), blocks);
+        };
+
+        const mutateTimetableDay = (day, mutation, term = window.appState.term, week = window.appState.week) => {
+            if (!SCHOOL_DAYS.includes(day)) return Promise.reject(new Error(`Invalid school day: ${day}`));
+            const ref = timetableDocRef(term, week);
+            return runTransaction(db, async transaction => {
+                const snapshot = await transaction.get(ref);
+                const storedData = snapshot.exists() ? snapshot.data() : {};
+                const storedDays = storedData.days || {};
+                const nextBlocks = mutation((storedDays[day] || []).map(cloneBlock));
+                if (!Array.isArray(nextBlocks)) throw new Error('Timetable day mutation must return an array.');
+                const clonedBlocks = nextBlocks.map(cloneBlock);
+                transaction.set(ref, sanitizeFirestoreData({
+                    days: { ...storedDays, [day]: clonedBlocks },
+                    schemaVersion: 2
+                }), { merge: true });
+                return clonedBlocks;
+            });
+        };
+
+        const persistTimetableDay = (day, blocks, term = window.appState.term, week = window.appState.week) =>
+            mutateTimetableDay(day, () => (blocks || []).map(cloneBlock), term, week);
+
+        const findAvailableLessonSlot = (blocks, duration = 30) => {
+            const sections = splitDayIntoSections(blocks);
+            for (const [sectionKey, bounds] of Object.entries(SCHEDULE_SECTIONS)) {
+                let cursor = bounds.start;
+                for (const lesson of sections[sectionKey]) {
+                    const range = getBlockTimeRange(lesson);
+                    if (!range || range.end <= bounds.start || range.start >= bounds.end) continue;
+                    const lessonStart = Math.max(range.start, bounds.start);
+                    if (lessonStart - cursor >= duration) return { sectionKey, start: cursor, end: cursor + duration };
+                    cursor = Math.max(cursor, Math.min(range.end, bounds.end));
+                }
+                if (bounds.end - cursor >= duration) return { sectionKey, start: cursor, end: cursor + duration };
+            }
+            return null;
         };
 
         const getBlockTimeRange = block => {
@@ -1789,7 +1825,7 @@
                     const lessonForDestination = { ...sourceLesson, id: mode === 'copy' ? createLessonId('copy') : sourceLesson.id, scheduleSection: section };
                     sections[section].splice(Math.min(Math.max(position, 0), sections[section].length), 0, lessonForDestination);
                     sourceDays[source.day] = composeOrEmptyDay(sections, sourceBlocks);
-                    transaction.set(sourceRef, { days: sourceDays, schemaVersion: 2 }, { merge: true });
+                    transaction.set(sourceRef, sanitizeFirestoreData({ days: sourceDays, schemaVersion: 2 }), { merge: true });
                     return lessonForDestination.id;
                 }
 
@@ -1807,10 +1843,10 @@
                 }
 
                 if (sameDocument) {
-                    transaction.set(sourceRef, { days: sourceDays, schemaVersion: 2 }, { merge: true });
+                    transaction.set(sourceRef, sanitizeFirestoreData({ days: sourceDays, schemaVersion: 2 }), { merge: true });
                 } else {
-                    if (mode === 'move') transaction.set(sourceRef, { days: sourceDays, schemaVersion: 2 }, { merge: true });
-                    transaction.set(targetRef, { days: targetDays, schemaVersion: 2 }, { merge: true });
+                    if (mode === 'move') transaction.set(sourceRef, sanitizeFirestoreData({ days: sourceDays, schemaVersion: 2 }), { merge: true });
+                    transaction.set(targetRef, sanitizeFirestoreData({ days: targetDays, schemaVersion: 2 }), { merge: true });
                 }
                 return lessonForDestination.id;
             });
@@ -1830,7 +1866,7 @@
                 const position = sections[section].findIndex(existing => (getBlockTimeRange(existing)?.start ?? Number.MAX_SAFE_INTEGER) > start);
                 sections[section].splice(position === -1 ? sections[section].length : position, 0, copiedLesson);
                 days[target.day] = composeOrEmptyDay(sections, targetBlocks);
-                transaction.set(targetRef, { days, schemaVersion: 2 }, { merge: true });
+                transaction.set(targetRef, sanitizeFirestoreData({ days, schemaVersion: 2 }), { merge: true });
                 return copiedLesson.id;
             });
         };
@@ -2080,54 +2116,85 @@
             }
         };
 
-        window.addLessonDirectly = (day) => {
-            const data = window.appState.weekData[day] || [];
-            const sections = splitDayIntoSections(data.length === 1 && data[0].type === 'cancelled' ? [] : data);
-            const existingLessons = Object.values(sections).flat();
-            const lastLesson = existingLessons[existingLessons.length - 1];
-            const section = lastLesson ? getLessonSection(lastLesson) : 'beforeBreak1';
-            const start = lastLesson ? (getBlockTimeRange(lastLesson)?.end ?? SCHEDULE_SECTIONS[section].start) : SCHEDULE_SECTIONS[section].start;
-            sections[section].push({
-                id: createLessonId('custom'),
-                type: 'lesson',
-                time: `${window.formatMinsToTimeStr(start)} - ${window.formatMinsToTimeStr(start + 30)}`,
-                subject: 'New Lesson',
-                topic: '',
-                unitOutlineLink: '',
-                slidesLink: '',
-                printLink: [],
-                lessonPlanLink: '',
-                lowDifLink: ''
-            });
-            const newData = composeScheduledDay(sections, data);
-            window.appState.weekData[day] = newData;
-            persistTimetableDay(day, newData).catch(error => {
-                console.error('Unable to add the lesson:', error);
-                showToast('Could not add the lesson.');
-            });
-            showToast(`New lesson added at ${window.formatMinsToTimeStr(start)}`);
-        };
-
-        window.deleteLesson = (day, idx, btn) => {
-            if (btn.dataset.confirmed === "true") {
-                const currentData = [...window.appState.weekData[day]];
-                currentData.splice(idx, 1);
-                
-                window.appState.weekData[day] = currentData;
-                persistTimetableDay(day, currentData).catch(error => {
-                    console.error('Unable to delete the lesson:', error);
-                    showToast('Could not delete the lesson.');
+        window.addLessonDirectly = async day => {
+            if (!SCHOOL_DAYS.includes(day)) return;
+            let addedLesson = null;
+            try {
+                const newData = await mutateTimetableDay(day, storedBlocks => {
+                    const currentBlocks = storedBlocks.length === 1 && storedBlocks[0].type === 'cancelled'
+                        ? []
+                        : normalizeStoredDay(storedBlocks);
+                    const slot = findAvailableLessonSlot(currentBlocks);
+                    if (!slot) throw new Error('No free 30-minute slot remains. Use the day editor to choose or adjust a lesson time.');
+                    const sections = splitDayIntoSections(currentBlocks);
+                    addedLesson = {
+                        id: createLessonId('custom'),
+                        type: 'lesson',
+                        time: `${window.formatMinsToTimeStr(slot.start)} - ${window.formatMinsToTimeStr(slot.end)}`,
+                        subject: 'New Lesson',
+                        topic: '',
+                        unitOutlineLink: '',
+                        slidesLink: '',
+                        printLink: [],
+                        lessonPlanLink: '',
+                        lowDifLink: '',
+                        scheduleSection: slot.sectionKey
+                    };
+                    sections[slot.sectionKey].push(addedLesson);
+                    return composeScheduledDay(sections, currentBlocks);
                 });
-                
+                window.appState.weekData[day] = newData;
                 if (window.appState.view === 'day') renderDayBlocks();
                 if (window.appState.view === 'week') renderWeekGrid();
                 if (window.appState.view === 'start-day') renderStartDay();
-                
-                const modal = document.getElementById('modal-lesson-detail');
-                if (modal && !modal.classList.contains('hidden')) {
-                    closeModals(); 
+                showToast(`New lesson added at ${addedLesson.time}`);
+            } catch (error) {
+                console.error('Unable to add the lesson:', error);
+                if (String(error.message || '').startsWith('No free 30-minute slot')) {
+                    initAddDay(day);
+                    addPopulateBlock();
+                    return;
                 }
-                showToast("Lesson deleted completely.");
+                showToast(error.message || 'Could not add the lesson.');
+            }
+        };
+
+        window.deleteLesson = async (day, idx, btn) => {
+            const requestedLesson = window.appState.weekData[day]?.[idx];
+            if (!requestedLesson || requestedLesson.type !== 'lesson') {
+                showToast('That lesson changed or was already removed.');
+                return;
+            }
+            if (btn.dataset.confirmed === "true") {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+                try {
+                    const updatedData = await mutateTimetableDay(day, storedBlocks => {
+                        const currentData = normalizeStoredDay(storedBlocks);
+                        const lessonIndex = findLessonIndex(currentData, {
+                            lessonId: requestedLesson.id,
+                            index: idx,
+                            subject: requestedLesson.subject,
+                            time: requestedLesson.time
+                        });
+                        if (lessonIndex === -1) throw new Error('That lesson changed or was already removed.');
+                        currentData.splice(lessonIndex, 1);
+                        return composeOrEmptyDay(splitDayIntoSections(currentData), currentData);
+                    });
+                    window.appState.weekData[day] = updatedData;
+                    if (window.appState.view === 'day') renderDayBlocks();
+                    if (window.appState.view === 'week') renderWeekGrid();
+                    if (window.appState.view === 'start-day') renderStartDay();
+                    const modal = document.getElementById('modal-lesson-detail');
+                    if (modal && !modal.classList.contains('hidden')) closeModals();
+                    showToast('Lesson deleted completely.');
+                } catch (error) {
+                    console.error('Unable to delete the lesson:', error);
+                    showToast(error.message || 'Could not delete the lesson.');
+                    if (window.appState.view === 'day') renderDayBlocks();
+                    if (window.appState.view === 'week') renderWeekGrid();
+                    if (window.appState.view === 'start-day') renderStartDay();
+                }
             } else {
                 btn.dataset.confirmed = "true";
                 const originalHTML = btn.innerHTML;
@@ -3226,17 +3293,14 @@
         };
         
         window.addPopulateBlock = () => {
-            let form = window.appState.newDayForm;
-            let lastTimeStr = '2:30pm - 3:00pm';
-            if (form.length > 0) {
-                lastTimeStr = form[form.length - 1].time;
-            }
-            let endPart = lastTimeStr.split('-')[1]?.trim() || '3:00pm';
-            let newEndMins = window.parseTimeStrToMins(endPart) + 40;
-            let newTimeStr = `${endPart} - ${window.formatMinsToTimeStr(newEndMins)}`;
+            const form = window.appState.newDayForm;
+            const slot = findAvailableLessonSlot(form);
+            const newTimeStr = slot
+                ? `${window.formatMinsToTimeStr(slot.start)} - ${window.formatMinsToTimeStr(slot.end)}`
+                : '';
             
             form.push({
-                id: 'custom_' + Date.now(),
+                id: createLessonId('custom'),
                 type: 'lesson',
                 time: newTimeStr,
                 subject: 'New Lesson',
@@ -3250,6 +3314,7 @@
             
             window.appState.activeBlockIndex = form.length - 1;
             renderPopulateUI();
+            if (!slot) showToast('No automatic 30-minute gap remains. Choose a time for the new lesson before saving.');
         };
 
         window.deletePopulateBlock = (idx) => {
@@ -3267,7 +3332,7 @@
             renderPopulateUI();
         };
 
-        window.saveFullDay = () => {
+        window.saveFullDay = async () => {
             let cleanedForm = window.appState.newDayForm.map(b => {
                 if(b.type === 'break') return b;
                 const cleanedPrint = Array.isArray(b.printLink) ? b.printLink.filter(l => l.trim() !== '') : [];
@@ -3286,13 +3351,18 @@
                 return;
             }
 
-            persistTimetableDay(window.appState.addingDay, cleanedForm).catch(error => {
+            try {
+                const savedBlocks = await persistTimetableDay(window.appState.addingDay, cleanedForm);
+                window.appState.weekData[window.appState.addingDay] = savedBlocks;
+                if (window.appState.view === 'day') renderDayBlocks();
+                if (window.appState.view === 'week') renderWeekGrid();
+                if (window.appState.view === 'start-day') renderStartDay();
+                showToast(`${window.appState.addingDay} populated successfully!`);
+                closeModals();
+            } catch (error) {
                 console.error('Unable to populate the day:', error);
                 showToast('Could not populate the day.');
-            });
-            
-            showToast(`${window.appState.addingDay} populated successfully!`);
-            closeModals();
+            }
         };
     </script>
 </body>
