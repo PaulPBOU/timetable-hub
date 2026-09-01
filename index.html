@@ -461,7 +461,7 @@
         <div class="w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             <div class="flex items-start justify-between gap-3 p-3.5 border-b border-slate-200 dark:border-slate-800">
                 <div>
-                    <div class="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 text-[8px] font-black uppercase tracking-[0.16em] mb-1"><i class="fa-solid fa-user-shield"></i> Duty location</div>
+                    <div class="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 text-[8px] font-black uppercase tracking-[0.16em] mb-1"><i class="fa-solid fa-user-shield"></i><span id="duty-picker-eyebrow">Duty location</span></div>
                     <h2 id="duty-picker-title" class="text-base font-black text-slate-800 dark:text-white">Choose an area</h2>
                     <p id="duty-picker-current" class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5">No duty selected</p>
                 </div>
@@ -471,7 +471,8 @@
                 <button data-duty-location="AREA A" onclick="selectDutyLocation('AREA A')" class="duty-location-option flex items-center gap-2.5 w-full p-2.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 hover:bg-amber-500 hover:text-white hover:border-amber-400 transition-all active:scale-[.98] text-left"><span class="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center shadow-sm text-xs"><i class="fa-solid fa-a"></i></span><span class="text-xs font-black">AREA A</span><i class="fa-solid fa-check ml-auto opacity-0 duty-option-check text-xs"></i></button>
                 <button data-duty-location="AREA B" onclick="selectDutyLocation('AREA B')" class="duty-location-option flex items-center gap-2.5 w-full p-2.5 rounded-xl bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800/60 text-cyan-800 dark:text-cyan-300 hover:bg-cyan-500 hover:text-white hover:border-cyan-400 transition-all active:scale-[.98] text-left"><span class="w-7 h-7 rounded-lg bg-cyan-500 text-white flex items-center justify-center shadow-sm text-xs"><i class="fa-solid fa-b"></i></span><span class="text-xs font-black">AREA B</span><i class="fa-solid fa-check ml-auto opacity-0 duty-option-check text-xs"></i></button>
                 <button data-duty-location="GRASS" onclick="selectDutyLocation('GRASS')" class="duty-location-option flex items-center gap-2.5 w-full p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-500 hover:text-white hover:border-emerald-400 transition-all active:scale-[.98] text-left"><span class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center shadow-sm text-xs"><i class="fa-solid fa-seedling"></i></span><span class="text-xs font-black">GRASS</span><i class="fa-solid fa-check ml-auto opacity-0 duty-option-check text-xs"></i></button>
-                <button id="duty-remove-button" onclick="selectDutyLocation('')" class="hidden items-center justify-center gap-2 mt-0.5 p-2 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 border border-transparent hover:border-rose-200 dark:hover:border-rose-800/60 text-[10px] font-black transition-colors"><i class="fa-solid fa-xmark"></i> Remove duty</button>
+                <button id="cricket-training-option" data-duty-location="CRICKET TRAINING" onclick="selectDutyLocation('CRICKET TRAINING')" class="duty-location-option hidden items-center gap-2.5 w-full p-2.5 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/60 text-green-800 dark:text-green-300 hover:bg-green-600 hover:text-white hover:border-green-500 transition-all active:scale-[.98] text-left"><span class="w-7 h-7 rounded-lg bg-green-600 text-white flex items-center justify-center shadow-sm text-xs"><i class="fa-solid fa-baseball-bat-ball"></i></span><span class="text-xs font-black">CRICKET TRAINING</span><i class="fa-solid fa-check ml-auto opacity-0 duty-option-check text-xs"></i></button>
+                <button id="duty-remove-button" onclick="selectDutyLocation('')" class="hidden items-center justify-center gap-2 mt-0.5 p-2 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 border border-transparent hover:border-rose-200 dark:hover:border-rose-800/60 text-[10px] font-black transition-colors"><i class="fa-solid fa-xmark"></i> Remove selection</button>
             </div>
         </div>
     </div>
@@ -836,7 +837,8 @@
             '2:00pm - 2:30pm',
             '2:30pm - 3:00pm'
         ];
-        const DUTY_LOCATIONS = ['AREA A', 'AREA B', 'GRASS'];
+        const CRICKET_TRAINING = 'CRICKET TRAINING';
+        const DUTY_LOCATIONS = ['AREA A', 'AREA B', 'GRASS', CRICKET_TRAINING];
 
         const emptyWeekDays = () => Object.fromEntries(SCHOOL_DAYS.map(day => [day, []]));
         const emptyDutyDays = () => Object.fromEntries(SCHOOL_DAYS.map(day => [day, {}]));
@@ -879,18 +881,22 @@
             };
         };
 
-        const normalizeDutyLocation = location => DUTY_LOCATIONS.includes(location) || location === 'UNASSIGNED' ? location : '';
+        const normalizeDutyLocation = (location, dutyKey = '') => {
+            if (location === 'UNASSIGNED') return location;
+            if (!DUTY_LOCATIONS.includes(location)) return '';
+            return dutyKey === 'morning' && location === CRICKET_TRAINING ? '' : location;
+        };
 
         const normalizeDutyDay = (storedDutyDay = {}, blocks = []) => {
-            const normalized = { morning: normalizeDutyLocation(storedDutyDay.morning) };
+            const normalized = { morning: normalizeDutyLocation(storedDutyDay.morning, 'morning') };
             [1, 2].forEach(number => {
                 const key = `break${number}`;
                 if (Object.prototype.hasOwnProperty.call(storedDutyDay, key)) {
-                    normalized[key] = normalizeDutyLocation(storedDutyDay[key]);
+                    normalized[key] = normalizeDutyLocation(storedDutyDay[key], key);
                     return;
                 }
                 const legacy = getBreakDutyState(blocks, number);
-                normalized[key] = legacy.isDuty ? (normalizeDutyLocation(legacy.dutyLocation) || 'UNASSIGNED') : '';
+                normalized[key] = legacy.isDuty ? (normalizeDutyLocation(legacy.dutyLocation, key) || 'UNASSIGNED') : '';
             });
             return normalized;
         };
@@ -999,7 +1005,7 @@
             : '';
 
         const getDutyInfo = (day, dutyKey) => {
-            const location = normalizeDutyLocation(window.appState.dutyData?.[day]?.[dutyKey]);
+            const location = normalizeDutyLocation(window.appState.dutyData?.[day]?.[dutyKey], dutyKey);
             return {
                 active: Boolean(location),
                 location,
@@ -1009,13 +1015,17 @@
 
         const dutySelectorHTML = (day, dutyKey, label, icon, { compact = false, time = '' } = {}) => {
             const duty = getDutyInfo(day, dutyKey);
+            const isCricketTraining = duty.location === CRICKET_TRAINING;
             const sizing = compact ? 'px-3 py-1 text-[8.5px]' : 'px-4 md:px-5 py-2 text-[10px] md:text-xs';
+            const activeClasses = isCricketTraining
+                ? 'bg-green-600 text-white border-2 border-green-500 scale-[1.03] shadow-green-600/30'
+                : 'bg-amber-500 text-white border-2 border-amber-400 scale-[1.03] shadow-amber-500/30';
             return `
-                <button type="button" onclick="event.stopPropagation(); openDutyPicker(event, '${day}', '${dutyKey}')" class="relative inline-flex items-center justify-center gap-1.5 md:gap-2 ${sizing} rounded-full font-black tracking-widest uppercase shadow-sm transition-all duration-300 ${duty.active ? 'bg-amber-500 text-white border-2 border-amber-400 scale-[1.03] shadow-amber-500/30' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60 hover:bg-amber-100 dark:hover:bg-amber-900/40 hover:scale-[1.03]'}" title="Choose duty location">
-                    <i class="fa-solid ${duty.active ? 'fa-user-shield' : icon}"></i>
+                <button type="button" onclick="event.stopPropagation(); openDutyPicker(event, '${day}', '${dutyKey}')" class="relative inline-flex items-center justify-center gap-1.5 md:gap-2 ${sizing} rounded-full font-black tracking-widest uppercase shadow-sm transition-all duration-300 ${duty.active ? activeClasses : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60 hover:bg-amber-100 dark:hover:bg-amber-900/40 hover:scale-[1.03]'}" title="Choose duty or break activity">
+                    <i class="fa-solid ${isCricketTraining ? 'fa-baseball-bat-ball' : duty.active ? 'fa-user-shield' : icon}"></i>
                     <span>${label}</span>
                     ${time ? `<span class="opacity-65 tracking-normal normal-case">${time}</span>` : ''}
-                    ${duty.active ? `<span class="inline-flex items-center gap-1 ml-0.5 px-1.5 py-0.5 rounded-full bg-white/20 border border-white/25 tracking-normal"><i class="fa-solid fa-location-dot text-[8px]"></i>${duty.displayLocation}</span>` : ''}
+                    ${duty.active ? `<span class="inline-flex items-center gap-1 ml-0.5 px-1.5 py-0.5 rounded-full bg-white/20 border border-white/25 tracking-normal"><i class="fa-solid ${isCricketTraining ? 'fa-person-running' : 'fa-location-dot'} text-[8px]"></i>${duty.displayLocation}</span>` : ''}
                 </button>`;
         };
 
@@ -2223,17 +2233,22 @@
         window.openDutyPicker = (event, day, dutyKey) => {
             if (!SCHOOL_DAYS.includes(day) || !['morning', 'break1', 'break2'].includes(dutyKey)) return;
             window.appState.activeDutySelection = { day, dutyKey };
-            const labels = { morning: 'Morning Duty', break1: 'Break 1 Duty', break2: 'Break 2 Duty' };
+            const labels = { morning: 'Morning Duty', break1: 'Break 1', break2: 'Break 2' };
             const duty = getDutyInfo(day, dutyKey);
+            document.getElementById('duty-picker-eyebrow').textContent = dutyKey === 'morning' ? 'Duty location' : 'Break selection';
             document.getElementById('duty-picker-title').textContent = labels[dutyKey];
             document.getElementById('duty-picker-current').textContent = duty.active
                 ? (duty.location === 'UNASSIGNED' ? 'Choose a location for this duty' : `Currently ${duty.location}`)
-                : 'Choose an area to activate this duty';
+                : (dutyKey === 'morning' ? 'Choose an area to activate this duty' : 'Choose an area or break activity');
+            const cricketOption = document.getElementById('cricket-training-option');
+            cricketOption.classList.toggle('hidden', dutyKey === 'morning');
+            cricketOption.classList.toggle('flex', dutyKey !== 'morning');
             document.querySelectorAll('.duty-location-option').forEach(option => {
                 const selected = option.dataset.dutyLocation === duty.location;
                 option.classList.toggle('ring-2', selected);
                 option.classList.toggle('ring-offset-2', selected);
-                option.classList.toggle('ring-amber-400', selected);
+                option.classList.toggle('ring-amber-400', selected && duty.location !== CRICKET_TRAINING);
+                option.classList.toggle('ring-green-500', selected && duty.location === CRICKET_TRAINING);
                 option.querySelector('.duty-option-check')?.classList.toggle('opacity-0', !selected);
             });
             const removeButton = document.getElementById('duty-remove-button');
@@ -2274,6 +2289,7 @@
             const selection = window.appState.activeDutySelection;
             if (!selection || (location && !DUTY_LOCATIONS.includes(location))) return;
             const { day, dutyKey } = selection;
+            if (dutyKey === 'morning' && location === CRICKET_TRAINING) return;
             const dayDutyData = { ...(window.appState.dutyData[day] || {}), [dutyKey]: location };
             window.appState.dutyData = { ...window.appState.dutyData, [day]: dayDutyData };
 
@@ -2316,7 +2332,7 @@
                     }
                     transaction.set(ref, payload, { merge: true });
                 });
-                const label = dutyKey === 'morning' ? 'Morning Duty' : dutyKey === 'break1' ? 'Break 1 Duty' : 'Break 2 Duty';
+                const label = dutyKey === 'morning' ? 'Morning Duty' : dutyKey === 'break1' ? 'Break 1' : 'Break 2';
                 showToast(location ? `${label} set to ${location}` : `${label} removed`);
             } catch (error) {
                 showToast('Could not save the duty location. Please try again.');
@@ -2437,11 +2453,12 @@
             data.forEach((block, idx) => {
                 if (block.type === 'break') {
                     const dutyKey = String(block.topic || '').includes('Break 1') ? 'break1' : 'break2';
-                    const isDuty = getDutyInfo(window.appState.day, dutyKey).active;
+                    const duty = getDutyInfo(window.appState.day, dutyKey);
+                    const isCricketTraining = duty.location === CRICKET_TRAINING;
                     scheduleContainer.innerHTML += `
                         <div class="relative flex items-center justify-center w-full py-0 -my-1 group transition-transform">
                             <div class="absolute inset-0 flex items-center">
-                                <div class="w-full border-t border-dashed ${isDuty ? 'border-amber-500' : 'border-amber-400/60 dark:border-amber-600/50'}"></div>
+                                <div class="w-full border-t border-dashed ${isCricketTraining ? 'border-green-600 dark:border-green-400' : duty.active ? 'border-amber-500' : 'border-amber-400/60 dark:border-amber-600/50'}"></div>
                             </div>
                             ${dutySelectorHTML(window.appState.day, dutyKey, block.topic, `fa-${block.icon}`, { compact: true })}
                         </div>`;
@@ -2584,11 +2601,12 @@
                     data.forEach((block, idx) => {
                         if(block.type === 'break') {
                             const dutyKey = String(block.topic || '').includes('Break 1') ? 'break1' : 'break2';
-                            const isDuty = getDutyInfo(day, dutyKey).active;
+                            const duty = getDutyInfo(day, dutyKey);
+                            const isCricketTraining = duty.location === CRICKET_TRAINING;
                             bodyHTML += `
                             <div class="schedule-break relative flex items-center justify-center py-2.5 my-1.5 group w-full" ondragover="allowLessonDrop(event)" ondragleave="clearLessonDropCue(event)" ondrop="dropLessonOnBreak(event, '${day}', ${idx})">
                                 <div class="absolute inset-0 flex items-center px-2">
-                                    <div class="w-full border-t border-dashed ${isDuty ? 'border-amber-500' : 'border-amber-300/60 dark:border-amber-700/60'}"></div>
+                                    <div class="w-full border-t border-dashed ${isCricketTraining ? 'border-green-600 dark:border-green-400' : duty.active ? 'border-amber-500' : 'border-amber-300/60 dark:border-amber-700/60'}"></div>
                                 </div>
                                 ${dutySelectorHTML(day, dutyKey, block.topic, `fa-${block.icon}`, { compact: true })}
                             </div>`;
@@ -2700,12 +2718,13 @@
             data.forEach((block, idx) => {
                 if(block.type === 'break') {
                     const dutyKey = String(block.topic || '').includes('Break 1') ? 'break1' : 'break2';
-                    const isDuty = getDutyInfo(window.appState.day, dutyKey).active;
+                    const duty = getDutyInfo(window.appState.day, dutyKey);
+                    const isCricketTraining = duty.location === CRICKET_TRAINING;
                     html += `
                     <div class="schedule-break flex items-center justify-center gap-4 my-2 relative z-10 group" ondragover="allowLessonDrop(event)" ondragleave="clearLessonDropCue(event)" ondrop="dropLessonOnBreak(event, '${window.appState.day}', ${idx})">
-                        <div class="h-px ${isDuty ? 'bg-amber-400 dark:bg-amber-500' : 'bg-amber-200 dark:bg-amber-800/50'} flex-1 transition-colors"></div>
+                        <div class="h-px ${isCricketTraining ? 'bg-green-600 dark:bg-green-400' : duty.active ? 'bg-amber-400 dark:bg-amber-500' : 'bg-amber-200 dark:bg-amber-800/50'} flex-1 transition-colors"></div>
                         ${dutySelectorHTML(window.appState.day, dutyKey, block.topic, `fa-${block.icon}`, { time: block.time })}
-                        <div class="h-px ${isDuty ? 'bg-amber-400 dark:bg-amber-500' : 'bg-amber-200 dark:bg-amber-800/50'} flex-1 transition-colors"></div>
+                        <div class="h-px ${isCricketTraining ? 'bg-green-600 dark:bg-green-400' : duty.active ? 'bg-amber-400 dark:bg-amber-500' : 'bg-amber-200 dark:bg-amber-800/50'} flex-1 transition-colors"></div>
                     </div>`;
                 } else {
                     const theme = getTheme(block.subject, block.topic);
