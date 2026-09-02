@@ -269,6 +269,81 @@
             animation: glassSweep 1.5s ease-in-out infinite;
         }
 
+        /* --- Point Deduction Feedback --- */
+        @keyframes deductionFlash {
+            0% { opacity: 0; box-shadow: inset 0 0 0 rgba(244,63,94,0); }
+            12% { opacity: .95; box-shadow: inset 0 0 28px rgba(244,63,94,.8), 0 0 24px rgba(244,63,94,.65); }
+            30% { opacity: .18; }
+            48% { opacity: .75; box-shadow: inset 0 0 20px rgba(244,63,94,.65), 0 0 18px rgba(244,63,94,.45); }
+            100% { opacity: 0; box-shadow: inset 0 0 0 rgba(244,63,94,0); }
+        }
+
+        @keyframes scoreDeducted {
+            0% { transform: translateY(-8px) scale(1.45); color: #fb7185; filter: drop-shadow(0 0 12px rgba(244,63,94,.95)); }
+            45% { transform: translateY(4px) scale(.9); color: #f43f5e; }
+            100% { transform: translateY(0) scale(1); color: #38bdf8; filter: drop-shadow(0 0 10px rgba(56,189,248,.5)); }
+        }
+
+        @keyframes deductionBadgeFloat {
+            0% { opacity: 0; transform: translateY(-15%) scale(.75); }
+            18% { opacity: 1; transform: translateY(-70%) scale(1.15); }
+            70% { opacity: 1; transform: translateY(-125%) scale(1); }
+            100% { opacity: 0; transform: translateY(-175%) scale(.95); }
+        }
+
+        @keyframes deductionScreenPulse {
+            0% { opacity: 0; }
+            10% { opacity: .72; }
+            25% { opacity: .18; }
+            40% { opacity: .55; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes deductionAlertSlam {
+            0% { opacity: 0; transform: translateY(-80px) rotate(-8deg) scale(1.8); filter: blur(5px); }
+            14% { opacity: 1; transform: translateY(12px) rotate(2deg) scale(.92); filter: blur(0); }
+            24% { transform: translateY(0) rotate(0) scale(1.05); }
+            34%, 72% { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
+            100% { opacity: 0; transform: translateY(70px) scale(.82); }
+        }
+
+        @keyframes deductionArrowsDrop {
+            0% { opacity: 0; transform: translateY(-24px) scaleY(.6); }
+            25% { opacity: 1; }
+            70% { opacity: 1; transform: translateY(12px) scaleY(1.15); }
+            100% { opacity: 0; transform: translateY(34px) scaleY(.8); }
+        }
+
+        .deduction-flash {
+            background: rgba(225,29,72,.38);
+            animation: deductionFlash .9s ease-out forwards;
+        }
+
+        .student-row.points-deducted .score-value {
+            animation: scoreDeducted .75s cubic-bezier(.2,.8,.3,1) both;
+        }
+
+        .deduction-badge {
+            animation: deductionBadgeFloat 1.1s ease-out forwards;
+        }
+
+        #deductionFeedback.is-active .deduction-screen-pulse {
+            animation: deductionScreenPulse 1.55s ease-out both;
+        }
+
+        #deductionFeedback.is-active .deduction-alert-card {
+            animation: deductionAlertSlam 1.55s cubic-bezier(.16,.9,.28,1) both;
+        }
+
+        #deductionDarts i { opacity: 0; }
+
+        #deductionFeedback.is-active #deductionDarts i {
+            animation: deductionArrowsDrop .8s ease-in 2 both;
+        }
+
+        #deductionFeedback.is-active #deductionDarts i:nth-child(2) { animation-delay: .08s; }
+        #deductionFeedback.is-active #deductionDarts i:nth-child(3) { animation-delay: .16s; }
+
         /* Default Ranks */
         .rank-1 { box-shadow: 0 0 20px rgba(251, 191, 36, 0.2); border-color: rgba(251, 191, 36, 0.5); }
     </style>
@@ -285,6 +360,25 @@
     <div class="shooting-star"></div>
     <div class="shooting-star"></div>
     <div class="shooting-star"></div>
+
+    <!-- Highly visible, silent feedback when points are deducted -->
+    <div id="deductionFeedback" class="fixed inset-0 z-[90] pointer-events-none flex items-center justify-center px-4" role="status" aria-live="assertive" aria-atomic="true">
+        <div class="deduction-screen-pulse absolute inset-0 opacity-0 bg-[radial-gradient(circle,rgba(244,63,94,.12)_20%,rgba(159,18,57,.78)_100%)] border-[12px] border-rose-500/80"></div>
+        <div class="deduction-alert-card opacity-0 relative min-w-[280px] max-w-lg rounded-[2rem] border-4 border-rose-300 bg-gradient-to-br from-rose-500 via-red-600 to-rose-950 px-8 py-5 text-center shadow-[0_0_70px_rgba(244,63,94,.95),inset_0_0_25px_rgba(255,255,255,.25)]">
+            <div id="deductionDarts" class="absolute -top-12 left-1/2 -translate-x-1/2 flex gap-3 text-4xl text-rose-300 drop-shadow-[0_0_10px_rgba(244,63,94,1)]">
+                <i class="fa-solid fa-angles-down"></i>
+                <i class="fa-solid fa-angles-down"></i>
+                <i class="fa-solid fa-angles-down"></i>
+            </div>
+            <div class="text-xs md:text-sm font-black uppercase tracking-[.32em] text-rose-100">Points deducted</div>
+            <div class="my-1 font-display text-6xl md:text-7xl font-black leading-none text-white drop-shadow-[0_5px_0_rgba(136,19,55,.8)]">
+                &minus;<span id="deductionAlertAmount">0</span>
+            </div>
+            <div class="text-lg md:text-xl font-black uppercase tracking-wide text-rose-100">
+                From <span id="deductionAlertName" class="text-white">student</span>
+            </div>
+        </div>
+    </div>
 
     <!-- Main Container (Reduced to max-w-xl for tighter spacing) -->
     <div class="flex flex-col h-full w-full max-w-xl mx-auto relative z-10">
@@ -391,9 +485,10 @@
         </div>
 
         <div class="flex gap-2 items-center">
-            <input type="number" id="popoverCustomPoints" placeholder="Custom" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-2 py-1.5 text-white font-bold text-center focus:outline-none focus:border-indigo-400">
-            <button onclick="applyCustomUpdate('add')" class="bg-emerald-500 hover:bg-emerald-400 text-white px-2.5 py-1.5 rounded-lg font-bold transition-all shadow-sm shadow-emerald-500/20" title="Add"><i class="fa-solid fa-plus"></i></button>
-            <button onclick="applyCustomUpdate('set')" class="bg-amber-500 hover:bg-amber-400 text-white px-2.5 py-1.5 rounded-lg font-bold transition-all shadow-sm shadow-amber-500/20" title="Set exact score"><i class="fa-solid fa-check"></i></button>
+            <input type="number" id="popoverCustomPoints" placeholder="Custom" class="flex-1 min-w-0 bg-slate-900 border border-slate-600 rounded-lg px-2 py-1.5 text-white font-bold text-center focus:outline-none focus:border-indigo-400">
+            <button onclick="applyCustomUpdate('add')" class="shrink-0 bg-emerald-500 hover:bg-emerald-400 text-white px-2.5 py-1.5 rounded-lg font-bold transition-all shadow-sm shadow-emerald-500/20" title="Add points" aria-label="Add custom points"><i class="fa-solid fa-plus"></i></button>
+            <button onclick="applyCustomUpdate('deduct')" class="shrink-0 bg-rose-500 hover:bg-rose-400 text-white px-2.5 py-1.5 rounded-lg font-bold transition-all shadow-sm shadow-rose-500/20" title="Deduct points" aria-label="Deduct custom points"><i class="fa-solid fa-minus"></i></button>
+            <button onclick="applyCustomUpdate('set')" class="shrink-0 bg-amber-500 hover:bg-amber-400 text-white px-2.5 py-1.5 rounded-lg font-bold transition-all shadow-sm shadow-amber-500/20" title="Set exact score" aria-label="Set exact score"><i class="fa-solid fa-check"></i></button>
         </div>
 
         <button onclick="openDeleteModal()" class="mt-2 w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 hover:border-rose-400 font-bold transition-all" title="Delete this name">
@@ -461,6 +556,9 @@
         let previousTopStudentId = null;
         let topWinnersCount = 0; // Defines how many top students get highlighted
         let previousStudentOrder = []; 
+        let pointsAudioContext = null;
+        let pendingDeduction = null;
+        let deductionFeedbackTimer = null;
 
         // DOM Elements
         const leaderboardList = document.getElementById('leaderboardList');
@@ -483,6 +581,63 @@
             }
             const index = Math.abs(hash) % nameColors.length;
             return nameColors[index];
+        }
+
+        // A short, bright ascending C-major chime for positive score changes.
+        function playPointsEarnedSound() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+
+            if (!pointsAudioContext) pointsAudioContext = new AudioContext();
+
+            const playChime = () => {
+                const now = pointsAudioContext.currentTime;
+                const masterGain = pointsAudioContext.createGain();
+                const warmthFilter = pointsAudioContext.createBiquadFilter();
+
+                warmthFilter.type = 'lowpass';
+                warmthFilter.frequency.setValueAtTime(3200, now);
+                masterGain.gain.setValueAtTime(0.0001, now);
+                masterGain.gain.exponentialRampToValueAtTime(0.075, now + 0.025);
+                masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.38);
+                warmthFilter.connect(masterGain);
+                masterGain.connect(pointsAudioContext.destination);
+
+                [523.25, 659.25, 783.99].forEach((frequency, index) => {
+                    const oscillator = pointsAudioContext.createOscillator();
+                    const noteGain = pointsAudioContext.createGain();
+                    const startTime = now + (index * 0.055);
+
+                    oscillator.type = index === 0 ? 'triangle' : 'sine';
+                    oscillator.frequency.setValueAtTime(frequency, startTime);
+                    noteGain.gain.setValueAtTime([0.5, 0.42, 0.35][index], startTime);
+                    oscillator.connect(noteGain);
+                    noteGain.connect(warmthFilter);
+                    oscillator.start(startTime);
+                    oscillator.stop(now + 0.4);
+                });
+            };
+
+            if (pointsAudioContext.state === 'suspended') {
+                pointsAudioContext.resume().then(playChime).catch(() => {});
+            } else {
+                playChime();
+            }
+        }
+
+        function showDeductionFeedback(studentName, amount) {
+            const feedback = document.getElementById('deductionFeedback');
+            document.getElementById('deductionAlertAmount').textContent = amount;
+            document.getElementById('deductionAlertName').textContent = studentName;
+
+            if (deductionFeedbackTimer) clearTimeout(deductionFeedbackTimer);
+            feedback.classList.remove('is-active');
+            void feedback.offsetWidth; // Restart the effect for consecutive deductions.
+            feedback.classList.add('is-active');
+
+            deductionFeedbackTimer = setTimeout(() => {
+                feedback.classList.remove('is-active');
+            }, 1600);
         }
 
         // --- Initialization ---
@@ -626,6 +781,8 @@
             students.push(newStudent);
             saveData(); 
 
+            if (points > 0) playPointsEarnedSound();
+
             nameInput.value = '';
             pointsInput.value = '';
             nameInput.focus();
@@ -675,6 +832,7 @@
             if(idx !== -1) {
                 students[idx].points += amount;
                 saveData();
+                if (amount > 0) playPointsEarnedSound();
                 fireConfetti();
             }
             closePopover();
@@ -687,12 +845,28 @@
 
             const idx = students.findIndex(s => s.id === currentlyEditingId);
             if(idx !== -1) {
+                const previousPoints = students[idx].points;
+                const studentName = students[idx].name;
                 if(mode === 'add') {
                     students[idx].points += val;
+                } else if (mode === 'deduct') {
+                    students[idx].points -= Math.abs(val);
                 } else if (mode === 'set') {
                     students[idx].points = val;
                 }
+
+                const pointsChange = students[idx].points - previousPoints;
+                if (pointsChange < 0) {
+                    pendingDeduction = {
+                        studentId: students[idx].id,
+                        amount: Math.abs(pointsChange)
+                    };
+                    renderLeaderboard();
+                    showDeductionFeedback(studentName, Math.abs(pointsChange));
+                }
+
                 saveData();
+                if (pointsChange > 0) playPointsEarnedSound();
                 if(mode === 'add' && val > 0) fireConfetti();
             }
             closePopover();
@@ -766,12 +940,14 @@
 
             students.forEach((student, index) => {
                 const studentColor = getColorForName(student.name);
+                const deduction = pendingDeduction?.studentId === student.id ? pendingDeduction : null;
 
                 // Determine if they are a "Prize Winner"
                 let extraClasses = '';
                 if (topWinnersCount > 0 && index < topWinnersCount) {
                     extraClasses = 'prize-winner';
                 }
+                if (deduction) extraClasses += ' points-deducted';
 
                 const el = document.createElement('div');
                 el.className = `student-row flex items-center justify-between py-1.5 md:py-2 px-2 md:px-3 rounded-full backdrop-blur-xl shadow-lg border relative flip-item cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:brightness-110 group ${getRankClass(index)} ${extraClasses}`;
@@ -784,6 +960,7 @@
                 el.innerHTML = `
                     <!-- 3D Glass Highlight for Pill Shape -->
                     <div class="absolute top-0 left-[5%] right-[5%] h-[30%] bg-gradient-to-b from-white/10 to-transparent rounded-t-full pointer-events-none z-0"></div>
+                    ${deduction ? '<div class="deduction-flash absolute inset-0 rounded-full pointer-events-none z-[5]"></div>' : ''}
                     
                     <div class="flex items-center gap-2 md:gap-4 overflow-hidden z-10 relative">
                         ${rankIcon}
@@ -804,12 +981,15 @@
                         <!-- Radar Sweep Animation -->
                         <div class="absolute top-0 left-0 h-full w-[40%] z-0 bg-gradient-to-r from-transparent via-white/20 to-transparent sweep-effect -translate-x-[150%]"></div>
                         
-                        <span class="text-2xl md:text-3xl font-display font-black text-sky-400 tracking-tighter drop-shadow-[0_0_10px_rgba(56,189,248,0.5)] z-10 relative leading-none">${student.points}</span>
+                        <span class="score-value text-2xl md:text-3xl font-display font-black text-sky-400 tracking-tighter drop-shadow-[0_0_10px_rgba(56,189,248,0.5)] z-10 relative leading-none">${student.points}</span>
                         <span class="text-[9px] md:text-[11px] font-bold text-sky-200/50 uppercase ml-1 mt-1 z-10 relative">Pts</span>
                     </div>
+                    ${deduction ? `<div class="deduction-badge absolute right-5 top-1/2 z-30 rounded-full border border-rose-300/70 bg-rose-500 px-3 py-1 text-lg font-black text-white shadow-[0_0_18px_rgba(244,63,94,.8)] pointer-events-none" role="status" aria-label="${deduction.amount} points deducted">&minus;${deduction.amount}</div>` : ''}
                 `;
                 leaderboardList.appendChild(el);
             });
+
+            pendingDeduction = null;
 
             // FLIP Execute
             requestAnimationFrame(() => {
