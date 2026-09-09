@@ -344,6 +344,441 @@
         #deductionFeedback.is-active #deductionDarts i:nth-child(2) { animation-delay: .08s; }
         #deductionFeedback.is-active #deductionDarts i:nth-child(3) { animation-delay: .16s; }
 
+        /* --- Bass Bonus Multiplier Reactor --- */
+        .bonus-badge {
+            background: linear-gradient(135deg, rgba(245,158,11,.2), rgba(217,70,239,.16));
+            box-shadow: 0 0 18px rgba(251,191,36,.16), inset 0 1px 0 rgba(255,255,255,.12);
+        }
+
+        .bonus-launch-button {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 45;
+            display: flex;
+            min-height: 52px;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: 1px solid rgba(103,232,249,.35);
+            border-radius: 18px;
+            padding: 0 18px;
+            color: #cffafe;
+            background: linear-gradient(90deg, rgba(88,28,135,.8), rgba(30,64,175,.78), rgba(8,145,178,.7));
+            box-shadow: 0 0 20px rgba(34,211,238,.16), inset 0 1px 0 rgba(255,255,255,.14);
+            backdrop-filter: blur(14px);
+            transition: opacity .2s ease, transform .2s ease, filter .2s ease, box-shadow .2s ease;
+        }
+
+        .bonus-launch-button:not(:disabled):hover {
+            box-shadow: 0 0 26px rgba(34,211,238,.3), inset 0 1px 0 rgba(255,255,255,.2);
+            transform: translateY(-2px);
+        }
+
+        .bonus-launch-button:disabled { cursor: not-allowed; opacity: .3; filter: saturate(.35); }
+
+        .bonus-launch-button.is-ready .bonus-launch-light {
+            background: #67e8f9;
+            box-shadow: 0 0 12px #22d3ee;
+            animation: pulse 1.3s ease-in-out infinite;
+        }
+
+        .bonus-teacher-hotspot {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            z-index: 46;
+            display: flex;
+            width: 76px;
+            height: 76px;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            background: transparent;
+            color: rgba(148,163,184,0);
+            cursor: pointer;
+        }
+
+        .bonus-teacher-hotspot span {
+            display: flex;
+            width: 28px;
+            height: 28px;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(148,163,184,0);
+            border-radius: 50%;
+            background: rgba(15,23,42,0);
+            transition: all .22s ease;
+        }
+
+        .bonus-teacher-hotspot:hover span,
+        .bonus-teacher-hotspot:focus-visible span {
+            border-color: rgba(148,163,184,.18);
+            background: rgba(15,23,42,.3);
+            color: rgba(203,213,225,.34);
+            box-shadow: 0 0 14px rgba(148,163,184,.08);
+        }
+
+        .bonus-stage {
+            isolation: isolate;
+            background:
+                radial-gradient(circle at 50% 42%, rgba(251,191,36,.18), transparent 24%),
+                radial-gradient(circle at 15% 20%, rgba(217,70,239,.2), transparent 32%),
+                radial-gradient(circle at 85% 78%, rgba(34,211,238,.18), transparent 30%),
+                #070814;
+        }
+
+        .bonus-stage::before {
+            content: '';
+            position: absolute;
+            width: 130vmax;
+            height: 130vmax;
+            left: 50%;
+            top: 44%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+            opacity: .28;
+            background: repeating-conic-gradient(from 0deg, rgba(251,191,36,.28) 0deg 7deg, transparent 7deg 18deg);
+            -webkit-mask-image: radial-gradient(circle, transparent 0 10%, black 28%, transparent 68%);
+            mask-image: radial-gradient(circle, transparent 0 10%, black 28%, transparent 68%);
+            animation: bonus-rays 18s linear infinite;
+        }
+
+        .bonus-machine {
+            position: relative;
+            width: min(720px, 88vw);
+            min-height: 340px;
+            border: 3px solid rgba(103,232,249,.65);
+            border-radius: 3rem;
+            background:
+                linear-gradient(90deg, rgba(34,211,238,.07) 1px, transparent 1px) 0 0/36px 36px,
+                linear-gradient(rgba(34,211,238,.07) 1px, transparent 1px) 0 0/36px 36px,
+                radial-gradient(circle at 50% 50%, rgba(126,34,206,.36), transparent 36%),
+                linear-gradient(145deg, #21104c 0%, #111936 44%, #071b2d 100%);
+            box-shadow: 0 0 0 7px rgba(15,23,42,.95), 0 0 0 10px rgba(251,191,36,.72), 0 30px 90px rgba(0,0,0,.75), inset 0 0 60px rgba(34,211,238,.18);
+        }
+
+        .bonus-energy-trace {
+            position: absolute;
+            inset: -10px;
+            border-radius: 3.5rem;
+            pointer-events: none;
+            padding: 3px;
+            background: conic-gradient(from var(--spin-angle), #22d3ee, transparent 14%, transparent 35%, #fbbf24 50%, transparent 64%, transparent 83%, #e879f9);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: spinBorder 3s linear infinite;
+            filter: drop-shadow(0 0 9px rgba(34,211,238,.75));
+        }
+
+        .bonus-reactor {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: clamp(220px, 34vw, 285px);
+            height: clamp(220px, 34vw, 285px);
+            margin: auto;
+        }
+
+        .bonus-orbit {
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            pointer-events: none;
+        }
+
+        .bonus-orbit-a {
+            inset: 3%;
+            border-top-color: #fbbf24;
+            border-right-color: rgba(251,191,36,.18);
+            border-bottom-color: #f472b6;
+            transform: rotate(-18deg);
+            animation: bonus-orbit-a 4.6s linear infinite;
+        }
+
+        .bonus-orbit-b {
+            inset: 11%;
+            border-left-color: #22d3ee;
+            border-bottom-color: rgba(34,211,238,.25);
+            border-right-color: #a78bfa;
+            transform: rotate(32deg);
+            animation: bonus-orbit-b 3.2s linear infinite reverse;
+        }
+
+        .bonus-core {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            width: 67%;
+            height: 67%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 4px solid rgba(255,255,255,.75);
+            border-radius: 50%;
+            color: white;
+            background: radial-gradient(circle at 45% 36%, rgba(255,255,255,.36), transparent 14%), linear-gradient(145deg, #9333ea, #1d4ed8 56%, #0891b2);
+            box-shadow: inset 0 0 34px rgba(255,255,255,.22), 0 0 26px rgba(34,211,238,.5), 0 0 60px rgba(168,85,247,.35);
+        }
+
+        .bonus-core::after {
+            content: '';
+            position: absolute;
+            inset: -60%;
+            background: linear-gradient(105deg, transparent 42%, rgba(255,255,255,.28) 49%, transparent 56%);
+            animation: bonus-core-sweep 2.2s ease-in-out infinite;
+        }
+
+        .bonus-reactor-value {
+            position: relative;
+            z-index: 2;
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(3.8rem, 9vw, 6.2rem);
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -.08em;
+            transform: translateX(-.06em);
+            text-shadow: 0 5px 0 rgba(30,64,175,.65), 0 0 20px rgba(255,255,255,.45);
+        }
+
+        .bonus-reactor-value.is-long { font-size: clamp(2.8rem, 7vw, 4.8rem); }
+        .bonus-reactor-value.is-very-long { font-size: clamp(2.1rem, 4.5vw, 3rem); letter-spacing: -.12em; }
+
+        .bonus-meter {
+            position: absolute;
+            top: 50%;
+            display: flex;
+            width: 78px;
+            flex-direction: column;
+            gap: 8px;
+            transform: translateY(-50%);
+        }
+
+        .bonus-meter-left { left: 7%; }
+        .bonus-meter-right { right: 7%; }
+
+        .bonus-meter span {
+            height: 9px;
+            border: 1px solid rgba(103,232,249,.3);
+            border-radius: 999px;
+            background: rgba(15,23,42,.8);
+            box-shadow: inset 0 0 5px rgba(0,0,0,.5);
+        }
+
+        .bonus-machine.is-spinning .bonus-meter span {
+            animation: bonus-meter-charge .8s ease-in-out infinite alternate;
+        }
+
+        .bonus-machine.is-spinning .bonus-meter span:nth-child(2) { animation-delay: .1s; }
+        .bonus-machine.is-spinning .bonus-meter span:nth-child(3) { animation-delay: .2s; }
+        .bonus-machine.is-spinning .bonus-meter span:nth-child(4) { animation-delay: .3s; }
+        .bonus-machine.is-spinning .bonus-meter span:nth-child(5) { animation-delay: .4s; }
+        .bonus-machine.is-spinning .bonus-orbit-a { animation-duration: .55s; }
+        .bonus-machine.is-spinning .bonus-orbit-b { animation-duration: .38s; }
+        .bonus-machine.is-spinning .bonus-reactor-value { animation: bonus-number-stream .1s linear infinite; }
+        .bonus-machine.is-settling { animation: bonus-machine-rumble .11s linear infinite; }
+        .bonus-machine.is-winner { animation: bonus-winner-pop .75s cubic-bezier(.2,1.5,.35,1); }
+        .bonus-machine.is-winner .bonus-core {
+            background: radial-gradient(circle at 45% 36%, #fff 0 5%, transparent 18%), linear-gradient(145deg, #f59e0b, #ec4899 55%, #8b5cf6);
+            box-shadow: inset 0 0 34px rgba(255,255,255,.3), 0 0 38px #fbbf24, 0 0 90px rgba(236,72,153,.55);
+        }
+
+        .bonus-stage.has-result { justify-content: flex-start; overflow-y: auto; }
+        .bonus-stage.has-result::-webkit-scrollbar { display: none; }
+        .bonus-stage.has-result { scrollbar-width: none; }
+        .bonus-stage.has-result .bonus-machine { min-height: 270px; }
+        .bonus-stage.has-result .bonus-reactor { width: 225px; height: 225px; }
+        .bonus-stage.has-result .bonus-result-card { margin-top: 10px; }
+
+        .bonus-power-transfer {
+            position: relative;
+            z-index: 12;
+            width: min(650px, 88vw);
+            height: 92px;
+            margin-top: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(103,232,249,.25);
+            border-radius: 28px;
+            background: linear-gradient(90deg, rgba(88,28,135,.42), rgba(15,23,42,.8) 48%, rgba(8,145,178,.32));
+            box-shadow: inset 0 0 24px rgba(34,211,238,.09), 0 16px 35px rgba(0,0,0,.32);
+            transition: height .45s ease, margin .45s ease, opacity .35s ease, transform .35s ease;
+        }
+
+        .bonus-power-transfer.is-complete {
+            height: 0;
+            margin-top: 0;
+            opacity: 0;
+            transform: scale(.92);
+        }
+
+        .bonus-conduit {
+            position: absolute;
+            top: 50%;
+            right: 116px;
+            left: 116px;
+            height: 14px;
+            transform: translateY(-50%);
+            overflow: hidden;
+            border: 1px solid rgba(34,211,238,.22);
+            border-radius: 999px;
+            background: rgba(2,6,23,.72);
+        }
+
+        .bonus-conduit::before {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            border-radius: inherit;
+            background: repeating-linear-gradient(90deg, transparent 0 16px, rgba(34,211,238,.9) 16px 27px, transparent 27px 38px);
+            filter: drop-shadow(0 0 5px #22d3ee);
+            animation: bonus-conduit-flow .75s linear infinite;
+        }
+
+        .bonus-power-cell {
+            --cell-x: 0px;
+            --cell-y: 0px;
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            z-index: 4;
+            display: flex;
+            width: 72px;
+            height: 72px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid rgba(255,255,255,.82);
+            border-radius: 50%;
+            color: white;
+            background: radial-gradient(circle at 35% 28%, white 0 5%, #fde047 12%, #f97316 45%, #be123c 78%);
+            box-shadow: 0 7px 0 #7f1d1d, 0 12px 22px rgba(0,0,0,.5), 0 0 28px rgba(251,191,36,.7);
+            transform: translate(var(--cell-x), var(--cell-y));
+            transition: transform .4s cubic-bezier(.2,1.2,.3,1), filter .2s ease;
+            touch-action: none;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .bonus-power-cell:hover { filter: brightness(1.12); }
+        .bonus-power-cell:active { cursor: grabbing; }
+        .bonus-power-cell.is-dragging {
+            z-index: 8;
+            transform: translate(var(--cell-x), var(--cell-y)) scale(1.08);
+            transition: none;
+            filter: brightness(1.2);
+        }
+
+        .bonus-power-cell:focus-visible { outline: 4px solid white; outline-offset: 4px; }
+        .bonus-power-cell.is-docked { animation: bonus-cell-dock .65s cubic-bezier(.2,1.4,.3,1) both; }
+
+        .bonus-power-dock {
+            position: absolute;
+            right: 9px;
+            top: 8px;
+            display: flex;
+            width: 78px;
+            height: 76px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 3px dashed rgba(103,232,249,.55);
+            border-radius: 24px;
+            color: rgba(207,250,254,.72);
+            background: rgba(8,145,178,.13);
+            box-shadow: inset 0 0 18px rgba(34,211,238,.16);
+            transition: all .2s ease;
+            pointer-events: none;
+        }
+
+        .bonus-power-dock.is-near {
+            border-style: solid;
+            border-color: white;
+            color: white;
+            background: rgba(34,211,238,.34);
+            box-shadow: inset 0 0 22px rgba(255,255,255,.25), 0 0 28px rgba(34,211,238,.7);
+            transform: scale(1.08);
+        }
+
+        .bonus-power-dock.is-charged {
+            border-style: solid;
+            border-color: #fde047;
+            color: white;
+            background: rgba(245,158,11,.32);
+            box-shadow: inset 0 0 22px rgba(255,255,255,.28), 0 0 34px rgba(250,204,21,.8);
+        }
+
+        .bonus-transfer-hint { animation: bonus-hint-bounce 1s ease-in-out infinite; }
+        .bonus-result-card { animation: bonus-result-rise .7s cubic-bezier(.16,1,.3,1) both; }
+
+        @keyframes bonus-rays { to { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes bonus-orbit-a { to { transform: rotate(342deg); } }
+        @keyframes bonus-orbit-b { to { transform: rotate(392deg); } }
+        @keyframes bonus-core-sweep {
+            0%, 20% { transform: translateX(-35%) rotate(0); opacity: 0; }
+            55% { opacity: 1; }
+            80%, 100% { transform: translateX(35%) rotate(0); opacity: 0; }
+        }
+        @keyframes bonus-number-stream {
+            0% { transform: translate(-.06em, -9px) scaleY(1.08); filter: blur(1.5px); opacity: .7; }
+            100% { transform: translate(-.06em, 9px) scaleY(.94); filter: blur(1.5px); opacity: 1; }
+        }
+        @keyframes bonus-meter-charge {
+            0% { background: rgba(15,23,42,.8); box-shadow: none; }
+            100% { background: #22d3ee; box-shadow: 0 0 12px #22d3ee; }
+        }
+        @keyframes bonus-conduit-flow { to { transform: translateX(38px); } }
+        @keyframes bonus-cell-dock {
+            0% { filter: brightness(1); }
+            45% { filter: brightness(2.1); box-shadow: 0 0 50px rgba(255,255,255,.9); }
+            100% { filter: brightness(1.25); }
+        }
+        @keyframes bonus-machine-rumble {
+            0%, 100% { transform: translateX(0) rotate(0); }
+            25% { transform: translateX(-3px) rotate(-.25deg); }
+            75% { transform: translateX(3px) rotate(.25deg); }
+        }
+        @keyframes bonus-winner-pop {
+            0% { transform: scale(.94); filter: brightness(1); }
+            45% { transform: scale(1.045); filter: brightness(1.55); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
+        @keyframes bonus-hint-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(8px); }
+        }
+        @keyframes bonus-result-rise {
+            from { opacity: 0; transform: translateY(35px) scale(.88); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @media (max-width: 1100px) {
+            .bonus-launch-button { bottom: 80px; }
+        }
+
+        @media (max-width: 640px) {
+            .bonus-machine { width: min(78vw, 520px); min-height: 315px; }
+            .bonus-reactor { width: 215px; height: 215px; }
+            .bonus-meter { width: 42px; gap: 6px; }
+            .bonus-meter-left { left: 3%; }
+            .bonus-meter-right { right: 3%; }
+            .bonus-power-transfer { width: 90vw; height: 84px; margin-top: 14px; }
+            .bonus-power-cell { width: 64px; height: 64px; }
+            .bonus-power-dock { width: 70px; height: 68px; }
+            .bonus-conduit { left: 90px; right: 90px; }
+            .bonus-launch-button { right: 12px; min-height: 46px; max-width: calc(100vw - 24px); padding: 0 14px; }
+            .bonus-launch-full-label { display: none; }
+            .bonus-teacher-hotspot { bottom: 72px; }
+            .bonus-stage.has-result .bonus-machine { min-height: 238px; }
+            .bonus-stage.has-result .bonus-reactor { width: 185px; height: 185px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .bonus-stage::before, .bonus-energy-trace, .bonus-orbit, .bonus-core::after, .bonus-transfer-hint, .bonus-conduit::before { animation: none; }
+        }
+
         /* Default Ranks */
         .rank-1 { box-shadow: 0 0 20px rgba(251, 191, 36, 0.2); border-color: rgba(251, 191, 36, 0.5); }
     </style>
@@ -409,9 +844,16 @@
                 </h1>
             </div>
             
-            <button onclick="openResetModal()" class="ml-3 bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white border border-white/20 backdrop-blur-sm rounded-full w-9 h-9 md:w-10 md:h-10 flex items-center justify-center shrink-0 transition-all shadow-lg" title="Start New Week">
-                <i class="fa-solid fa-rotate-right text-sm md:text-base"></i>
-            </button>
+            <div class="ml-2 flex items-center gap-1.5 shrink-0">
+                <div id="bonusDailyBadge" class="bonus-badge hidden items-center gap-1.5 rounded-full border border-amber-300/50 px-2.5 py-1.5 text-amber-100" title="Today's Bass Bonus value">
+                    <i class="fa-solid fa-ticket text-amber-300 text-xs"></i>
+                    <span class="hidden sm:inline text-[9px] font-black uppercase tracking-wider">Bass Bonus</span>
+                    <span class="font-display font-black text-sm md:text-base leading-none">×<span id="bonusBadgeValue">1</span></span>
+                </div>
+                <button onclick="openResetModal()" class="bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white border border-white/20 backdrop-blur-sm rounded-full w-9 h-9 md:w-10 md:h-10 flex items-center justify-center transition-all shadow-lg" title="Start New Week">
+                    <i class="fa-solid fa-rotate-right text-sm md:text-base"></i>
+                </button>
+            </div>
         </div>
 
         <!-- Leaderboard List Area (Takes up remaining space) -->
@@ -471,6 +913,20 @@
             </div>
         </div>
     </div>
+
+    <!-- Fixed student launcher (bottom-right) -->
+    <button id="bonusLaunchButton" onclick="openBonusStage()" disabled class="bonus-launch-button group" title="The teacher needs to arm today's multiplier first">
+        <span class="bonus-launch-light h-2 w-2 rounded-full bg-slate-500 transition"></span>
+        <i class="fa-solid fa-atom text-amber-300 transition duration-500 group-hover:rotate-180"></i>
+        <span class="font-display text-xs font-black uppercase tracking-[.16em]"><span class="bonus-launch-full-label">Bass Bonus </span>Reactor · <span id="bonusLaunchState">Standby</span></span>
+        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-cyan-300/60"></i>
+    </button>
+
+    <!-- Invisible teacher hotspot (bottom-left); only whispers its location on hover/focus -->
+    <button onclick="openBonusTeacherPanel()" class="bonus-teacher-hotspot" title="Teacher multiplier settings" aria-label="Open teacher multiplier settings">
+        <span><i class="fa-solid fa-gear text-[10px]"></i></span>
+    </button>
+
     <!-- Tiny Popover for Existing Students -->
     <div id="actionPopover" class="hidden fixed z-50 bg-slate-800/95 backdrop-blur-xl border border-slate-600 shadow-2xl rounded-2xl p-3 w-64 text-sm animate-in zoom-in-95 duration-200">
         <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-700">
@@ -530,6 +986,80 @@
             </div>
         </div>
     </div>
+
+    <!-- Discreet teacher setup for the controlled Bass Bonus reveal -->
+    <div id="bonusTeacherModal" class="hidden fixed inset-0 z-[120] items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="bonusTeacherTitle">
+        <div class="w-full max-w-sm overflow-hidden rounded-3xl border border-amber-400/35 bg-slate-900 shadow-[0_25px_90px_rgba(0,0,0,.8)]">
+            <div class="relative border-b border-white/10 bg-gradient-to-r from-amber-500/15 via-fuchsia-500/10 to-cyan-500/10 px-6 py-5">
+                <button onclick="closeBonusTeacherPanel()" class="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-white/10 hover:text-white" aria-label="Close Bass Bonus controls"><i class="fa-solid fa-xmark"></i></button>
+                <div class="mb-1 text-[10px] font-black uppercase tracking-[.28em] text-amber-300">Teacher controls</div>
+                <h2 id="bonusTeacherTitle" class="text-2xl font-display font-black">Set the Reactor Value</h2>
+                <p class="mt-1 text-sm font-semibold text-slate-400">Save the result quietly. The separate launch button will then be ready for your student.</p>
+            </div>
+            <div class="p-6">
+                <label for="bonusTargetInput" class="mb-2 block text-xs font-black uppercase tracking-widest text-slate-400">Today, each Bass Bonus is worth…</label>
+                <div class="relative mb-4">
+                    <span class="absolute inset-y-0 left-4 flex items-center font-display text-2xl font-black text-amber-300">×</span>
+                    <input id="bonusTargetInput" type="number" min="1" max="1000" inputmode="numeric" autocomplete="off" placeholder="5" class="w-full rounded-2xl border-2 border-slate-700 bg-slate-950 py-4 pl-11 pr-5 text-center font-display text-4xl font-black text-white outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15">
+                </div>
+                <p id="bonusTeacherError" class="hidden mb-3 text-center text-sm font-bold text-rose-400">Enter a whole number from 1 to 1,000.</p>
+                <button onclick="armBonusMachine()" class="w-full rounded-2xl border border-amber-300/50 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 px-5 py-3.5 font-display text-lg font-black uppercase tracking-wide text-white shadow-lg shadow-orange-500/25 transition hover:brightness-110 active:scale-[.98]">
+                    <i class="fa-solid fa-lock mr-2"></i>Save &amp; arm reactor
+                </button>
+                <div class="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
+                    <span id="bonusCurrentValue" class="text-xs font-bold text-slate-500">No value set today</span>
+                    <button onclick="clearBonusForToday()" class="text-xs font-bold text-slate-500 transition hover:text-rose-300">Clear today</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full-screen student-facing Bass Bonus show -->
+    <div id="bonusStage" class="bonus-stage hidden fixed inset-0 z-[130] flex-col items-center justify-center overflow-hidden px-4 py-6 text-center" role="dialog" aria-modal="true" aria-labelledby="bonusStageTitle">
+        <button id="bonusStageClose" onclick="closeBonusStage()" class="absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/25 text-white/55 backdrop-blur transition hover:bg-white/10 hover:text-white" aria-label="Close multiplier stage"><i class="fa-solid fa-xmark"></i></button>
+
+        <div class="relative z-10 mb-3 md:mb-6">
+            <div class="mb-1 text-[10px] md:text-xs font-black uppercase tracking-[.42em] text-amber-300">Daily energy challenge</div>
+            <h2 id="bonusStageTitle" class="font-display text-4xl md:text-6xl font-black uppercase italic tracking-tight text-white drop-shadow-[0_5px_0_rgba(88,28,135,.9)]">Bass Bonus Reactor</h2>
+            <p id="bonusStageStatus" class="mt-2 font-bold uppercase tracking-[.18em] text-cyan-200" aria-live="assertive">Power the reactor to begin!</p>
+        </div>
+
+        <div id="bonusMachine" class="bonus-machine z-10 flex items-center justify-center px-5 py-6 md:px-10 md:py-7">
+            <div class="bonus-energy-trace"></div>
+            <div class="bonus-meter bonus-meter-left" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="bonus-reactor">
+                <div class="bonus-orbit bonus-orbit-a"></div>
+                <div class="bonus-orbit bonus-orbit-b"></div>
+                <div class="bonus-core">
+                    <span class="relative z-[2] text-[9px] font-black uppercase tracking-[.3em] text-cyan-100">Multiplier</span>
+                    <span id="bonusReactorValue" class="bonus-reactor-value">×?</span>
+                    <span class="relative z-[2] text-[8px] font-black uppercase tracking-[.24em] text-white/60">Energy core</span>
+                </div>
+            </div>
+            <div class="bonus-meter bonus-meter-right" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+
+        <div id="bonusPowerTransfer" class="bonus-power-transfer">
+            <div class="bonus-conduit" aria-hidden="true"></div>
+            <button id="bonusPowerCell" class="bonus-power-cell" aria-label="Drag the power cell into the reactor dock">
+                <i class="fa-solid fa-bolt text-xl drop-shadow-[0_0_8px_rgba(255,255,255,.8)]"></i>
+                <span class="mt-0.5 text-[7px] font-black uppercase tracking-wider">Power cell</span>
+            </button>
+            <div id="bonusPowerDock" class="bonus-power-dock" aria-hidden="true">
+                <i class="fa-solid fa-plug-circle-bolt text-xl"></i>
+                <span class="mt-0.5 text-[7px] font-black uppercase tracking-wider">Drop here</span>
+            </div>
+        </div>
+
+        <div id="bonusTransferHint" class="bonus-transfer-hint relative z-10 mt-3 flex items-center gap-2 text-sm font-black uppercase tracking-widest text-rose-300">
+            <i class="fa-solid fa-hand-pointer"></i> Drag the power cell into the reactor dock
+        </div>
+
+        <div id="bonusResultCard" class="bonus-result-card relative z-10 mt-4 hidden max-w-3xl rounded-3xl border border-amber-300/50 bg-amber-400/10 px-6 py-4 backdrop-blur-xl shadow-[0_0_45px_rgba(251,191,36,.28)]">
+            <p class="font-display text-2xl md:text-4xl font-black text-white">Today, each <span class="text-amber-300">Bass Bonus</span> is worth <span class="whitespace-nowrap text-cyan-300"><span id="bonusResultValue">1</span> points!</span></p>
+            <button onclick="closeBonusStage()" class="mt-3 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm font-black uppercase tracking-wider text-white transition hover:bg-white/20">Back to the leaderboard</button>
+        </div>
+    </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
@@ -559,12 +1089,29 @@
         let pointsAudioContext = null;
         let pendingDeduction = null;
         let deductionFeedbackTimer = null;
+        let bassBonusMultiplier = null;
+        let bassBonusDate = null;
+        let armedBonusMultiplier = null;
+        let bonusArmedDate = null;
+        let pendingBonusMultiplier = null;
+        let bonusRevealInProgress = false;
+        let bonusSpinIntervals = [];
+        let bonusRevealTimers = [];
+        let bonusWindupAudio = null;
 
         // DOM Elements
         const leaderboardList = document.getElementById('leaderboardList');
         const nameInput = document.getElementById('studentNameInput');
         const pointsInput = document.getElementById('pointsInput');
         const actionPopover = document.getElementById('actionPopover');
+        const bonusTeacherModal = document.getElementById('bonusTeacherModal');
+        const bonusTargetInput = document.getElementById('bonusTargetInput');
+        const bonusStage = document.getElementById('bonusStage');
+        const bonusMachine = document.getElementById('bonusMachine');
+        const bonusPowerTransfer = document.getElementById('bonusPowerTransfer');
+        const bonusPowerCell = document.getElementById('bonusPowerCell');
+        const bonusPowerDock = document.getElementById('bonusPowerDock');
+        const bonusReactorValue = document.getElementById('bonusReactorValue');
 
         // Color Array for assigning consistent dynamic colors based on name
         const nameColors = [
@@ -640,9 +1187,383 @@
             }, 1600);
         }
 
+        function getTodayKey() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function updateBonusBadge() {
+            const badge = document.getElementById('bonusDailyBadge');
+            const hasTodaysValue = bassBonusDate === getTodayKey() && Number.isInteger(bassBonusMultiplier);
+            const hasArmedValue = bonusArmedDate === getTodayKey() && Number.isInteger(armedBonusMultiplier);
+            const currentArmHasBeenRevealed = hasTodaysValue && hasArmedValue && bassBonusMultiplier === armedBonusMultiplier;
+            badge.classList.toggle('hidden', !hasTodaysValue);
+            badge.classList.toggle('flex', hasTodaysValue);
+            if (hasTodaysValue) document.getElementById('bonusBadgeValue').textContent = bassBonusMultiplier;
+
+            const launchButton = document.getElementById('bonusLaunchButton');
+            launchButton.disabled = !hasArmedValue;
+            launchButton.classList.toggle('is-ready', hasArmedValue);
+            launchButton.title = hasArmedValue
+                ? 'Open the student Bass Bonus experience'
+                : 'The teacher needs to arm today’s multiplier first';
+            document.getElementById('bonusLaunchState').textContent = hasArmedValue
+                ? (currentArmHasBeenRevealed ? 'Replay' : 'Ready')
+                : 'Standby';
+
+            const currentValue = document.getElementById('bonusCurrentValue');
+            if (hasArmedValue && hasTodaysValue) currentValue.textContent = `Armed ×${armedBonusMultiplier} · Live ×${bassBonusMultiplier}`;
+            else if (hasArmedValue) currentValue.textContent = `Armed at ×${armedBonusMultiplier} · Not revealed yet`;
+            else currentValue.textContent = 'No value armed today';
+        }
+
+        function openBonusTeacherPanel() {
+            closePopover();
+            updateBonusBadge();
+            bonusTargetInput.value = bonusArmedDate === getTodayKey() && Number.isInteger(armedBonusMultiplier)
+                ? armedBonusMultiplier
+                : '';
+            document.getElementById('bonusTeacherError').classList.add('hidden');
+            bonusTeacherModal.classList.remove('hidden');
+            bonusTeacherModal.classList.add('flex');
+            setTimeout(() => bonusTargetInput.focus(), 50);
+        }
+
+        function closeBonusTeacherPanel() {
+            bonusTeacherModal.classList.add('hidden');
+            bonusTeacherModal.classList.remove('flex');
+        }
+
+        function armBonusMachine() {
+            const target = Number(bonusTargetInput.value);
+            if (!Number.isInteger(target) || target < 1 || target > 1000) {
+                document.getElementById('bonusTeacherError').classList.remove('hidden');
+                bonusTargetInput.focus();
+                return;
+            }
+
+            armedBonusMultiplier = target;
+            bonusArmedDate = getTodayKey();
+            pendingBonusMultiplier = target;
+            updateBonusBadge();
+            saveData();
+            closeBonusTeacherPanel();
+        }
+
+        function clearBonusForToday() {
+            bassBonusMultiplier = null;
+            bassBonusDate = null;
+            armedBonusMultiplier = null;
+            bonusArmedDate = null;
+            pendingBonusMultiplier = null;
+            updateBonusBadge();
+            saveData();
+        }
+
+        function clearBonusAnimationTimers() {
+            bonusSpinIntervals.forEach(clearInterval);
+            bonusRevealTimers.forEach(clearTimeout);
+            bonusSpinIntervals = [];
+            bonusRevealTimers = [];
+            stopBonusWindupSound();
+        }
+
+        function setBonusReactorValue(value) {
+            bonusReactorValue.textContent = `×${value}`;
+            bonusReactorValue.classList.toggle('is-long', String(value).length >= 3);
+            bonusReactorValue.classList.toggle('is-very-long', String(value).length >= 4);
+        }
+
+        function openBonusStage() {
+            const hasArmedValue = bonusArmedDate === getTodayKey() && Number.isInteger(armedBonusMultiplier);
+            if (!hasArmedValue) return;
+            pendingBonusMultiplier = armedBonusMultiplier;
+            clearBonusAnimationTimers();
+            bonusRevealInProgress = false;
+            bonusStage.classList.remove('has-result');
+            bonusMachine.classList.remove('is-spinning', 'is-settling', 'is-winner');
+            bonusPowerTransfer.classList.remove('is-complete');
+            bonusPowerCell.classList.remove('is-dragging', 'is-docked');
+            bonusPowerCell.style.setProperty('--cell-x', '0px');
+            bonusPowerCell.style.setProperty('--cell-y', '0px');
+            bonusPowerCell.disabled = false;
+            bonusPowerDock.classList.remove('is-near', 'is-charged');
+            setBonusReactorValue('?');
+            bonusReactorValue.style.animation = '';
+            document.getElementById('bonusStageStatus').textContent = 'Power the reactor to begin!';
+            const transferHint = document.getElementById('bonusTransferHint');
+            transferHint.innerHTML = '<i class="fa-solid fa-hand-pointer"></i> Drag the power cell into the reactor dock';
+            transferHint.classList.remove('hidden');
+            document.getElementById('bonusResultCard').classList.add('hidden');
+            document.getElementById('bonusStageClose').classList.remove('hidden');
+            bonusStage.classList.remove('hidden');
+            bonusStage.classList.add('flex');
+            bonusStage.scrollTop = 0;
+            bonusPowerCell.focus();
+        }
+
+        function closeBonusStage() {
+            clearBonusAnimationTimers();
+            bonusRevealInProgress = false;
+            bonusStage.classList.add('hidden');
+            bonusStage.classList.remove('flex');
+            bonusStage.classList.remove('has-result');
+            bonusMachine.classList.remove('is-spinning', 'is-settling', 'is-winner');
+        }
+
+        function randomReactorValue() {
+            return Math.floor(Math.random() * 1000) + 1;
+        }
+
+        function playBonusTick(channel = 0) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            if (!pointsAudioContext) pointsAudioContext = new AudioContext();
+            if (pointsAudioContext.state === 'suspended') pointsAudioContext.resume().catch(() => {});
+
+            const now = pointsAudioContext.currentTime;
+            const oscillator = pointsAudioContext.createOscillator();
+            const gain = pointsAudioContext.createGain();
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(150 + channel * 28, now);
+            gain.gain.setValueAtTime(.018, now);
+            gain.gain.exponentialRampToValueAtTime(.0001, now + .045);
+            oscillator.connect(gain);
+            gain.connect(pointsAudioContext.destination);
+            oscillator.start(now);
+            oscillator.stop(now + .05);
+        }
+
+        function startBonusWindupSound() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            stopBonusWindupSound();
+            if (!pointsAudioContext) pointsAudioContext = new AudioContext();
+            if (pointsAudioContext.state === 'suspended') pointsAudioContext.resume().catch(() => {});
+
+            const now = pointsAudioContext.currentTime;
+            const master = pointsAudioContext.createGain();
+            const filter = pointsAudioContext.createBiquadFilter();
+            const lowOscillator = pointsAudioContext.createOscillator();
+            const highOscillator = pointsAudioContext.createOscillator();
+
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(480, now);
+            filter.frequency.exponentialRampToValueAtTime(2800, now + 4.2);
+            master.gain.setValueAtTime(.0001, now);
+            master.gain.exponentialRampToValueAtTime(.045, now + .16);
+            master.gain.exponentialRampToValueAtTime(.085, now + 4.15);
+
+            lowOscillator.type = 'sawtooth';
+            lowOscillator.frequency.setValueAtTime(72, now);
+            lowOscillator.frequency.exponentialRampToValueAtTime(185, now + 4.2);
+            highOscillator.type = 'sine';
+            highOscillator.frequency.setValueAtTime(145, now);
+            highOscillator.frequency.exponentialRampToValueAtTime(520, now + 4.2);
+
+            lowOscillator.connect(filter);
+            highOscillator.connect(filter);
+            filter.connect(master);
+            master.connect(pointsAudioContext.destination);
+            lowOscillator.start(now);
+            highOscillator.start(now);
+            bonusWindupAudio = { master, oscillators: [lowOscillator, highOscillator] };
+        }
+
+        function stopBonusWindupSound() {
+            if (!bonusWindupAudio || !pointsAudioContext) return;
+            const now = pointsAudioContext.currentTime;
+            const { master, oscillators } = bonusWindupAudio;
+            master.gain.cancelScheduledValues(now);
+            master.gain.setValueAtTime(Math.max(master.gain.value, .0001), now);
+            master.gain.exponentialRampToValueAtTime(.0001, now + .12);
+            oscillators.forEach(oscillator => {
+                try { oscillator.stop(now + .14); } catch (_) {}
+            });
+            bonusWindupAudio = null;
+        }
+
+        function playBonusFanfare() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            if (!pointsAudioContext) pointsAudioContext = new AudioContext();
+            const now = pointsAudioContext.currentTime;
+            const notes = [261.63, 329.63, 392, 523.25, 659.25, 783.99];
+
+            notes.forEach((frequency, index) => {
+                const oscillator = pointsAudioContext.createOscillator();
+                const gain = pointsAudioContext.createGain();
+                const start = now + (index < 3 ? index * .08 : .36 + (index - 3) * .035);
+                oscillator.type = index < 3 ? 'triangle' : 'sine';
+                oscillator.frequency.setValueAtTime(frequency, start);
+                gain.gain.setValueAtTime(.0001, start);
+                gain.gain.exponentialRampToValueAtTime(.11, start + .025);
+                gain.gain.exponentialRampToValueAtTime(.0001, start + .55);
+                oscillator.connect(gain);
+                gain.connect(pointsAudioContext.destination);
+                oscillator.start(start);
+                oscillator.stop(start + .58);
+            });
+        }
+
+        function fireBonusConfetti() {
+            if (typeof confetti !== 'function') return;
+            const end = Date.now() + 3200;
+            const colors = ['#fde047', '#fb7185', '#22d3ee', '#c084fc', '#ffffff'];
+            (function frame() {
+                confetti({ particleCount: 7, angle: 62, spread: 70, startVelocity: 48, origin: { x: 0, y: .72 }, colors });
+                confetti({ particleCount: 7, angle: 118, spread: 70, startVelocity: 48, origin: { x: 1, y: .72 }, colors });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        }
+
+        function startBonusReveal() {
+            if (bonusRevealInProgress || !Number.isInteger(pendingBonusMultiplier)) return;
+            bonusRevealInProgress = true;
+            bonusPowerCell.blur();
+            bonusPowerCell.disabled = true;
+            bonusPowerTransfer.classList.add('is-complete');
+            document.getElementById('bonusTransferHint').classList.add('hidden');
+            document.getElementById('bonusStageStatus').textContent = 'Multiplier reactor activated!';
+            bonusMachine.classList.add('is-spinning');
+            startBonusWindupSound();
+
+            bonusSpinIntervals[0] = setInterval(() => {
+                setBonusReactorValue(randomReactorValue());
+                playBonusTick(0);
+            }, 78);
+
+            bonusRevealTimers.push(setTimeout(() => {
+                bonusMachine.classList.add('is-settling');
+                document.getElementById('bonusStageStatus').textContent = 'Locking in today’s value…';
+            }, 2300));
+
+            bonusRevealTimers.push(setTimeout(() => {
+                clearInterval(bonusSpinIntervals[0]);
+                bonusReactorValue.style.animation = 'none';
+                setBonusReactorValue(pendingBonusMultiplier);
+                bonusReactorValue.parentElement.animate(
+                    [
+                        { transform: 'scale(.82)', filter: 'brightness(2.2)' },
+                        { transform: 'scale(1.08)', filter: 'brightness(1.5)' },
+                        { transform: 'scale(1)', filter: 'brightness(1)' }
+                    ],
+                    { duration: 650, easing: 'cubic-bezier(.2,1.4,.3,1)' }
+                );
+            }, 4050));
+
+            bonusRevealTimers.push(setTimeout(() => {
+                bonusMachine.classList.remove('is-spinning', 'is-settling');
+                bonusMachine.classList.add('is-winner');
+                stopBonusWindupSound();
+                document.getElementById('bonusStageStatus').textContent = 'Bass Bonus multiplier confirmed!';
+                document.getElementById('bonusResultValue').textContent = pendingBonusMultiplier;
+                document.getElementById('bonusResultCard').classList.remove('hidden');
+                bonusStage.classList.add('has-result');
+                requestAnimationFrame(() => { bonusStage.scrollTop = 0; });
+
+                bassBonusMultiplier = pendingBonusMultiplier;
+                bassBonusDate = getTodayKey();
+                updateBonusBadge();
+                saveData();
+                playBonusFanfare();
+                fireBonusConfetti();
+                bonusRevealInProgress = false;
+            }, 4400));
+        }
+
+        function setupBonusPowerCellListeners() {
+            let startX = 0;
+            let startY = 0;
+            let pointerActive = false;
+            let suppressClick = false;
+            let dragProgress = 0;
+
+            const resetPowerCell = () => {
+                bonusPowerCell.classList.remove('is-dragging');
+                bonusPowerCell.style.setProperty('--cell-x', '0px');
+                bonusPowerCell.style.setProperty('--cell-y', '0px');
+                bonusPowerDock.classList.remove('is-near');
+            };
+
+            const dockPowerCell = () => {
+                if (bonusRevealInProgress || bonusPowerCell.disabled) return;
+                const targetX = bonusPowerDock.offsetLeft + (bonusPowerDock.offsetWidth / 2) - bonusPowerCell.offsetLeft - (bonusPowerCell.offsetWidth / 2);
+                const targetY = bonusPowerDock.offsetTop + (bonusPowerDock.offsetHeight / 2) - bonusPowerCell.offsetTop - (bonusPowerCell.offsetHeight / 2);
+                bonusPowerCell.classList.remove('is-dragging');
+                bonusPowerCell.classList.add('is-docked');
+                bonusPowerCell.style.setProperty('--cell-x', `${targetX}px`);
+                bonusPowerCell.style.setProperty('--cell-y', `${targetY}px`);
+                bonusPowerCell.disabled = true;
+                bonusPowerDock.classList.remove('is-near');
+                bonusPowerDock.classList.add('is-charged');
+                document.getElementById('bonusStageStatus').textContent = 'Power cell connected!';
+                document.getElementById('bonusTransferHint').innerHTML = '<i class="fa-solid fa-circle-check"></i> Connection successful — charging reactor';
+                playBonusTick(8);
+                bonusRevealTimers.push(setTimeout(startBonusReveal, 650));
+            };
+
+            bonusPowerCell.addEventListener('pointerdown', (event) => {
+                if (bonusRevealInProgress) return;
+                event.preventDefault();
+                pointerActive = true;
+                suppressClick = false;
+                dragProgress = 0;
+                startX = event.clientX;
+                startY = event.clientY;
+                bonusPowerCell.classList.add('is-dragging');
+                bonusPowerCell.setPointerCapture(event.pointerId);
+            });
+
+            bonusPowerCell.addEventListener('pointermove', (event) => {
+                if (!pointerActive || bonusRevealInProgress) return;
+                event.preventDefault();
+                const maxX = bonusPowerTransfer.clientWidth - bonusPowerCell.offsetWidth - 20;
+                const x = Math.max(0, Math.min(maxX, event.clientX - startX));
+                const y = Math.max(-7, Math.min(7, event.clientY - startY));
+                dragProgress = maxX > 0 ? x / maxX : 0;
+                if (x > 5 || Math.abs(y) > 4) suppressClick = true;
+                bonusPowerCell.style.setProperty('--cell-x', `${x}px`);
+                bonusPowerCell.style.setProperty('--cell-y', `${y}px`);
+
+                const cellRect = bonusPowerCell.getBoundingClientRect();
+                const dockRect = bonusPowerDock.getBoundingClientRect();
+                const nearDock = cellRect.right >= dockRect.left - 28 && cellRect.left <= dockRect.right;
+                bonusPowerDock.classList.toggle('is-near', nearDock);
+            });
+
+            const releasePowerCell = () => {
+                if (!pointerActive) return;
+                pointerActive = false;
+                const cellRect = bonusPowerCell.getBoundingClientRect();
+                const dockRect = bonusPowerDock.getBoundingClientRect();
+                const overlapsDock = cellRect.right >= dockRect.left && cellRect.left <= dockRect.right && cellRect.bottom >= dockRect.top && cellRect.top <= dockRect.bottom;
+                if (overlapsDock || dragProgress >= .72) dockPowerCell();
+                else resetPowerCell();
+                setTimeout(() => { suppressClick = false; }, 0);
+            };
+
+            bonusPowerCell.addEventListener('pointerup', releasePowerCell);
+            bonusPowerCell.addEventListener('pointercancel', () => {
+                pointerActive = false;
+                if (dragProgress >= .72) dockPowerCell();
+                else resetPowerCell();
+            });
+            bonusPowerCell.addEventListener('click', () => {
+                if (!suppressClick) dockPowerCell();
+            });
+        }
+
         // --- Initialization ---
         function init() {
             setupInputListeners();
+            setupBonusPowerCellListeners();
+            updateBonusBadge();
+
+            window.setInterval(updateBonusBadge, 60000);
             
             // Close popovers and custom menus when clicking outside
             document.addEventListener('click', (e) => {
@@ -655,6 +1576,13 @@
                     trophyMenu.classList.add('hidden');
                 }
             });
+            document.addEventListener('keydown', (e) => {
+                if (e.shiftKey && e.key.toLowerCase() === 'b') openBonusTeacherPanel();
+                if (e.key === 'Escape' && !bonusRevealInProgress) {
+                    closeBonusTeacherPanel();
+                    closeBonusStage();
+                }
+            });
             // Connect to Firebase realtime updates
             signInAnonymously(auth).then(() => {
                 const docRef = doc(db, "leaderboard", "current_week");
@@ -663,7 +1591,20 @@
                         const data = docSnap.data();
                         students = data.students || [];
                         topWinnersCount = data.topWinnersCount || 0;
+                        const storedMultiplier = Number(data.bassBonusMultiplier);
+                        bassBonusMultiplier = Number.isInteger(storedMultiplier) ? storedMultiplier : null;
+                        bassBonusDate = typeof data.bassBonusDate === 'string' ? data.bassBonusDate : null;
+                        const storedArmedMultiplier = Number(data.armedBonusMultiplier);
+                        armedBonusMultiplier = Number.isInteger(storedArmedMultiplier) ? storedArmedMultiplier : null;
+                        bonusArmedDate = typeof data.bonusArmedDate === 'string' ? data.bonusArmedDate : null;
+
+                        // Backwards compatibility for a value revealed before the separate launch control existed.
+                        if (bonusArmedDate !== getTodayKey() && bassBonusDate === getTodayKey() && Number.isInteger(bassBonusMultiplier)) {
+                            armedBonusMultiplier = bassBonusMultiplier;
+                            bonusArmedDate = bassBonusDate;
+                        }
                         updateTopXUI(topWinnersCount); // Sync UI
+                        updateBonusBadge();
                         
                         if (students.length > 0) {
                             sortStudents();
@@ -672,6 +1613,11 @@
                     } else {
                         students = [];
                         topWinnersCount = 0;
+                        bassBonusMultiplier = null;
+                        bassBonusDate = null;
+                        armedBonusMultiplier = null;
+                        bonusArmedDate = null;
+                        updateBonusBadge();
                     }
                     renderLeaderboard();
                 });
@@ -685,7 +1631,11 @@
             if (auth.currentUser) {
                 setDoc(doc(db, "leaderboard", "current_week"), { 
                     students: students,
-                    topWinnersCount: topWinnersCount 
+                    topWinnersCount: topWinnersCount,
+                    bassBonusMultiplier: bassBonusMultiplier,
+                    bassBonusDate: bassBonusDate,
+                    armedBonusMultiplier: armedBonusMultiplier,
+                    bonusArmedDate: bonusArmedDate
                 }, { merge: true });
             }
         }
@@ -735,7 +1685,14 @@
                     e.preventDefault();
                     applyCustomUpdate('add');
                 }
-            })
+            });
+
+            bonusTargetInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    armBonusMachine();
+                }
+            });
         }
         function sortStudents() {
             students.sort((a, b) => b.points - a.points);
@@ -1090,6 +2047,12 @@
         window.confirmDeleteStudent = confirmDeleteStudent;
         window.toggleTrophyMenu = toggleTrophyMenu;
         window.selectTopX = selectTopX;
+        window.openBonusTeacherPanel = openBonusTeacherPanel;
+        window.closeBonusTeacherPanel = closeBonusTeacherPanel;
+        window.armBonusMachine = armBonusMachine;
+        window.clearBonusForToday = clearBonusForToday;
+        window.openBonusStage = openBonusStage;
+        window.closeBonusStage = closeBonusStage;
 
         // Boot app
         init();
