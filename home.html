@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Term 3 Calendar | Ambient Edition</title>
+    <title>School Calendar | Ambient Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -134,9 +134,186 @@
         .grid-rows-1 { grid-template-rows: 1fr; }
         
         input:focus, textarea:focus { outline: none; }
+
+        .mobile-only { display: none; }
+
+        @media (max-width: 767px), (max-height: 500px) and (pointer: coarse) {
+            body {
+                flex-direction: column !important;
+                position: relative;
+                inset: auto;
+                width: 100%;
+                height: auto;
+                min-height: 100vh;
+                min-height: 100dvh;
+                overflow-x: hidden;
+                overflow-y: auto;
+                padding-bottom: calc(76px + env(safe-area-inset-bottom)) !important;
+            }
+
+            .mobile-only { display: flex; }
+            body[data-mobile-panel="calendar"] > aside { display: none; }
+            body[data-mobile-panel="tools"] > main { display: none; }
+
+            body > main, body > aside {
+                box-sizing: border-box;
+                width: 100%;
+                max-width: 100%;
+                height: auto !important;
+                min-height: calc(100dvh - 92px);
+                overflow: hidden;
+            }
+
+            body > main > .calendar-scroll {
+                flex: none;
+                overflow: visible;
+                padding: 12px;
+            }
+
+            #calendar-weekdays { display: none; }
+
+            #term-grid {
+                display: flex;
+                flex-direction: column;
+                height: auto;
+                gap: 0;
+            }
+
+            #term-grid > .term-week-row {
+                display: flex;
+                flex-direction: column;
+                height: auto;
+                gap: 9px;
+            }
+
+            #term-grid > .term-week-row.mobile-week-hidden { display: none; }
+
+            #term-grid .term-week-label { display: none; }
+
+            #term-grid .calendar-cell {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto;
+                grid-template-areas: "date actions" "events events";
+                align-content: start;
+                column-gap: 8px;
+                row-gap: 8px;
+                min-height: 94px;
+                padding: 12px 14px;
+                border-radius: 18px;
+                overflow: visible;
+            }
+
+            #term-grid .calendar-date {
+                grid-area: date;
+                position: static;
+                display: flex;
+                align-items: baseline;
+                gap: 8px;
+                padding: 0;
+                background: transparent;
+                backdrop-filter: none;
+                font-size: 11px;
+                line-height: 1.4;
+                opacity: 1;
+            }
+
+            #term-grid .calendar-day-name {
+                display: inline;
+                font-family: 'Outfit', sans-serif;
+                font-size: 15px;
+                font-weight: 700;
+                color: rgb(15 23 42);
+            }
+
+            .dark #term-grid .calendar-day-name { color: rgb(244 244 245); }
+
+            #term-grid .calendar-cell-actions {
+                grid-area: actions;
+                position: static;
+                display: flex;
+                gap: 5px;
+                opacity: 1;
+            }
+
+            #term-grid .calendar-cell-actions a,
+            #term-grid .calendar-cell-actions button {
+                width: 30px;
+                height: 30px;
+                border-radius: 9px;
+                font-size: 12px;
+            }
+
+            #term-grid .calendar-events {
+                grid-area: events;
+                display: flex;
+                gap: 5px;
+                min-height: 0;
+                overflow: visible;
+            }
+
+            #term-grid .calendar-event-button {
+                min-height: 29px;
+                padding: 5px 9px;
+                flex-shrink: 0;
+            }
+
+            #term-grid .calendar-event-button span { font-size: 11px; }
+
+            body > aside > .flex-1 { overflow: visible; }
+            #sidebar-todos-list { overflow: visible; min-height: 180px; }
+
+            .mobile-tabs {
+                position: fixed;
+                z-index: 90;
+                left: 8px;
+                right: 8px;
+                bottom: calc(8px + env(safe-area-inset-bottom));
+                height: 58px;
+                padding: 5px;
+                border: 1px solid rgba(var(--color-border) / .75);
+                border-radius: 18px;
+                background: rgba(var(--color-surface) / .94);
+                box-shadow: 0 12px 36px rgba(0,0,0,.16);
+                backdrop-filter: blur(18px);
+            }
+
+            .mobile-tabs button {
+                flex: 1;
+                border-radius: 13px;
+                color: #64748b;
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+            .mobile-tabs button[aria-current="page"] {
+                color: #059669;
+                background: rgba(16,185,129,.12);
+            }
+
+            .dark .mobile-tabs button { color: #a1a1aa; }
+            .dark .mobile-tabs button[aria-current="page"] { color: #6ee7b7; }
+
+            #modal-add-event, #modal-event-detail {
+                padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
+            }
+
+            #modal-add-event > div, #modal-event-detail > div {
+                height: min(100%, 720px);
+                max-height: 100%;
+                border-radius: 22px;
+            }
+
+            #detail-modal-container > div:last-child {
+                flex-wrap: wrap;
+                padding: 12px 16px;
+                gap: 8px;
+            }
+
+            #detail-modal-container > div:last-child button { min-height: 40px; }
+        }
     </style>
 </head>
-<body class="p-2 gap-2 flex flex-col md:flex-row transition-colors duration-500">
+<body data-mobile-panel="calendar" class="p-2 gap-2 flex flex-col md:flex-row transition-colors duration-500">
     <div class="ambient-bg"></div>
     <div id="toast-container" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none font-sans"></div>
 
@@ -148,7 +325,7 @@
                 </div>
                 <div>
                     <h1 class="text-lg font-outfit font-bold leading-tight tracking-tight text-slate-900 dark:text-white">Workspace</h1>
-                    <p class="text-[10px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest mt-0.5">Term 3</p>
+                    <p id="workspace-term" class="text-[10px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest mt-0.5">Current term</p>
                 </div>
             </div>
             
@@ -218,10 +395,31 @@
     </aside>
 
     <main class="relative z-10 flex-1 flex flex-col glass rounded-2xl shadow-xl overflow-hidden min-w-0 h-[calc(100vh-1rem)] md:h-full">
+        <div class="mobile-only items-center justify-between px-4 pt-4 pb-1">
+            <div>
+                <p class="text-[10px] font-bold uppercase tracking-[.18em] text-emerald-600 dark:text-emerald-400">Workspace</p>
+                <div class="flex items-center gap-2">
+                    <h1 class="font-outfit text-2xl font-bold text-slate-900 dark:text-white">Calendar</h1>
+                    <div class="calendar-term-control relative">
+                        <button type="button" onclick="toggleCalendarTermMenu(this)" aria-label="Choose calendar term" aria-haspopup="true" aria-expanded="false" class="calendar-term-button inline-flex h-8 items-center gap-1 rounded-lg px-2 text-[11px] font-semibold text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"><span class="calendar-term-label">T4</span><i class="fa-solid fa-chevron-down text-[8px]"></i></button>
+                        <div class="calendar-term-menu hidden absolute left-0 top-full mt-1 z-50 min-w-36 rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-1 shadow-xl shadow-slate-900/10 dark:shadow-black/30"></div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" onclick="toggleTheme()" class="h-10 w-10 rounded-xl bg-white/80 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 flex items-center justify-center border border-slate-200/70 dark:border-zinc-700" aria-label="Toggle theme"><i class="fa-solid fa-moon theme-icon-class text-sm"></i></button>
+        </div>
+        <span id="calendar-status" class="sr-only" role="status" aria-live="polite">Current term</span>
+        <div id="mobile-week-nav" class="mobile-only items-center justify-between gap-3 px-4 py-2 border-y border-slate-200/50 dark:border-zinc-800/70">
+            <button id="mobile-previous-week" type="button" onclick="changeMobileWeek(-1)" aria-label="Previous week" class="h-10 w-10 shrink-0 rounded-xl border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 flex items-center justify-center disabled:opacity-30"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+            <div class="min-w-0 text-center"><div id="mobile-week-title" class="font-outfit text-base font-bold text-slate-900 dark:text-white">Week 1</div><div id="mobile-week-dates" class="text-[11px] text-slate-500 dark:text-zinc-400"></div></div>
+            <button id="mobile-next-week" type="button" onclick="changeMobileWeek(1)" aria-label="Next week" class="h-10 w-10 shrink-0 rounded-xl border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 flex items-center justify-center disabled:opacity-30"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+        </div>
         
-        <div class="grid grid-cols-term gap-3 shrink-0 border-b border-slate-200/50 dark:border-zinc-800/50 bg-white/50 dark:bg-zinc-900/50">
-            <div class="flex items-center justify-center py-2 border-r border-slate-200/50 dark:border-zinc-800/50">
+        <div id="calendar-weekdays" class="grid grid-cols-term gap-3 shrink-0 border-b border-slate-200/50 dark:border-zinc-800/50 bg-white/50 dark:bg-zinc-900/50">
+            <div class="calendar-term-control relative z-40 flex items-center justify-center gap-0.5 py-2 border-r border-slate-200/50 dark:border-zinc-800/50">
                 <span class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Wk</span>
+                <button type="button" onclick="toggleCalendarTermMenu(this)" aria-label="Choose calendar term" aria-haspopup="true" aria-expanded="false" title="Choose calendar term" class="calendar-term-button inline-flex h-5 w-5 items-center justify-center rounded-md text-slate-400 dark:text-zinc-500 hover:bg-slate-100 dark:hover:bg-zinc-800 hover:text-emerald-600 dark:hover:text-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"><i class="fa-solid fa-chevron-down text-[8px]"></i></button>
+                <div class="calendar-term-menu hidden absolute left-0 top-full mt-1 z-50 min-w-36 rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-1 shadow-xl shadow-slate-900/10 dark:shadow-black/30"></div>
             </div>
             <div class="py-2 flex items-center justify-center text-xs font-outfit font-bold text-slate-800 dark:text-slate-200">Monday</div>
             <div class="py-2 flex items-center justify-center text-xs font-outfit font-bold text-slate-800 dark:text-slate-200">Tuesday</div>
@@ -230,12 +428,17 @@
             <div class="py-2 flex items-center justify-center text-xs font-outfit font-bold text-slate-800 dark:text-slate-200">Friday</div>
         </div>
 
-        <div class="flex-1 overflow-hidden py-3 px-2 custom-scrollbar bg-slate-50/60 dark:bg-[#131315]">
+        <div class="calendar-scroll flex-1 overflow-hidden py-3 px-2 custom-scrollbar bg-slate-50/60 dark:bg-[#131315]">
             <div class="grid grid-rows-10 gap-2 h-full min-h-0" id="term-grid">
                 <!-- Injected via JS -->
             </div>
         </div>
     </main>
+
+    <nav class="mobile-tabs mobile-only" aria-label="Mobile navigation">
+        <button id="mobile-calendar-tab" type="button" onclick="showMobilePanel('calendar')" aria-current="page" class="flex items-center justify-center gap-2"><i class="fa-regular fa-calendar"></i> Calendar</button>
+        <button id="mobile-tools-tab" type="button" onclick="showMobilePanel('tools')" class="flex items-center justify-center gap-2"><i class="fa-solid fa-layer-group"></i> Toolkit</button>
+    </nav>
 
     <!-- Add Event Modal -->
     <div id="modal-add-event" class="hidden fixed inset-0 z-[150] items-center justify-center p-4 bg-slate-900/40 dark:bg-black/60 backdrop-blur-md transition-opacity">
@@ -451,22 +654,29 @@
             throw lastError;
         };
 
-        // Core Time Logic
+        // Keep these term dates in sync with index.html. Existing document IDs never change.
+        const calendarTerms = [
+            { name: 'Term 1', start: new Date(2026, 0, 28) },
+            { name: 'Term 2', start: new Date(2026, 3, 20) },
+            { name: 'Term 3', start: new Date(2026, 6, 20) },
+            { name: 'Term 4', start: new Date(2026, 9, 12) }
+        ];
+
+        // Resolve weekends before selecting the term, including the weekend before Term 4.
         window.getCurrentSchoolTime = () => {
             const now = new Date();
             now.setHours(0, 0, 0, 0);
-            const terms = [
-                { name: 'Term 1', start: new Date(2026, 0, 28) },
-                { name: 'Term 2', start: new Date(2026, 3, 20) },
-                { name: 'Term 3', start: new Date(2026, 6, 20) },
-                { name: 'Term 4', start: new Date(2026, 9, 12) }
-            ];
+            if (now.getDay() === 6) now.setDate(now.getDate() + 2);
+            else if (now.getDay() === 0) now.setDate(now.getDate() + 1);
+            const terms = calendarTerms;
             let term = terms[0].name, weekNum = 1, curDay = 'Monday';
 
             for (let i = terms.length - 1; i >= 0; i--) {
                 if (now >= terms[i].start) {
                     term = terms[i].name;
-                    const daysDiff = Math.round((now - terms[i].start) / (1000 * 60 * 60 * 24));
+                    const weekStart = new Date(terms[i].start);
+                    weekStart.setDate(weekStart.getDate() - (weekStart.getDay() + 6) % 7);
+                    const daysDiff = Math.round((now - weekStart) / (1000 * 60 * 60 * 24));
                     weekNum = Math.floor(daysDiff / 7) + 1;
                     break;
                 }
@@ -475,18 +685,14 @@
             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             curDay = days[now.getDay()];
 
-            // Fast-forward to next week's Monday on weekends (Saturday/Sunday)
-            if (curDay === 'Saturday' || curDay === 'Sunday') {
-                curDay = 'Monday';
-                weekNum += 1;
-            }
-
             return { term, week: Math.min(Math.max(weekNum, 1), 12), day: curDay };
         };
 
         const schoolTime = window.getCurrentSchoolTime();
-        window.currentWeekNum = schoolTime.term === 'Term 3' && schoolTime.week <= 10 ? schoolTime.week : -1;
+        window.selectedCalendarTerm = schoolTime.term;
+        window.currentWeekNum = schoolTime.week;
         window.currentDayStr = schoolTime.day;
+        document.getElementById('workspace-term').textContent = schoolTime.term;
 
         window.activeTodoTerm = schoolTime.term;
         window.activeTodoWeek = schoolTime.week;
@@ -498,6 +704,11 @@
         window.todosData = [];
         let unsubscribeTodos = null;
         window.termEvents = {};
+        let unsubscribeEvents = null;
+        let eventsLoaded = false;
+        let calendarAuthenticated = false;
+        const eventDocumentId = term => `2026_${term.replaceAll(' ', '')}_Events`;
+        const canEditCalendar = () => eventsLoaded && window.selectedCalendarTerm === window.getCurrentSchoolTime().term;
         window.activeCell = { w: 0, d: 0, id: null };
         
         window.selectedColor = 'indigo';
@@ -514,6 +725,38 @@
         };
 
         const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        let mobileWeekNum = Math.min(schoolTime.week, 10);
+
+        const calendarWeekDate = (termName, week, dayIndex = 0) => {
+            const date = new Date(calendarTerms.find(term => term.name === termName).start);
+            date.setDate(date.getDate() - (date.getDay() + 6) % 7 + (week - 1) * 7 + dayIndex);
+            return date;
+        };
+
+        const updateMobileWeek = () => {
+            const start = calendarWeekDate(window.selectedCalendarTerm, mobileWeekNum);
+            const end = calendarWeekDate(window.selectedCalendarTerm, mobileWeekNum, 4);
+            const month = date => date.toLocaleString('en-AU', { month: 'short' });
+            document.getElementById('mobile-week-title').textContent = `Week ${mobileWeekNum}`;
+            document.getElementById('mobile-week-dates').textContent = `${start.getDate()} ${month(start)} – ${end.getDate()} ${month(end)}`;
+            document.getElementById('mobile-previous-week').disabled = mobileWeekNum === 1;
+            document.getElementById('mobile-next-week').disabled = mobileWeekNum === 10;
+        };
+
+        window.changeMobileWeek = direction => {
+            mobileWeekNum = Math.min(10, Math.max(1, mobileWeekNum + direction));
+            updateMobileWeek();
+            renderGrid();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.showMobilePanel = panel => {
+            if (panel !== 'calendar' && panel !== 'tools') return;
+            document.body.dataset.mobilePanel = panel;
+            document.getElementById('mobile-calendar-tab').setAttribute('aria-current', panel === 'calendar' ? 'page' : 'false');
+            document.getElementById('mobile-tools-tab').setAttribute('aria-current', panel === 'tools' ? 'page' : 'false');
+            window.scrollTo({ top: 0, behavior: 'instant' });
+        };
 
         window.showToast = (msg) => {
             const container = document.getElementById('toast-container');
@@ -670,14 +913,14 @@
             grid.innerHTML = '';
 
             for (let w = 0; w < 10; w++) {
-                const isCurrentWeek = (w + 1) === window.currentWeekNum;
+                const isCurrentWeek = window.selectedCalendarTerm === schoolTime.term && (w + 1) === window.currentWeekNum;
                 const row = document.createElement('div');
                 
                 let rowClasses = "grid grid-cols-term gap-2.5 h-full min-h-0 w-full group/row ";
-                row.className = rowClasses;
+                row.className = `${rowClasses} term-week-row${w + 1 === mobileWeekNum ? '' : ' mobile-week-hidden'}`;
 
                 const weekLabel = document.createElement('div');
-                weekLabel.className = `flex flex-col items-center justify-center rounded-2xl transition-all min-h-0 ${isCurrentWeek ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-100 dark:bg-zinc-800/50 text-slate-500 dark:text-zinc-400'}`;
+                weekLabel.className = `term-week-label flex flex-col items-center justify-center rounded-2xl transition-all min-h-0 ${isCurrentWeek ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-100 dark:bg-zinc-800/50 text-slate-500 dark:text-zinc-400'}`;
                 weekLabel.innerHTML = `<span class="text-[9px] font-bold uppercase tracking-wider opacity-70 leading-none">Wk</span><span class="text-base font-outfit font-bold leading-none mt-1">${w + 1}</span>`;
                 row.appendChild(weekLabel);
 
@@ -686,7 +929,7 @@
                     const events = window.termEvents[cellKey] || [];
                     const isCurrentDay = isCurrentWeek && dayNames[d] === window.currentDayStr;
                     
-                    const cellDate = new Date(2026, 6, 20 + (w * 7) + d);
+                    const cellDate = calendarWeekDate(window.selectedCalendarTerm, w + 1, d);
                     const dateStr = cellDate.getDate() + ' ' + cellDate.toLocaleString('en-US', { month: 'short' });
                     
                     const cell = document.createElement('div');
@@ -698,18 +941,18 @@
                     } else {
                         cellClasses += "bg-white/60 dark:bg-zinc-900/40 border-slate-200/60 dark:border-zinc-800/60 hover:bg-white dark:hover:bg-zinc-900 hover:shadow-md hover:border-slate-300 dark:hover:border-zinc-700 ";
                     }
-                    cell.className = cellClasses;
+                    cell.className = `${cellClasses} calendar-cell`;
 
-                    const absoluteLink = `https://paulpbou.github.io/timetable-hub/index.html#Term%203/Week%20${w + 1}/${dayNames[d]}`;
+                    const absoluteLink = `index.html#${encodeURIComponent(window.selectedCalendarTerm)}/Week%20${w + 1}/${dayNames[d]}`;
                     
                     cell.innerHTML += `
-                        <span class="absolute bottom-1 right-1 z-40 text-[8px] font-medium pointer-events-none opacity-70 ${isCurrentDay ? 'text-emerald-600 dark:text-emerald-400 bg-white/40 dark:bg-zinc-900/40' : 'text-slate-500 dark:text-zinc-400 bg-white/30 dark:bg-zinc-900/30'} rounded backdrop-blur-[2px] px-1 py-0.5 leading-none">${dateStr}</span>
+                        <span class="calendar-date absolute bottom-1 right-1 z-40 text-[8px] font-medium pointer-events-none opacity-70 ${isCurrentDay ? 'text-emerald-600 dark:text-emerald-400 bg-white/40 dark:bg-zinc-900/40' : 'text-slate-500 dark:text-zinc-400 bg-white/30 dark:bg-zinc-900/30'} rounded backdrop-blur-[2px] px-1 py-0.5 leading-none"><span class="calendar-day-name mobile-only">${dayNames[d]}</span>${dateStr}</span>
                         
-                        <div class="absolute top-1 right-1 z-30 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <a href="${absoluteLink}" target="_blank" class="w-5 h-5 rounded-md bg-white/90 dark:bg-zinc-800/90 hover:bg-slate-200 dark:hover:bg-zinc-700 flex items-center justify-center text-slate-500 transition-colors shadow-sm pointer-events-auto backdrop-blur-sm" title="Open Timetable">
+                        <div class="calendar-cell-actions absolute top-1 right-1 z-30 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a href="${absoluteLink}" target="_blank" aria-label="Open ${dayNames[d]} Week ${w + 1} timetable" class="w-5 h-5 rounded-md bg-white/90 dark:bg-zinc-800/90 hover:bg-slate-200 dark:hover:bg-zinc-700 flex items-center justify-center text-slate-500 transition-colors shadow-sm pointer-events-auto backdrop-blur-sm" title="Open Timetable">
                                 <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
                             </a>
-                            <button onclick="openAddModal(${w}, ${d})" class="w-5 h-5 rounded-md bg-emerald-50/90 hover:bg-emerald-100 dark:bg-emerald-500/40 dark:hover:bg-emerald-500/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center transition-colors shadow-sm pointer-events-auto backdrop-blur-sm" title="Add Event">
+                            <button onclick="openAddModal(${w}, ${d})" aria-label="Add event to ${dayNames[d]} Week ${w + 1}" class="w-5 h-5 rounded-md bg-emerald-50/90 hover:bg-emerald-100 dark:bg-emerald-500/40 dark:hover:bg-emerald-500/60 text-emerald-600 dark:text-emerald-400 ${canEditCalendar() ? 'flex' : 'hidden'} items-center justify-center transition-colors shadow-sm pointer-events-auto backdrop-blur-sm" title="Add Event">
                                 <i class="fa-solid fa-plus text-[8px]"></i>
                             </button>
                         </div>
@@ -721,7 +964,7 @@
                     if (numEvents >= 4) gapClass = "gap-[1px]";
 
                     const eventsContainer = document.createElement('div');
-                    eventsContainer.className = `flex-1 flex flex-col ${gapClass} min-h-0 overflow-hidden w-full h-full relative z-10`;
+                    eventsContainer.className = `calendar-events flex-1 flex flex-col ${gapClass} min-h-0 overflow-hidden w-full h-full relative z-10`;
                     
                     events.forEach(evt => {
                         const styleKey = evt.color || 'indigo';
@@ -742,7 +985,7 @@
                         }
                         
                         eventsContainer.innerHTML += `
-                        <button onclick="openEventDetail('${evt.id}', ${w}, ${d})" class="w-full text-left px-1.5 ${pyClass} rounded-full border ${styleObj.pill} transition-all hover:scale-[1.02] flex items-center gap-1.5 group/evt shrink min-h-0">
+                        <button onclick="openEventDetail('${evt.id}', ${w}, ${d})" class="calendar-event-button w-full text-left px-1.5 ${pyClass} rounded-full border ${styleObj.pill} transition-all hover:scale-[1.02] flex items-center gap-1.5 group/evt shrink min-h-0">
                             <div class="${dotClass} rounded-full ${styleObj.dot} shrink-0 transition-all"></div>
                             <span class="truncate font-medium ${textClass} flex-1 leading-tight transition-all">${evt.title}</span>
                         </button>`;
@@ -753,9 +996,11 @@
                 }
                 grid.appendChild(row);
             }
+            updateMobileWeek();
         };
 
         window.openAddModal = (w, d) => {
+            if (!canEditCalendar()) return;
             window.activeCell = { w, d, id: null };
             document.getElementById('modal-add-title').innerText = `Week ${w + 1} - ${dayNames[d]}`;
             document.getElementById('new-event-title').value = '';
@@ -834,12 +1079,17 @@
             `;
             
             document.getElementById('edit-detail-desc').value = evt.details;
+            ['btn-delete-event', 'btn-edit-event'].forEach(id => {
+                document.getElementById(id).classList.toggle('hidden', !canEditCalendar());
+                document.getElementById(id).classList.toggle('flex', canEditCalendar());
+            });
             
             document.getElementById('modal-event-detail').classList.remove('hidden');
             document.getElementById('modal-event-detail').classList.add('flex');
         };
 
         window.toggleEditEventMode = () => {
+            if (!canEditCalendar()) return;
             document.getElementById('display-detail-title').classList.add('hidden');
             document.getElementById('edit-detail-title').classList.remove('hidden');
             document.getElementById('display-detail-desc').classList.add('hidden');
@@ -867,6 +1117,7 @@
         };
 
         window.saveEditedEvent = (id, w, d) => {
+            if (!canEditCalendar()) return;
             const cellKey = `${w}-${d}`;
             const events = window.termEvents[cellKey];
             const evtIdx = events.findIndex(e => e.id === id);
@@ -904,6 +1155,7 @@
         };
 
         window.submitNewEvent = () => {
+            if (!canEditCalendar()) return;
             const title = document.getElementById('new-event-title').value.trim();
             const details = document.getElementById('new-event-details').value.trim();
             if (!title) return;
@@ -920,6 +1172,7 @@
         };
 
         window.deleteEvent = (id) => {
+            if (!canEditCalendar()) return;
             const cellKey = `${window.activeCell.w}-${window.activeCell.d}`;
             if (!window.termEvents[cellKey]) return;
             window.termEvents[cellKey] = window.termEvents[cellKey].filter(e => e.id !== id);
@@ -930,19 +1183,89 @@
         };
 
         const syncToFirebase = () => {
-            setDoc(doc(db, "timetables", "2026_Term3_Events"), { events: window.termEvents }, { merge: true }).catch(e => console.error("Sync error", e));
+            if (!canEditCalendar()) return;
+            setDoc(doc(db, "timetables", eventDocumentId(window.selectedCalendarTerm)), { events: window.termEvents }, { merge: true }).catch(e => console.error("Sync error", e));
         };
 
         const loadEventsFromFirebase = () => {
-            onSnapshot(doc(db, "timetables", "2026_Term3_Events"), (docSnap) => {
-                if (docSnap.exists() && docSnap.data().events) window.termEvents = docSnap.data().events;
-                else syncToFirebase(); 
+            if (unsubscribeEvents) unsubscribeEvents();
+            const requestedTerm = window.selectedCalendarTerm;
+            unsubscribeEvents = onSnapshot(doc(db, "timetables", eventDocumentId(requestedTerm)), (docSnap) => {
+                if (requestedTerm !== window.selectedCalendarTerm) return;
+                // Viewing an empty term must never create or overwrite database records.
+                window.termEvents = docSnap.exists() ? (docSnap.data().events || {}) : {};
+                eventsLoaded = true;
+                updateCalendarHeading();
                 renderGrid();
             }, (error) => {
+                if (requestedTerm !== window.selectedCalendarTerm) return;
+                eventsLoaded = false;
+                document.getElementById('calendar-status').textContent = 'Calendar unavailable — reload to retry';
+                renderGrid();
                 console.error('Unable to load calendar events:', error);
                 showToast('Unable to load calendar data');
             });
         };
+
+        const updateCalendarHeading = () => {
+            const isCurrentTerm = window.selectedCalendarTerm === window.getCurrentSchoolTime().term;
+            document.title = `${window.selectedCalendarTerm} Calendar | Ambient Edition`;
+            document.getElementById('workspace-term').textContent = window.selectedCalendarTerm;
+            document.querySelectorAll('.calendar-term-label').forEach(label => {
+                label.textContent = window.selectedCalendarTerm.replace('Term ', 'T');
+            });
+            document.querySelectorAll('.calendar-term-button').forEach(button => {
+                button.title = `${window.selectedCalendarTerm} calendar${isCurrentTerm ? '' : ' · view only'}. Choose term`;
+            });
+            document.getElementById('calendar-status').textContent = eventsLoaded
+                ? (isCurrentTerm ? 'Current term' : 'Previous term · view only')
+                : 'Loading calendar…';
+            document.querySelectorAll('.calendar-term-menu button').forEach(button => {
+                button.setAttribute('aria-current', button.dataset.term === window.selectedCalendarTerm ? 'true' : 'false');
+            });
+        };
+
+        const closeCalendarTermMenu = () => {
+            document.querySelectorAll('.calendar-term-menu').forEach(menu => menu.classList.add('hidden'));
+            document.querySelectorAll('.calendar-term-button').forEach(button => button.setAttribute('aria-expanded', 'false'));
+        };
+
+        window.toggleCalendarTermMenu = button => {
+            const menu = button.closest('.calendar-term-control').querySelector('.calendar-term-menu');
+            const opening = menu.classList.contains('hidden');
+            closeCalendarTermMenu();
+            if (opening) {
+                menu.classList.remove('hidden');
+                button.setAttribute('aria-expanded', 'true');
+            }
+        };
+
+        window.selectCalendarTerm = term => {
+            const currentTermIndex = calendarTerms.findIndex(item => item.name === window.getCurrentSchoolTime().term);
+            if (!calendarTerms.slice(0, currentTermIndex + 1).some(item => item.name === term)) return;
+            closeCalendarTermMenu();
+            closeModals();
+            window.selectedCalendarTerm = term;
+            mobileWeekNum = term === window.getCurrentSchoolTime().term ? Math.min(window.getCurrentSchoolTime().week, 10) : 1;
+            window.termEvents = {};
+            eventsLoaded = false;
+            updateCalendarHeading();
+            renderGrid();
+            if (calendarAuthenticated) loadEventsFromFirebase();
+        };
+
+        const currentTermIndex = calendarTerms.findIndex(term => term.name === schoolTime.term);
+        const calendarTermMenuHTML = calendarTerms.slice(0, currentTermIndex + 1)
+            .map(term => `<button type="button" data-term="${term.name}" onclick="selectCalendarTerm('${term.name}')" class="w-full flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-xs text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 aria-[current=true]:text-emerald-600 dark:aria-[current=true]:text-emerald-400"><span>${term.name}</span>${term.name === schoolTime.term ? '<span class="text-[9px] text-slate-400 dark:text-zinc-500">Now</span>' : ''}</button>`).join('');
+        document.querySelectorAll('.calendar-term-menu').forEach(menu => { menu.innerHTML = calendarTermMenuHTML; });
+        updateCalendarHeading();
+
+        document.addEventListener('click', event => {
+            if (!event.target.closest('.calendar-term-control')) closeCalendarTermMenu();
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') closeCalendarTermMenu();
+        });
 
         const loadTodosFromFirebase = () => {
             if (unsubscribeTodos) unsubscribeTodos();
@@ -1089,11 +1412,13 @@
         }
 
         authenticateWithRetry().then(async () => {
-            await window.autoCarryOverTodos();
+            calendarAuthenticated = true;
             loadEventsFromFirebase();
             loadTodosFromFirebase();
+            await window.autoCarryOverTodos();
         }).catch((e) => {
             console.error("Auth failed:", e);
+            document.getElementById('calendar-status').textContent = 'Calendar unavailable — reload to retry';
             renderGrid();
         });
 

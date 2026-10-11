@@ -1280,10 +1280,13 @@
         };
 
         window.getCurrentSchoolTime = () => {
-            const realNow = new Date();
-            const now = new Date(realNow); 
+            const now = new Date();
             now.setHours(0, 0, 0, 0);
+            // Resolve weekends before selecting the term, including the weekend before Term 4.
+            if (now.getDay() === 6) now.setDate(now.getDate() + 2);
+            else if (now.getDay() === 0) now.setDate(now.getDate() + 1);
             
+            // Keep these term dates in sync with home.html; historical document IDs stay unchanged.
             const terms = [
                 { name: 'Term 1', start: new Date(2026, 0, 28) },
                 { name: 'Term 2', start: new Date(2026, 3, 20) },
@@ -1291,24 +1294,21 @@
                 { name: 'Term 4', start: new Date(2026, 9, 12) }
             ];
             
-            let curTerm = 'Term 2', weekNum = 1;
+            let curTerm = terms[0].name, weekNum = 1;
             
             for(let i = terms.length - 1; i >= 0; i--) {
                 if(now >= terms[i].start) {
                     curTerm = terms[i].name;
-                    const daysDiff = Math.round((now - terms[i].start) / (1000 * 60 * 60 * 24));
+                    const weekStart = new Date(terms[i].start);
+                    weekStart.setDate(weekStart.getDate() - (weekStart.getDay() + 6) % 7);
+                    const daysDiff = Math.round((now - weekStart) / (1000 * 60 * 60 * 24));
                     weekNum = Math.floor(daysDiff / 7) + 1;
                     break;
                 }
             }
             
             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            let curDay = days[realNow.getDay()];
-            
-            if (curDay === 'Saturday' || curDay === 'Sunday') {
-                curDay = 'Monday'; 
-                weekNum += 1;
-            }
+            const curDay = days[now.getDay()];
             
             return { term: curTerm, week: `Week ${Math.min(Math.max(weekNum, 1), 12)}`, day: curDay };
         };
@@ -1345,7 +1345,11 @@
                     window.appState.coverData = docSnap.data().cover || {};
                     window.appState.todosData = docSnap.data().todos || emptyWeekDays();
                 } else {
-                    setDoc(docRef, { days: window.appState.weekData, duties: window.appState.dutyData, cover: {}, todos: window.appState.todosData }, { merge: true });
+                    // Empty weeks are created only when the user saves content, never just by viewing them.
+                    window.appState.weekData = emptyWeekDays();
+                    window.appState.dutyData = emptyDutyDays();
+                    window.appState.coverData = {};
+                    window.appState.todosData = emptyWeekDays();
                 }
                 
                 if (window.appState.view === 'week') renderWeekGrid();
@@ -1356,6 +1360,8 @@
         };
 
         window.autoCarryOverTodos = async (currentDay) => {
+            const currentSchoolTime = window.getCurrentSchoolTime();
+            if (window.appState.term !== currentSchoolTime.term || window.appState.week !== currentSchoolTime.week) return;
             const currentDayIndex = SCHOOL_DAYS.indexOf(currentDay);
             if (currentDayIndex === -1) return;
             const transitions = [];
