@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Behaviour log | Classroom Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;800&display=swap" rel="stylesheet">
+    <script>
+        try { document.documentElement.classList.toggle('dark', localStorage.theme === 'dark' || (!localStorage.theme && matchMedia('(prefers-color-scheme: dark)').matches)); } catch {}
+    </script>
+    <style>
+        :root { color-scheme: light; --bg:#f5f4f0; --surface:#fdfcf9; --text:#293632; --muted:#7a837e; --line:#e1e4dc; --accent:#587764; --error:#b63c3c; }
+        :root.dark { color-scheme:dark; --bg:#151b18; --surface:#1b231e; --text:#e5e9e2; --muted:#9ba69d; --line:#303c33; --accent:#adc7b2; --error:#ffaaaa; }
+        * { box-sizing:border-box; }
+        body { margin:0; background:var(--bg); color:var(--text); font:14px/1.6 'Nunito','Arial Rounded MT Bold',system-ui,sans-serif; }
+        main { max-width:720px; margin:auto; padding:12px 28px 80px; }
+        a { color:var(--muted); text-decoration:none; font-size:18px; display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; margin-bottom:4px; }
+        a:hover { color:var(--text); }
+        p { margin:0; }
+        .page-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+        h1 { margin:0; font-size:clamp(19px,4vw,27px); font-weight:800; letter-spacing:-.5px; }
+        #open-entry { flex-shrink:0; width:40px; height:40px; border-radius:50%; font-size:26px; background:var(--text); color:var(--surface); }
+        dialog { width:min(540px,calc(100% - 36px)); max-height:calc(100dvh - 40px); padding:0; border:0; border-radius:22px; background:var(--surface); color:var(--text); box-shadow:0 24px 100px #0003; }
+        dialog::backdrop { background:#101b1855; backdrop-filter:blur(5px); }
+        #popup-status.error { padding:0 26px 18px; font-size:12px; color:var(--error); }
+        form { position:relative; padding:22px 26px 52px; background:var(--surface); border-radius:22px; box-shadow:0 8px 40px #152c1910; transition:box-shadow .2s; }
+        form:focus-within { box-shadow:0 8px 40px #152c1918; }
+        input,textarea,button { font:inherit; }
+        input,textarea { width:100%; color:var(--text); background:transparent; border:0; border-radius:0; padding:12px 0; }
+        input::placeholder,textarea::placeholder { color:var(--muted); opacity:.7; }
+        #student-name { font-size:25px; font-weight:500; letter-spacing:-.8px; }
+        textarea { display:block; resize:vertical; min-height:82px; padding-right:0; resize:none; }
+        :focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+        form input:focus-visible,form textarea:focus-visible { outline:none; box-shadow:0 1px 0 var(--accent); }
+        button { cursor:pointer; border:0; background:transparent; color:var(--muted); }
+        button:hover { color:var(--text); }
+        button:disabled { cursor:wait; opacity:.35; }
+        #save { position:absolute; right:20px; bottom:16px; width:36px; height:36px; font-size:23px; border-radius:50%; background:var(--text); color:var(--surface); }
+        #cancel-edit { position:absolute; right:64px; bottom:16px; width:36px; height:36px; font-size:22px; border-radius:50%; }
+        .entry-meta,.entry-actions { display:flex; align-items:center; gap:5px; }
+        .entry-meta { flex-shrink:0; gap:12px; }
+        .entry-actions button { display:grid; place-items:center; width:32px; height:32px; border-radius:50%; padding:7px; }
+        .entry-actions button:hover { background:var(--line); }
+        .entry-actions svg { width:15px; height:15px; }
+        .entry-actions { opacity:.7; transition:opacity .2s; }
+        .entry:hover .entry-actions,.entry:focus-within .entry-actions { opacity:1; }
+        @media(pointer:coarse) { .entry-actions { opacity:1; } }
+        #status.error { margin-top:12px; font-size:12px; color:var(--error); }
+        .list-header { display:flex; justify-content:flex-end; margin:28px 0 10px; }
+        #archive-date { width:148px; padding:6px 8px; font-size:12px; color:var(--muted); }
+        .entry-header { display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
+        ol { padding:0; margin:0; list-style:none; }
+        .entry { padding:20px 5px; border-bottom:1px solid var(--line); }
+        .entry-header { align-items:baseline; }
+        .entry-name { font-family:'Nunito','Arial Rounded MT Bold',system-ui,sans-serif; font-size:16px; font-weight:800; letter-spacing:-.2px; overflow-wrap:anywhere; }
+        time { flex-shrink:0; color:var(--muted); font-size:12px; }
+        .entry p { margin-top:5px; white-space:pre-wrap; overflow-wrap:anywhere; color:var(--muted); }
+        #list-message.error { padding:16px 0; color:var(--error); font-size:12px; }
+        .sr-only { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+        [hidden] { display:none !important; }
+        @media(max-width:480px) { main { padding:10px 18px 50px; } form { padding:18px 20px 52px; } .entry-meta { gap:5px; } }
+    </style>
+</head>
+<body>
+<main>
+    <a href="index.html#start-day" aria-label="Back to Start the Day" title="Back">&larr;</a>
+    <header class="page-heading"><h1 id="date-title"></h1><button id="open-entry" type="button" aria-label="New entry" title="New entry">+</button></header>
+    <dialog id="entry-dialog" aria-label="Behaviour entry">
+    <form id="entry-form">
+        <input id="student-name" name="student" aria-label="Student name" placeholder="Name" maxlength="120" required autocomplete="off">
+        <textarea id="description" name="description" aria-label="Behaviour description" placeholder="Description" maxlength="4000" required></textarea>
+        <button id="save" type="submit" aria-label="Add entry" title="Add entry" disabled>+</button>
+        <button id="cancel-edit" type="button" aria-label="Close entry" title="Close">×</button>
+    </form>
+    <p id="popup-status" class="sr-only" role="status" aria-live="polite"></p>
+    </dialog>
+    <p id="status" class="sr-only" role="status" aria-live="polite">Connecting…</p>
+    <section aria-label="Recorded entries">
+        <div class="list-header"><input type="date" id="archive-date" aria-label="View entries by date"></div>
+        <p id="list-message" class="sr-only" role="status">Loading entries…</p>
+        <ol id="entries" aria-label="Behaviour entries, newest first"></ol>
+    </section>
+</main>
+<script type="module">
+const $ = id => document.getElementById(id);
+const zone = 'Australia/Sydney';
+const dayKey = (date = new Date()) => {
+    const parts = new Intl.DateTimeFormat('en-AU', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
+    const value = type => parts.find(part => part.type === type).value;
+    return `${value('year')}-${value('month')}-${value('day')}`;
+};
+const timeLabel = new Intl.DateTimeFormat('en-AU', { timeZone: zone, hour: 'numeric', minute: '2-digit' });
+let today = dayKey();
+let selectedDay = today;
+let backend;
+let unsubscribe;
+let saving = false;
+let editing = null;
+$('archive-date').value = today;
+$('archive-date').max = today;
+updateDateTitle(today);
+
+function updateDateTitle(day) {
+    const [year, month, date] = day.split('-').map(Number);
+    const weekday = new Intl.DateTimeFormat('en-AU', { weekday: 'long', timeZone: zone }).format(new Date(`${day}T12:00:00+11:00`));
+    $('date-title').textContent = `${weekday.toUpperCase()} ${date}-${month}-${year}`;
+}
+
+function status(message, error = false) {
+    for (const id of ['status', 'popup-status']) {
+        $(id).textContent = message;
+        $(id).classList.toggle('error', error);
+        $(id).classList.toggle('sr-only', !error || (id === 'status' && $('entry-dialog').open));
+    }
+}
+
+function showDay(day) {
+    selectedDay = day;
+    updateDateTitle(day);
+    $('archive-date').value = day;
+    $('entries').replaceChildren();
+    $('list-message').hidden = false;
+    $('list-message').textContent = 'Loading entries…';
+    $('list-message').className = 'sr-only';
+    unsubscribe?.();
+    if (!backend) return;
+    unsubscribe = backend.listen(day, (snapshot) => {
+        if (selectedDay !== day) return;
+        const entries = Object.entries(snapshot.data()?.entries || {}).map(([id, entry]) => ({ ...entry, id })).sort((a, b) => b.occurredAt - a.occurredAt);
+        $('entries').replaceChildren();
+        $('list-message').hidden = entries.length > 0;
+        $('list-message').textContent = snapshot.metadata.fromCache ? 'Connecting to the database…' : day === today ? 'No entries today.' : 'No entries for this day.';
+        for (const entry of entries) {
+            const row = document.createElement('li');
+            row.className = 'entry';
+            const heading = document.createElement('div');
+            heading.className = 'entry-header';
+            const name = document.createElement('span');
+            name.className = 'entry-name';
+            name.textContent = entry.name;
+            const time = document.createElement('time');
+            time.dateTime = new Date(entry.occurredAt).toISOString();
+            time.textContent = timeLabel.format(new Date(entry.occurredAt));
+            const description = document.createElement('p');
+            description.textContent = entry.description;
+            const meta = document.createElement('div');
+            meta.className = 'entry-meta';
+            const actions = document.createElement('div');
+            actions.className = 'entry-actions';
+            const edit = actionButton(`Edit entry for ${entry.name}`, '<path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z"/>', () => beginEdit(day, entry));
+            const remove = actionButton(`Delete entry for ${entry.name}`, '<path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/>', () => deleteEntry(day, entry));
+            edit.disabled = remove.disabled = saving || Boolean(editing);
+            actions.append(edit, remove);
+            meta.append(time, actions);
+            heading.append(name, meta);
+            row.append(heading, description);
+            $('entries').append(row);
+        }
+    }, () => {
+        if (selectedDay !== day) return;
+        $('list-message').hidden = false;
+        $('list-message').className = 'error';
+        $('list-message').textContent = 'Could not load this day. Check your connection and database access, then select the date again.';
+    });
+}
+
+function actionButton(label, path, action) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.title = label;
+    button.setAttribute('aria-label', label);
+    // Only fixed icon markup is inserted here; student text uses textContent.
+    button.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
+    button.addEventListener('click', action);
+    return button;
+}
+function syncControls() {
+    $('archive-date').disabled = saving || Boolean(editing);
+    $('open-entry').disabled = saving;
+    $('save').disabled = saving || !backend;
+    $('cancel-edit').disabled = saving;
+    $('student-name').readOnly = $('description').readOnly = saving;
+    document.querySelectorAll('.entry-actions button').forEach(button => { button.disabled = saving || Boolean(editing); });
+}
+function beginEdit(day, entry) {
+    if (saving || editing) return;
+    editing = { day, entry, draft: { name: $('student-name').value, description: $('description').value } };
+    $('student-name').value = entry.name;
+    $('description').value = entry.description;
+    $('save').textContent = '✓';
+    $('save').title = 'Save changes';
+    $('save').setAttribute('aria-label', 'Save changes');
+    $('entry-dialog').showModal();
+    status('');
+    syncControls();
+    $('student-name').focus();
+
+}
+function finishEdit() {
+    if (!editing) return;
+    $('student-name').value = editing.draft.name;
+    $('description').value = editing.draft.description;
+    editing = null;
+    $('save').textContent = '+';
+    $('save').title = 'Add entry';
+    $('save').setAttribute('aria-label', 'Add entry');
+
+    syncControls();
+}
+function closeEntry() {
+    if (saving) return;
+    finishEdit();
+    status('');
+    $('entry-dialog').close();
+    $('open-entry').focus();
+}
+$('open-entry').addEventListener('click', () => {
+    $('entry-dialog').showModal();
+    status('');
+    $('student-name').focus();
+});
+$('cancel-edit').addEventListener('click', closeEntry);
+$('entry-dialog').addEventListener('cancel', event => { event.preventDefault(); closeEntry(); });
+async function deleteEntry(day, entry) {
+    if (saving || editing || !confirm(`Delete this entry for ${entry.name}?`)) return;
+    saving = true;
+    syncControls();
+    try {
+        await backend.change(day, entry, null);
+        status('Entry deleted.');
+    } catch (error) {
+        status(error.message === 'entry-changed' ? 'This entry changed elsewhere. Reload this day before trying again.' : 'Could not delete. Please try again.', true);
+    } finally {
+        saving = false;
+        syncControls();
+    }
+}
+
+function refreshToday() {
+    const next = dayKey();
+    if (next === today) return;
+    const wasToday = selectedDay === today;
+    today = next;
+    $('archive-date').max = today;
+    if (wasToday && !editing && !saving) showDay(today);
+}
+setInterval(refreshToday, 30000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshToday(); });
+$('archive-date').addEventListener('change', () => {
+    const day = $('archive-date').value;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(day) && day <= today) showDay(day);
+    else $('archive-date').value = selectedDay;
+});
+window.addEventListener('beforeunload', event => {
+    if (saving || $('student-name').value.trim() || $('description').value.trim()) { event.preventDefault(); event.returnValue = ''; }
+});
+$('description').addEventListener('keydown', event => {
+    if (event.key !== 'Enter' || event.shiftKey || event.isComposing) return;
+    event.preventDefault();
+    if (!event.repeat && !saving && backend) $('entry-form').requestSubmit();
+});
+$('entry-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    if (!backend || saving) return;
+    const name = $('student-name').value.trim();
+    const description = $('description').value.trim();
+    if (!name || !description) { status('Enter a name and a description.', true); return; }
+    refreshToday();
+    const occurredAt = Date.now();
+    const day = editing ? editing.day : dayKey(new Date(occurredAt));
+    const entry = { name, description, occurredAt };
+    saving = true;
+    syncControls();
+    status('Saving…');
+    try {
+        if (editing) {
+            await backend.change(day, editing.entry, { name, description });
+            finishEdit();
+        } else {
+            await backend.add(day, entry);
+            $('entry-form').reset();
+        }
+        showDay(day);
+        $('entry-dialog').close();
+        status('Saved to database.');
+        $('open-entry').focus();
+    } catch (error) {
+        if (error.message === 'entry-changed') status('This entry changed elsewhere. Cancel editing and try again. Your text is still here.', true);
+        else status('Not saved. Check your connection or database access, then try again. Your text is still here.', true);
+    } finally {
+        saving = false;
+        syncControls();
+    }
+});
+
+try {
+    const [{ initializeApp }, { getAuth, signInAnonymously }, { getFirestore, doc, onSnapshot, runTransaction, serverTimestamp }] = await Promise.all([
+        import('https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js'),
+        import('https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js'),
+        import('https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js')
+    ]);
+    const app = initializeApp({
+        apiKey: 'AIzaSyCEGrh2SIC20vJj_nLm4x34ok01srxip7I',
+        authDomain: 'paul-s-2026.firebaseapp.com',
+        projectId: 'paul-s-2026',
+        storageBucket: 'paul-s-2026.firebasestorage.app',
+        messagingSenderId: '524167059781',
+        appId: '1:524167059781:web:57347f46b29c9d4a49862c'
+    });
+    await signInAnonymously(getAuth(app));
+    const db = getFirestore(app);
+    // Separate date-keyed documents retain past days without touching timetable data.
+    const dayRef = day => doc(db, 'timetables', `behaviour_${day}`);
+    backend = {
+        listen: (day, next, error) => onSnapshot(dayRef(day), { includeMetadataChanges: true }, next, error),
+        change: async (day, original, changes) => {
+            await runTransaction(db, async transaction => {
+                const ref = dayRef(day);
+                const snapshot = await transaction.get(ref);
+                const entries = { ...(snapshot.data()?.entries || {}) };
+                const current = entries[original.id];
+                if (!current || current.name !== original.name || current.description !== original.description) throw new Error('entry-changed');
+                if (changes) entries[original.id] = { ...current, ...changes, updatedAt: serverTimestamp() };
+                else delete entries[original.id];
+                // Replace the map field: merging would retain a deleted map key.
+                transaction.update(ref, { entries });
+            });
+        },
+        add: async (day, entry) => {
+            const id = crypto.randomUUID();
+            await runTransaction(db, async transaction => {
+                const ref = dayRef(day);
+                const snapshot = await transaction.get(ref);
+                const entries = { ...(snapshot.data()?.entries || {}), [id]: { ...entry, savedAt: serverTimestamp() } };
+                transaction.set(ref, { date: day, entries }, { merge: true });
+            });
+        }
+    };
+    $('save').disabled = false;
+    status('');
+    showDay(selectedDay);
+} catch {
+    status('Could not connect. Check your connection and reload this page. Your text is still here.', true);
+    $('list-message').textContent = 'Database unavailable.';
+}
+
+</script>
+</body>
+</html>
