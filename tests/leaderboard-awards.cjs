@@ -1,16 +1,23 @@
-// Run with Node and Playwright available; uses Edge and an isolated Firebase stub.
+// Run with Node and Playwright available; add --maths for the maths leaderboard.
+// Uses Edge and an isolated Firebase stub; never writes real student data.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const http = require('node:http');
 const { chromium } = require('playwright');
+const maths = process.argv.includes('--maths');
+const leaderboardFile = maths ? 'leaderboard_maths.html' : 'leaderboard.html';
+const muteKey = maths ? 'leaderboard-maths:award-muted' : 'leaderboard:award-muted';
 
 const firebaseStub = `
 export const initializeApp = () => ({});
 export const getAuth = () => ({ currentUser: { uid: 'test' } });
 export const signInAnonymously = () => Promise.resolve();
 export const getFirestore = () => ({});
-export const doc = () => ({});
+export const doc = (db, collection, document) => {
+    if (collection !== '${maths ? 'math_class_leaderboard' : 'leaderboard'}' || document !== 'current_week') throw new Error('Unexpected leaderboard database');
+    return {};
+};
 export function onSnapshot(ref, callback) {
     window.testSnapshot = data => {
         window.testData = structuredClone(data);
@@ -56,12 +63,13 @@ export function setDoc(ref, data) {
         });
         const page = await context.newPage();
         page.on('pageerror', error => errors.push(error.message));
-        await page.goto(base + '/leaderboard.html', { waitUntil: 'domcontentloaded' });
+        await page.goto(base + '/' + leaderboardFile, { waitUntil: 'domcontentloaded' });
         console.log('Loaded isolated leaderboard');
         const row = id => page.locator(`.student-row[data-id="${id}"]`);
         const score = id => row(id).locator('.score-value');
         const open = async id => { await row(id).click(); await page.locator('#actionPopover').waitFor({ state: 'visible' }); };
         await row('a').waitFor();
+        if (process.env.LEADERBOARD_SCREENSHOT) await page.screenshot({ path: process.env.LEADERBOARD_SCREENSHOT.replace('.png', '-desktop.png') });
         await open('a');
         await page.locator('#tokenCountInput').fill('6');
         assert.match(await page.locator('#tokenPreview').innerText(), /6 tokens × 5 = \+30 points/);
@@ -119,7 +127,7 @@ export function setDoc(ref, data) {
         assert.equal(await score('c').innerText(), '100');
         await page.locator('#awardSoundButton').click();
         assert.equal(await page.locator('#awardSoundButton').getAttribute('aria-pressed'), 'true');
-        assert.equal(await page.evaluate(() => localStorage.getItem('leaderboard:award-muted')), 'true');
+        assert.equal(await page.evaluate(key => localStorage.getItem(key), muteKey), 'true');
         console.log('PASS: exact-score increases, reduced motion and persistent mute');
 
         await page.setViewportSize({ width: 390, height: 600 });
@@ -143,6 +151,24 @@ export function setDoc(ref, data) {
         await page.evaluate(() => { openPopover('a', document.querySelector('[data-id="a"]')); quickAddPoints(100000); });
         await page.waitForFunction(() => !document.querySelector('.points-counting'), { timeout: 8000 });
         assert.equal(await score('a').innerText(), '100055');
+        await page.setViewportSize({ width: 1100, height: 850 });
+        await page.evaluate(() => openBonusTeacherPanel());
+        await page.locator('#bonusTargetInput').fill('7');
+        await page.locator('#bonusTargetInput').press('Enter');
+        await page.evaluate(() => openBonusStage());
+        if (process.env.LEADERBOARD_SCREENSHOT) await page.screenshot({ path: process.env.LEADERBOARD_SCREENSHOT.replace('.png', '-reactor.png') });
+        await page.locator('#bonusPowerCell').press('Enter');
+        await page.locator('#bonusResultCard').waitFor({ state: 'visible' });
+        assert.equal(await page.locator('#bonusResultValue').innerText(), '7');
+        assert.equal(await page.evaluate(() => testData.bassBonusMultiplier), 7);
+        await page.evaluate(() => closeBonusStage());
+        await page.evaluate(() => selectTopX(2));
+        assert.equal(await page.locator('.prize-winner').count(), 2);
+        await open('c');
+        await page.getByRole('button', { name: 'Delete name', exact: true }).click();
+        await page.evaluate(() => confirmDeleteStudent());
+        assert.equal(await row('c').count(), 0);
+        console.log('PASS: keyboard bonus reveal, saved multiplier, winner highlights and student deletion');
         await page.evaluate(() => { openPopover('b', document.querySelector('[data-id="b"]')); quickAddPoints(50); confirmReset(); });
         await page.waitForTimeout(200);
         assert.equal(await page.locator('.student-row').count(), 0);

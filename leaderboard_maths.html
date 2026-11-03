@@ -9,7 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
+
     <script>
         tailwind.config = {
             theme: {
@@ -45,10 +45,10 @@
             }
         }
     </script>
-    
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Nunito:wght@400;700;900&family=Outfit:wght@700;900&family=Space+Mono:wght@400;700&display=swap');
-        
+
         body {
             font-family: 'Nunito', sans-serif;
             background-color: #080f1e; /* Deep dark blue for blueprint style */
@@ -78,7 +78,7 @@
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background-color: #080f1e;
-            background-image: 
+            background-image:
                 linear-gradient(rgba(56, 189, 248, 0.07) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(56, 189, 248, 0.07) 1px, transparent 1px),
                 linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
@@ -134,25 +134,58 @@
             will-change: transform;
         }
 
-        /* --- Custom Winner Highlight Animation (Math Theme) --- */
-        @keyframes mathGoldSparkle {
-            0%, 100% { 
-                background-color: rgba(250, 204, 21, 0.03); 
-                box-shadow: 0 0 10px rgba(250, 204, 21, 0.05), inset 0 0 5px rgba(250, 204, 21, 0.05); 
+        /* --- Custom Winner Highlight Animation --- */
+        @property --spin-angle {
+            syntax: "<angle>";
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        @keyframes spinBorder {
+            0% { --spin-angle: 0deg; }
+            100% { --spin-angle: 360deg; }
+        }
+
+        /* Toned down glow */
+        @keyframes goldSparkle {
+            0%, 100% {
+                background-color: rgba(251, 191, 36, 0.03);
+                box-shadow: 0 0 10px rgba(251, 191, 36, 0.05), inset 0 0 5px rgba(251, 191, 36, 0.05);
             }
-            50% { 
-                background-color: rgba(250, 204, 21, 0.1); 
-                box-shadow: 0 0 20px rgba(250, 204, 21, 0.2), inset 0 0 10px rgba(250, 204, 21, 0.1); 
+            50% {
+                background-color: rgba(251, 191, 36, 0.08);
+                box-shadow: 0 0 15px rgba(251, 191, 36, 0.15), inset 0 0 10px rgba(251, 191, 36, 0.08);
             }
         }
 
         .prize-winner {
             position: relative;
-            border-color: rgba(250,204,21,0.5) !important;
-            animation: mathGoldSparkle 3s ease-in-out infinite alternate !important;
+            border-color: transparent !important;
+            animation: goldSparkle 3s ease-in-out infinite alternate !important;
         }
 
-        /* Golden circuitry/grid pattern for winners */
+        .prize-winner::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 2px; /* Controls the thickness of the tracing trail */
+            background: conic-gradient(
+                from var(--spin-angle, 0deg),
+                transparent 60%,
+                rgba(251, 191, 36, 0.3) 75%,
+                rgba(253, 230, 138, 0.9) 95%,
+                #ffffff 100%
+            );
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            z-index: -1;
+            animation: spinBorder 2.5s linear infinite;
+        }
+
+        /* Dynamic "Warp Speed" Boost Pad Pattern */
         .prize-winner::after {
             content: "";
             position: absolute;
@@ -160,22 +193,639 @@
             border-radius: inherit;
             pointer-events: none;
             z-index: -1;
-            background-image: 
-                linear-gradient(rgba(250, 204, 21, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(250, 204, 21, 0.1) 1px, transparent 1px);
-            background-size: 8px 8px;
-            /* Fades at the edges */
-            -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
-            mask-image: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='40' viewBox='0 0 32 40'%3E%3Cpath d='M0 40 L12 20 L0 0 H8 L20 20 L8 40 Z' fill='%23fbbf24' fill-opacity='0.25'/%3E%3C/svg%3E");
+            background-size: 32px 40px;
+            animation: boostPad 0.5s linear infinite;
+            /* Fades the racing arrows at the edges so the text stays easy to read */
+            -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 15%, black 85%, transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0%, black 15%, black 85%, transparent 100%);
+        }
+
+        @keyframes boostPad {
+            0% { background-position: 0 0; }
+            100% { background-position: 32px 0; }
+        }
+
+        /* --- New Glass Sweep Animation --- */
+        @keyframes glassSweep {
+            0% { transform: translateX(-150%) skewX(-15deg); }
+            100% { transform: translateX(300%) skewX(-15deg); }
+        }
+        .group:hover .sweep-effect {
+            animation: glassSweep 1.5s ease-in-out infinite;
+        }
+
+        /* --- Point Deduction Feedback --- */
+        @keyframes deductionFlash {
+            0% { opacity: 0; box-shadow: inset 0 0 0 rgba(244,63,94,0); }
+            12% { opacity: .95; box-shadow: inset 0 0 28px rgba(244,63,94,.8), 0 0 24px rgba(244,63,94,.65); }
+            30% { opacity: .18; }
+            48% { opacity: .75; box-shadow: inset 0 0 20px rgba(244,63,94,.65), 0 0 18px rgba(244,63,94,.45); }
+            100% { opacity: 0; box-shadow: inset 0 0 0 rgba(244,63,94,0); }
+        }
+
+        @keyframes scoreDeducted {
+            0% { transform: translateY(-8px) scale(1.45); color: #fb7185; filter: drop-shadow(0 0 12px rgba(244,63,94,.95)); }
+            45% { transform: translateY(4px) scale(.9); color: #f43f5e; }
+            100% { transform: translateY(0) scale(1); color: #38bdf8; filter: drop-shadow(0 0 10px rgba(56,189,248,.5)); }
+        }
+
+        @keyframes deductionBadgeFloat {
+            0% { opacity: 0; transform: translateY(-15%) scale(.75); }
+            18% { opacity: 1; transform: translateY(-70%) scale(1.15); }
+            70% { opacity: 1; transform: translateY(-125%) scale(1); }
+            100% { opacity: 0; transform: translateY(-175%) scale(.95); }
+        }
+
+        @keyframes deductionScreenPulse {
+            0% { opacity: 0; }
+            10% { opacity: .72; }
+            25% { opacity: .18; }
+            40% { opacity: .55; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes deductionAlertSlam {
+            0% { opacity: 0; transform: translateY(-80px) rotate(-8deg) scale(1.8); filter: blur(5px); }
+            14% { opacity: 1; transform: translateY(12px) rotate(2deg) scale(.92); filter: blur(0); }
+            24% { transform: translateY(0) rotate(0) scale(1.05); }
+            34%, 72% { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
+            100% { opacity: 0; transform: translateY(70px) scale(.82); }
+        }
+
+        @keyframes deductionArrowsDrop {
+            0% { opacity: 0; transform: translateY(-24px) scaleY(.6); }
+            25% { opacity: 1; }
+            70% { opacity: 1; transform: translateY(12px) scaleY(1.15); }
+            100% { opacity: 0; transform: translateY(34px) scaleY(.8); }
+        }
+
+        .deduction-flash {
+            background: rgba(225,29,72,.38);
+            animation: deductionFlash .9s ease-out forwards;
+        }
+
+        .student-row.points-deducted .score-value {
+            animation: scoreDeducted .75s cubic-bezier(.2,.8,.3,1) both;
+        }
+
+        .deduction-badge {
+            animation: deductionBadgeFloat 1.1s ease-out forwards;
+        }
+
+        #deductionFeedback.is-active .deduction-screen-pulse {
+            animation: deductionScreenPulse 1.55s ease-out both;
+        }
+
+        #deductionFeedback.is-active .deduction-alert-card {
+            animation: deductionAlertSlam 1.55s cubic-bezier(.16,.9,.28,1) both;
+        }
+
+        #deductionDarts i { opacity: 0; }
+
+        #deductionFeedback.is-active #deductionDarts i {
+            animation: deductionArrowsDrop .8s ease-in 2 both;
+        }
+
+        #deductionFeedback.is-active #deductionDarts i:nth-child(2) { animation-delay: .08s; }
+        #deductionFeedback.is-active #deductionDarts i:nth-child(3) { animation-delay: .16s; }
+
+        /* --- Maths Bonus Multiplier Reactor --- */
+        .bonus-badge {
+            background: linear-gradient(135deg, rgba(245,158,11,.2), rgba(217,70,239,.16));
+            box-shadow: 0 0 18px rgba(251,191,36,.16), inset 0 1px 0 rgba(255,255,255,.12);
+        }
+
+        .bonus-launch-button {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 45;
+            display: flex;
+            min-height: 52px;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: 1px solid rgba(103,232,249,.35);
+            border-radius: 18px;
+            padding: 0 18px;
+            color: #cffafe;
+            background: linear-gradient(90deg, rgba(88,28,135,.8), rgba(30,64,175,.78), rgba(8,145,178,.7));
+            box-shadow: 0 0 20px rgba(34,211,238,.16), inset 0 1px 0 rgba(255,255,255,.14);
+            backdrop-filter: blur(14px);
+            transition: opacity .2s ease, transform .2s ease, filter .2s ease, box-shadow .2s ease;
+        }
+
+        .bonus-launch-button:not(:disabled):hover {
+            box-shadow: 0 0 26px rgba(34,211,238,.3), inset 0 1px 0 rgba(255,255,255,.2);
+            transform: translateY(-2px);
+        }
+
+        .bonus-launch-button:disabled { cursor: not-allowed; opacity: .3; filter: saturate(.35); }
+
+        .bonus-launch-button.is-ready .bonus-launch-light {
+            background: #67e8f9;
+            box-shadow: 0 0 12px #22d3ee;
+            animation: pulse 1.3s ease-in-out infinite;
+        }
+
+        .bonus-teacher-hotspot {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            z-index: 46;
+            display: flex;
+            width: 76px;
+            height: 76px;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            background: transparent;
+            color: rgba(148,163,184,0);
+            cursor: pointer;
+        }
+
+        .bonus-teacher-hotspot span {
+            display: flex;
+            width: 28px;
+            height: 28px;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(148,163,184,0);
+            border-radius: 50%;
+            background: rgba(15,23,42,0);
+            transition: all .22s ease;
+        }
+
+        .bonus-teacher-hotspot:hover span,
+        .bonus-teacher-hotspot:focus-visible span {
+            border-color: rgba(148,163,184,.18);
+            background: rgba(15,23,42,.3);
+            color: rgba(203,213,225,.34);
+            box-shadow: 0 0 14px rgba(148,163,184,.08);
+        }
+
+        .bonus-stage {
+            isolation: isolate;
+            background:
+                radial-gradient(circle at 50% 42%, rgba(251,191,36,.18), transparent 24%),
+                radial-gradient(circle at 15% 20%, rgba(217,70,239,.2), transparent 32%),
+                radial-gradient(circle at 85% 78%, rgba(34,211,238,.18), transparent 30%),
+                #070814;
+        }
+
+        .bonus-stage::before {
+            content: '';
+            position: absolute;
+            width: 130vmax;
+            height: 130vmax;
+            left: 50%;
+            top: 44%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+            opacity: .28;
+            background: repeating-conic-gradient(from 0deg, rgba(251,191,36,.28) 0deg 7deg, transparent 7deg 18deg);
+            -webkit-mask-image: radial-gradient(circle, transparent 0 10%, black 28%, transparent 68%);
+            mask-image: radial-gradient(circle, transparent 0 10%, black 28%, transparent 68%);
+            animation: bonus-rays 18s linear infinite;
+        }
+
+        .bonus-machine {
+            position: relative;
+            width: min(720px, 88vw);
+            min-height: 340px;
+            border: 3px solid rgba(103,232,249,.65);
+            border-radius: 3rem;
+            background:
+                linear-gradient(90deg, rgba(34,211,238,.07) 1px, transparent 1px) 0 0/36px 36px,
+                linear-gradient(rgba(34,211,238,.07) 1px, transparent 1px) 0 0/36px 36px,
+                radial-gradient(circle at 50% 50%, rgba(126,34,206,.36), transparent 36%),
+                linear-gradient(145deg, #21104c 0%, #111936 44%, #071b2d 100%);
+            box-shadow: 0 0 0 7px rgba(15,23,42,.95), 0 0 0 10px rgba(251,191,36,.72), 0 30px 90px rgba(0,0,0,.75), inset 0 0 60px rgba(34,211,238,.18);
+        }
+
+        .bonus-energy-trace {
+            position: absolute;
+            inset: -10px;
+            border-radius: 3.5rem;
+            pointer-events: none;
+            padding: 3px;
+            background: conic-gradient(from var(--spin-angle), #22d3ee, transparent 14%, transparent 35%, #fbbf24 50%, transparent 64%, transparent 83%, #e879f9);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: spinBorder 3s linear infinite;
+            filter: drop-shadow(0 0 9px rgba(34,211,238,.75));
+        }
+
+        .bonus-reactor {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: clamp(220px, 34vw, 285px);
+            height: clamp(220px, 34vw, 285px);
+            margin: auto;
+        }
+
+        .bonus-orbit {
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            pointer-events: none;
+        }
+
+        .bonus-orbit-a {
+            inset: 3%;
+            border-top-color: #fbbf24;
+            border-right-color: rgba(251,191,36,.18);
+            border-bottom-color: #f472b6;
+            transform: rotate(-18deg);
+            animation: bonus-orbit-a 4.6s linear infinite;
+        }
+
+        .bonus-orbit-b {
+            inset: 11%;
+            border-left-color: #22d3ee;
+            border-bottom-color: rgba(34,211,238,.25);
+            border-right-color: #a78bfa;
+            transform: rotate(32deg);
+            animation: bonus-orbit-b 3.2s linear infinite reverse;
+        }
+
+        .bonus-core {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            width: 67%;
+            height: 67%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 4px solid rgba(255,255,255,.75);
+            border-radius: 50%;
+            color: white;
+            background: radial-gradient(circle at 45% 36%, rgba(255,255,255,.36), transparent 14%), linear-gradient(145deg, #9333ea, #1d4ed8 56%, #0891b2);
+            box-shadow: inset 0 0 34px rgba(255,255,255,.22), 0 0 26px rgba(34,211,238,.5), 0 0 60px rgba(168,85,247,.35);
+        }
+
+        .bonus-core::after {
+            content: '';
+            position: absolute;
+            inset: -60%;
+            background: linear-gradient(105deg, transparent 42%, rgba(255,255,255,.28) 49%, transparent 56%);
+            animation: bonus-core-sweep 2.2s ease-in-out infinite;
+        }
+
+        .bonus-reactor-value {
+            position: relative;
+            z-index: 2;
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(3.8rem, 9vw, 6.2rem);
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -.08em;
+            transform: translateX(-.06em);
+            text-shadow: 0 5px 0 rgba(30,64,175,.65), 0 0 20px rgba(255,255,255,.45);
+        }
+
+        .bonus-reactor-value.is-long { font-size: clamp(2.8rem, 7vw, 4.8rem); }
+        .bonus-reactor-value.is-very-long { font-size: clamp(2.1rem, 4.5vw, 3rem); letter-spacing: -.12em; }
+
+        .bonus-meter {
+            position: absolute;
+            top: 50%;
+            display: flex;
+            width: 78px;
+            flex-direction: column;
+            gap: 8px;
+            transform: translateY(-50%);
+        }
+
+        .bonus-meter-left { left: 7%; }
+        .bonus-meter-right { right: 7%; }
+
+        .bonus-meter span {
+            height: 9px;
+            border: 1px solid rgba(103,232,249,.3);
+            border-radius: 999px;
+            background: rgba(15,23,42,.8);
+            box-shadow: inset 0 0 5px rgba(0,0,0,.5);
+        }
+
+        .bonus-machine.is-spinning .bonus-meter span {
+            animation: bonus-meter-charge .8s ease-in-out infinite alternate;
+        }
+
+        .bonus-machine.is-spinning .bonus-meter span:nth-child(2) { animation-delay: .1s; }
+        .bonus-machine.is-spinning .bonus-meter span:nth-child(3) { animation-delay: .2s; }
+        .bonus-machine.is-spinning .bonus-meter span:nth-child(4) { animation-delay: .3s; }
+        .bonus-machine.is-spinning .bonus-meter span:nth-child(5) { animation-delay: .4s; }
+        .bonus-machine.is-spinning .bonus-orbit-a { animation-duration: .55s; }
+        .bonus-machine.is-spinning .bonus-orbit-b { animation-duration: .38s; }
+        .bonus-machine.is-spinning .bonus-reactor-value { animation: bonus-number-stream .1s linear infinite; }
+        .bonus-machine.is-settling { animation: bonus-machine-rumble .11s linear infinite; }
+        .bonus-machine.is-winner { animation: bonus-winner-pop .75s cubic-bezier(.2,1.5,.35,1); }
+        .bonus-machine.is-winner .bonus-core {
+            background: radial-gradient(circle at 45% 36%, #fff 0 5%, transparent 18%), linear-gradient(145deg, #f59e0b, #ec4899 55%, #8b5cf6);
+            box-shadow: inset 0 0 34px rgba(255,255,255,.3), 0 0 38px #fbbf24, 0 0 90px rgba(236,72,153,.55);
+        }
+
+        .bonus-stage.has-result { justify-content: flex-start; overflow-y: auto; }
+        .bonus-stage.has-result::-webkit-scrollbar { display: none; }
+        .bonus-stage.has-result { scrollbar-width: none; }
+        .bonus-stage.has-result .bonus-machine { min-height: 270px; }
+        .bonus-stage.has-result .bonus-reactor { width: 225px; height: 225px; }
+        .bonus-stage.has-result .bonus-result-card { margin-top: 10px; }
+
+        .bonus-power-transfer {
+            position: relative;
+            z-index: 12;
+            width: min(650px, 88vw);
+            height: 92px;
+            margin-top: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(103,232,249,.25);
+            border-radius: 28px;
+            background: linear-gradient(90deg, rgba(88,28,135,.42), rgba(15,23,42,.8) 48%, rgba(8,145,178,.32));
+            box-shadow: inset 0 0 24px rgba(34,211,238,.09), 0 16px 35px rgba(0,0,0,.32);
+            transition: height .45s ease, margin .45s ease, opacity .35s ease, transform .35s ease;
+        }
+
+        .bonus-power-transfer.is-complete {
+            height: 0;
+            margin-top: 0;
+            opacity: 0;
+            transform: scale(.92);
+        }
+
+        .bonus-conduit {
+            position: absolute;
+            top: 50%;
+            right: 116px;
+            left: 116px;
+            height: 14px;
+            transform: translateY(-50%);
+            overflow: hidden;
+            border: 1px solid rgba(34,211,238,.22);
+            border-radius: 999px;
+            background: rgba(2,6,23,.72);
+        }
+
+        .bonus-conduit::before {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            border-radius: inherit;
+            background: repeating-linear-gradient(90deg, transparent 0 16px, rgba(34,211,238,.9) 16px 27px, transparent 27px 38px);
+            filter: drop-shadow(0 0 5px #22d3ee);
+            animation: bonus-conduit-flow .75s linear infinite;
+        }
+
+        .bonus-power-cell {
+            --cell-x: 0px;
+            --cell-y: 0px;
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            z-index: 4;
+            display: flex;
+            width: 72px;
+            height: 72px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid rgba(255,255,255,.82);
+            border-radius: 50%;
+            color: white;
+            background: radial-gradient(circle at 35% 28%, white 0 5%, #fde047 12%, #f97316 45%, #be123c 78%);
+            box-shadow: 0 7px 0 #7f1d1d, 0 12px 22px rgba(0,0,0,.5), 0 0 28px rgba(251,191,36,.7);
+            transform: translate(var(--cell-x), var(--cell-y));
+            transition: transform .4s cubic-bezier(.2,1.2,.3,1), filter .2s ease;
+            touch-action: none;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .bonus-power-cell:hover { filter: brightness(1.12); }
+        .bonus-power-cell:active { cursor: grabbing; }
+        .bonus-power-cell.is-dragging {
+            z-index: 8;
+            transform: translate(var(--cell-x), var(--cell-y)) scale(1.08);
+            transition: none;
+            filter: brightness(1.2);
+        }
+
+        .bonus-power-cell:focus-visible { outline: 4px solid white; outline-offset: 4px; }
+        .bonus-power-cell.is-docked { animation: bonus-cell-dock .65s cubic-bezier(.2,1.4,.3,1) both; }
+
+        .bonus-power-dock {
+            position: absolute;
+            right: 9px;
+            top: 8px;
+            display: flex;
+            width: 78px;
+            height: 76px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 3px dashed rgba(103,232,249,.55);
+            border-radius: 24px;
+            color: rgba(207,250,254,.72);
+            background: rgba(8,145,178,.13);
+            box-shadow: inset 0 0 18px rgba(34,211,238,.16);
+            transition: all .2s ease;
+            pointer-events: none;
+        }
+
+        .bonus-power-dock.is-near {
+            border-style: solid;
+            border-color: white;
+            color: white;
+            background: rgba(34,211,238,.34);
+            box-shadow: inset 0 0 22px rgba(255,255,255,.25), 0 0 28px rgba(34,211,238,.7);
+            transform: scale(1.08);
+        }
+
+        .bonus-power-dock.is-charged {
+            border-style: solid;
+            border-color: #fde047;
+            color: white;
+            background: rgba(245,158,11,.32);
+            box-shadow: inset 0 0 22px rgba(255,255,255,.28), 0 0 34px rgba(250,204,21,.8);
+        }
+
+        .bonus-transfer-hint { animation: bonus-hint-bounce 1s ease-in-out infinite; }
+        .bonus-result-card { animation: bonus-result-rise .7s cubic-bezier(.16,1,.3,1) both; }
+
+        @keyframes bonus-rays { to { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes bonus-orbit-a { to { transform: rotate(342deg); } }
+        @keyframes bonus-orbit-b { to { transform: rotate(392deg); } }
+        @keyframes bonus-core-sweep {
+            0%, 20% { transform: translateX(-35%) rotate(0); opacity: 0; }
+            55% { opacity: 1; }
+            80%, 100% { transform: translateX(35%) rotate(0); opacity: 0; }
+        }
+        @keyframes bonus-number-stream {
+            0% { transform: translate(-.06em, -9px) scaleY(1.08); filter: blur(1.5px); opacity: .7; }
+            100% { transform: translate(-.06em, 9px) scaleY(.94); filter: blur(1.5px); opacity: 1; }
+        }
+        @keyframes bonus-meter-charge {
+            0% { background: rgba(15,23,42,.8); box-shadow: none; }
+            100% { background: #22d3ee; box-shadow: 0 0 12px #22d3ee; }
+        }
+        @keyframes bonus-conduit-flow { to { transform: translateX(38px); } }
+        @keyframes bonus-cell-dock {
+            0% { filter: brightness(1); }
+            45% { filter: brightness(2.1); box-shadow: 0 0 50px rgba(255,255,255,.9); }
+            100% { filter: brightness(1.25); }
+        }
+        @keyframes bonus-machine-rumble {
+            0%, 100% { transform: translateX(0) rotate(0); }
+            25% { transform: translateX(-3px) rotate(-.25deg); }
+            75% { transform: translateX(3px) rotate(.25deg); }
+        }
+        @keyframes bonus-winner-pop {
+            0% { transform: scale(.94); filter: brightness(1); }
+            45% { transform: scale(1.045); filter: brightness(1.55); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
+        @keyframes bonus-hint-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(8px); }
+        }
+        @keyframes bonus-result-rise {
+            from { opacity: 0; transform: translateY(35px) scale(.88); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @media (max-width: 1100px) {
+            .bonus-launch-button { bottom: 80px; }
+        }
+
+        @media (max-width: 640px) {
+            .bonus-machine { width: min(78vw, 520px); min-height: 315px; }
+            .bonus-reactor { width: 215px; height: 215px; }
+            .bonus-meter { width: 42px; gap: 6px; }
+            .bonus-meter-left { left: 3%; }
+            .bonus-meter-right { right: 3%; }
+            .bonus-power-transfer { width: 90vw; height: 84px; margin-top: 14px; }
+            .bonus-power-cell { width: 64px; height: 64px; }
+            .bonus-power-dock { width: 70px; height: 68px; }
+            .bonus-conduit { left: 90px; right: 90px; }
+            .bonus-launch-button { right: 12px; min-height: 46px; max-width: calc(100vw - 24px); padding: 0 14px; }
+            .bonus-launch-full-label { display: none; }
+            .bonus-teacher-hotspot { bottom: 72px; }
+            .bonus-stage.has-result .bonus-machine { min-height: 238px; }
+            .bonus-stage.has-result .bonus-reactor { width: 185px; height: 185px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .bonus-stage::before, .bonus-energy-trace, .bonus-orbit, .bonus-core::after, .bonus-transfer-hint, .bonus-conduit::before { animation: none; }
         }
 
         /* Default Ranks */
-        .rank-1 { box-shadow: 0 0 25px rgba(250, 204, 21, 0.25); border-color: rgba(250, 204, 21, 0.6); }
-
-        /* Calculator button active state */
-        .calc-btn:active {
-            transform: scale(0.95);
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        #actionPopover { max-height: calc(100dvh - 20px); overflow-y: auto; }
+        .score-value { font-variant-numeric: tabular-nums; }
+        .student-row.points-counting {
+            border-color: #fcd34d;
+            box-shadow: 0 0 26px #fbbf2470, inset 0 0 20px #fbbf2420;
+        }
+        .points-counting .score-value { color: #fef08a; text-shadow: 0 0 18px #f59e0b; }
+        #awardFeedback { background: linear-gradient(110deg, #78350f80, #312e8170); }
+        #awardProgress { transform-origin: left; transition: transform .08s linear; }
+        @media (prefers-reduced-motion: reduce) {
+            .floating-math { animation: none; }
+            .student-row { transition: none !important; }
+            #awardProgress { transition: none; }
+        }
+        .rank-1 { box-shadow: 0 0 20px rgba(251, 191, 36, 0.2); border-color: rgba(251, 191, 36, 0.5); }
+        /* Maths lab: instrument panels, mint LCD scores and orange function keys.
+           Presentation only; the shared interaction and animation hooks stay intact. */
+        body { background: #061b19; }
+        .grid-bg {
+            background-color: #061b19;
+            background-image: linear-gradient(#75e5bd12 1px, transparent 1px),
+                linear-gradient(90deg, #75e5bd12 1px, transparent 1px);
+            background-size: 28px 28px;
+        }
+        .ambient-glow { background: radial-gradient(circle, #73e6b823, transparent 70%); }
+        .ambient-glow-2 { background: radial-gradient(circle, #ff9a5720, transparent 70%); }
+        .floating-math { color: #b4f7ce; }
+        .maths-console {
+            background: linear-gradient(90deg, #061b1966, #102c2877, #061b1966);
+            border-inline: 1px solid #9be8ca16;
+        }
+        #leaderboardHeader { padding-top: 18px; padding-bottom: 14px; }
+        #leaderboardHeader h1 span {
+            color: #e1ffe9; background: none; font-style: normal;
+            font-family: 'Space Mono', monospace; letter-spacing: -.06em;
+            text-shadow: 0 0 22px #7df5bd44;
+        }
+        #leaderboardHeader button, #bonusDailyBadge { border-radius: 6px; }
+        #leaderboardList { gap: 10px; }
+        body .student-row {
+            border-radius: 10px 3px 10px 3px;
+            border-color: #497667; border-left: 4px solid #6caa91;
+            background: linear-gradient(110deg, #183a32, #0b2622);
+            box-shadow: 0 4px 0 #031310, inset 0 1px 0 #ddffe615;
+            padding-block: 10px;
+        }
+        body .student-row.rank-1 {
+            border-color: #dca471; border-left-color: #ffb46f;
+            background: linear-gradient(110deg, #493826, #1b3026);
+            box-shadow: 0 4px 0 #031310, 0 0 24px #ffa76c20;
+        }
+        body .maths-avatar { border-radius: 6px; background: #09221b; }
+        body .maths-name { font-size: 1.3rem; letter-spacing: -.025em; }
+        body .maths-score {
+            border-radius: 4px; background: #071811; border: 1px solid #91cfa666;
+            box-shadow: inset 0 3px 8px #0009, 0 1px 0 #c6f6d522;
+            min-width: 86px; padding: 9px 12px;
+            background-image: repeating-linear-gradient(0deg, transparent 0 3px, #9dffb808 3px 4px);
+        }
+        body .score-value { font-family: 'Space Mono', monospace; color: #b9ff99; font-size: 1.5rem; text-shadow: 0 0 12px #a3ff7666; }
+        body .maths-score > span:last-child { color: #95bf9b; }
+        body .student-rowbody .points-counting { border-color: #d1ff90; box-shadow: 0 0 28px #bbff7866, inset 0 0 20px #baff7820; }
+        body .points-counting .score-value { color: #eeffc5; text-shadow: 0 0 20px #bbff78; }
+        body .student-row.points-deducted { border-color: #fb7185; }
+        #awardFeedback { border-radius: 4px; border-color: #baff7870; background: linear-gradient(110deg, #335f2c, #143e32); }
+        #awardProgress { background: #baff78; }
+        #awardAmount { font-family: 'Space Mono', monospace; color: #d1ff90; }
+        body .maths-dock { border-radius: 8px; background: #18392f; border-color: #709b80; box-shadow: 0 6px 0 #031812, 0 15px 40px #0008; }
+        body .maths-dock input, #actionPopover input { border-radius: 4px; background: #071f19; border-color: #4c7762; }
+        #mainActionBtn { border-radius: 5px; background: #f5a166; color: #2e2017; border-color: #ffca93; box-shadow: 0 3px 0 #9e5c37; }
+        #mainActionBtn:hover { background: #ffc48c; }
+        #actionPopover, #trophyMenu, #resetModal > div, #deleteStudentModal > div, #bonusTeacherModal > div {
+            border-radius: 10px; background: #16362e; border-color: #6a9d80;
+            box-shadow: 0 12px 50px #0009, inset 0 1px 0 #d1ffdd22;
+        }
+        #actionPopover button, #trophyMenu button { border-radius: 4px; }
+        #tokenForm { border-radius: 6px; background: #c6f6a810; border-color: #b8e99d66; }
+        #redeemTokensButton { background: #b9eb9c; color: #142b1c; }
+        #bonusLaunchButton { border-radius: 6px; background: linear-gradient(110deg, #214f3d, #0d3026); border-color: #95c9a4; color: #d4f5cb; box-shadow: 0 4px 0 #031812, 0 0 20px #baff7815; }
+        .bonus-stage {
+            background: radial-gradient(ellipse at 50% 45%, #436b2e66, transparent 55%),
+                repeating-linear-gradient(0deg, transparent 0 27px, #a5e8ba0a 27px 28px), #061b19;
+        }
+        #bonusStageTitle { font-style: normal; color: #e1ffe9; filter: drop-shadow(0 4px 0 #244d36); }
+        .bonus-machine { border-radius: 16px; border-color: #a7d8ac;
+            background: repeating-linear-gradient(90deg, #c4ffb608 0 1px, transparent 1px 28px), linear-gradient(145deg, #294a35, #0b281f);
+            box-shadow: 0 0 0 7px #0c2018, 0 0 0 10px #dba16b, 0 30px 90px #000b, inset 0 0 60px #baff7818;
+        }
+        .bonus-energy-trace { border-radius: 21px; background: conic-gradient(from var(--spin-angle), #baff78, transparent 14%, transparent 35%, #ffb46f 50%, transparent 64%, transparent 83%, #73e6b8); }
+        .bonus-core { background: radial-gradient(circle, #284f2c, #071b12); border-color: #c0ed96; }
+        body .bonus-reactor-value { font-family: 'Space Mono', monospace; color: #d2ffa7; text-shadow: 0 0 24px #baff78; }
+        .bonus-orbit-a { border-top-color: #ffb46f; border-bottom-color: #dcf7ae; }
+        .bonus-orbit-b { border-left-color: #88e2b2; border-right-color: #baff78; }
+        #bonusResultCard { border-radius: 8px; background: #24462c; border-color: #baff78; }
+        @media (min-width: 768px) {
+            body .maths-name { font-size: 1.65rem; }
+            body .score-value { font-size: 1.8rem; }
+        }
+        @media (max-width: 380px) {
+            body .maths-score { min-width: 72px; padding-inline: 8px; }
         }
     </style>
 </head>
@@ -185,7 +835,7 @@
     <div class="grid-bg"></div>
     <div class="ambient-glow"></div>
     <div class="ambient-glow-2"></div>
-    
+
     <!-- Floating Math Symbols instead of shooting stars -->
     <div class="floating-math">π</div>
     <div class="floating-math">∑</div>
@@ -195,138 +845,287 @@
     <div class="floating-math">θ</div>
     <div class="floating-math">Δ</div>
 
-    <!-- Main Container -->
-    <div class="flex flex-col h-full w-full max-w-xl mx-auto relative z-10">
-        
-        <!-- Compact Header - Forced Single Line -->
-        <div class="flex flex-row justify-between items-center px-4 md:px-6 py-3 shrink-0">
-            
-            <!-- Reimagined HUD-style Title (Math Theme) -->
-            <div class="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                <!-- Glowing Calculator/Math Emblem (Blue/Cyan Theme) -->
-                <div class="relative shrink-0 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg bg-slate-900 border border-sky-500/50 shadow-[inset_0_2px_5px_rgba(255,255,255,0.1),_0_0_15px_rgba(14,165,233,0.3)] overflow-hidden group cursor-default">
-                    <div class="absolute inset-0 bg-gradient-to-b from-sky-400/10 to-blue-600/20"></div>
-                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-sky-400/20 to-transparent group-hover:animate-scanline"></div>
-                    <i class="fa-solid fa-square-root-variable text-sky-400 text-sm md:text-base relative z-10 [text-shadow:0_0_8px_rgba(56,189,248,0.8)] group-hover:scale-110 transition-all duration-300"></i>
+    <!-- Highly visible, silent feedback when points are deducted -->
+    <div id="deductionFeedback" class="fixed inset-0 z-[90] pointer-events-none flex items-center justify-center px-4" role="status" aria-live="assertive" aria-atomic="true">
+        <div class="deduction-screen-pulse absolute inset-0 opacity-0 bg-[radial-gradient(circle,rgba(244,63,94,.12)_20%,rgba(159,18,57,.78)_100%)] border-[12px] border-rose-500/80"></div>
+        <div class="deduction-alert-card opacity-0 relative min-w-[280px] max-w-lg rounded-[2rem] border-4 border-rose-300 bg-gradient-to-br from-rose-500 via-red-600 to-rose-950 px-8 py-5 text-center shadow-[0_0_70px_rgba(244,63,94,.95),inset_0_0_25px_rgba(255,255,255,.25)]">
+            <div id="deductionDarts" class="absolute -top-12 left-1/2 -translate-x-1/2 flex gap-3 text-4xl text-rose-300 drop-shadow-[0_0_10px_rgba(244,63,94,1)]">
+                <i class="fa-solid fa-angles-down"></i>
+                <i class="fa-solid fa-angles-down"></i>
+                <i class="fa-solid fa-angles-down"></i>
+            </div>
+            <div class="text-xs md:text-sm font-black uppercase tracking-[.32em] text-rose-100">Points deducted</div>
+            <div class="my-1 font-display text-6xl md:text-7xl font-black leading-none text-white drop-shadow-[0_5px_0_rgba(136,19,55,.8)]">
+                &minus;<span id="deductionAlertAmount">0</span>
+            </div>
+            <div class="text-lg md:text-xl font-black uppercase tracking-wide text-rose-100">
+                From <span id="deductionAlertName" class="text-white">student</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container (Reduced to max-w-xl for tighter spacing) -->
+    <div class="maths-console flex flex-col h-full w-full max-w-xl mx-auto relative z-10">
+
+        <!-- One compact row; badge labels shorten on narrow screens. -->
+        <div id="leaderboardHeader" class="flex flex-nowrap items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 shrink-0">
+
+            <!-- Reimagined HUD-style Title -->
+            <div class="flex items-center gap-1.5 shrink-0 order-1">
+                <!-- Glowing Rocket Emblem (Green Theme) -->
+                <div class="relative shrink-0 w-7 h-7 md:w-8 md:h-8 hidden min-[360px]:flex items-center justify-center rounded-[0.6rem] bg-slate-800/80 border border-slate-600/50 shadow-[inset_0_2px_5px_rgba(255,255,255,0.1),_0_0_15px_rgba(16,185,129,0.2)] overflow-hidden group cursor-default">
+                    <div class="absolute inset-0 bg-gradient-to-b from-emerald-400/10 to-teal-500/20"></div>
+                    <div class="absolute inset-0 -translate-x-[150%] skew-x-[-15deg] bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-[glassSweep_1.5s_ease-in-out_infinite]"></div>
+                    <i class="fa-solid fa-square-root-variable text-emerald-400 text-sm md:text-base relative z-10 [text-shadow:0_0_8px_rgba(52,211,153,0.8)] transform -rotate-12 group-hover:rotate-0 group-hover:scale-110 transition-all duration-300"></i>
                 </div>
-                
+
                 <!-- Stylized Typography -->
-                <h1 class="font-montserrat flex items-center gap-2 md:gap-3 min-w-0">
-                    <span class="text-2xl md:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-sky-100 to-blue-300 [text-shadow:0_0_20px_rgba(14,165,233,0.3)] pr-1.5 md:pr-2">
-                        MATHS CLASS
-                    </span>
-                    <!-- Blue Theme for Label -->
-                    <span class="flex text-[8px] md:text-[10px] font-bold tracking-[0.15em] md:tracking-[0.25em] text-sky-300 uppercase px-2 py-1 md:px-2.5 md:py-1 rounded-md border border-sky-500/40 bg-sky-950/50 shadow-[inset_0_0_10px_rgba(14,165,233,0.3)] truncate items-center gap-1 md:gap-1.5 mt-0.5">
-                        <div class="w-1.5 h-1.5 rounded-sm bg-sky-400 animate-pulse shrink-0"></div>
-                        <span class="truncate">Weekly Score</span>
+                <h1 class="font-montserrat flex items-center min-w-0 leading-none">
+                    <!-- Added pr-1.5 and md:pr-2 to prevent italic clipping -->
+                    <span class="text-xl md:text-2xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-100 to-slate-400 [text-shadow:0_0_20px_rgba(255,255,255,0.2)] pr-1 whitespace-nowrap">
+                        MATHS
                     </span>
                 </h1>
             </div>
-            
-            <button onclick="openResetModal()" class="ml-3 bg-slate-800 hover:bg-slate-700 text-sky-300 hover:text-white border border-sky-500/30 rounded-lg w-9 h-9 md:w-10 md:h-10 flex items-center justify-center shrink-0 transition-all shadow-lg" title="Start New Week">
-                <i class="fa-solid fa-eraser text-sm md:text-base"></i>
-            </button>
-        </div>
 
-        <!-- Leaderboard List Area -->
-        <div id="leaderboardList" class="flex-1 overflow-y-auto no-scrollbar px-3 md:px-5 pb-20 flex flex-col gap-2 relative">
-            <!-- Students injected here -->
-            <div class="h-full flex flex-col items-center justify-center text-sky-400/50 text-xl font-math animate-pulse gap-3">
-                <i class="fa-solid fa-calculator text-4xl"></i>
-                Calculating data...
+            <div class="flex items-center justify-end gap-1.5 shrink-0 order-4">
+                <button id="awardSoundButton" onclick="toggleAwardSound()" class="bg-white/10 hover:bg-white/20 text-amber-200 hover:text-white border border-white/20 backdrop-blur-sm rounded-full w-8 h-8 shrink-0 flex items-center justify-center transition-all shadow-lg" aria-label="Mute award sounds" aria-pressed="false" title="Mute award sounds"><i class="fa-solid fa-volume-high text-sm md:text-base"></i></button>
+                <button onclick="openResetModal()" class="bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white border border-white/20 backdrop-blur-sm rounded-full w-8 h-8 shrink-0 flex items-center justify-center transition-all shadow-lg" title="Start New Week">
+                    <i class="fa-solid fa-rotate-right text-sm md:text-base"></i>
+                </button>
+            </div>
+            <div class="flex items-center gap-1 text-[8px] font-bold tracking-[0.1em] text-emerald-300 uppercase px-1.5 py-1 rounded-md border border-emerald-500/40 bg-emerald-950/50 shadow-[inset_0_0_10px_rgba(16,185,129,0.3)] whitespace-nowrap shrink-0 order-2 mr-auto" title="Weekly Points">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+                <span class="hidden min-[380px]:inline">Weekly Points</span><span class="min-[380px]:hidden">Points</span>
+            </div>
+            <div id="bonusDailyBadge" class="bonus-badge hidden items-center gap-1 rounded-full border border-amber-300/50 px-2 py-1 text-amber-100 whitespace-nowrap shrink-0 order-3" title="Today's Maths Bonus value">
+                <i class="fa-solid fa-ticket text-amber-300 text-xs"></i>
+                <span class="hidden min-[520px]:inline text-[8px] font-black uppercase tracking-wide">Maths Bonus</span>
+                <span class="font-display font-black text-sm md:text-base leading-none">×<span id="bonusBadgeValue">1</span></span>
             </div>
         </div>
-        
-        <!-- Compact Bottom Dock (Math Aesthetic) -->
+
+        <!-- Leaderboard List Area (Takes up remaining space) -->
+        <div id="awardFeedback" class="hidden relative overflow-hidden shrink-0 mx-4 mb-3 px-4 py-3 rounded-2xl border border-amber-300/40">
+            <div class="flex items-center justify-between gap-3">
+                <div class="min-w-0"><div class="text-[10px] font-black uppercase tracking-widest text-amber-200">Points incoming</div><div id="awardName" class="font-display text-xl font-black truncate"></div></div>
+                <div id="awardAmount" class="font-display text-3xl font-black text-amber-200 whitespace-nowrap"></div>
+            </div>
+            <p id="awardDetail" class="text-xs text-slate-200 mt-1"></p>
+            <div id="awardProgress" class="absolute bottom-0 left-0 w-full h-1 bg-amber-300"></div>
+        </div>
+        <div id="awardAnnouncement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+        <div id="saveError" class="hidden mx-4 mb-2 rounded-xl bg-rose-950 border border-rose-400 px-3 py-2 text-sm text-rose-100" role="alert">Could not save the change. Check your connection and reload to confirm the saved scores before trying again.</div>
+        <div id="leaderboardList" class="flex-1 overflow-y-auto no-scrollbar px-3 md:px-5 pb-20 flex flex-col gap-2 relative">
+            <!-- Students injected here -->
+            <div class="h-full flex items-center justify-center text-white/50 text-xl font-bold font-display animate-pulse">
+                Loading database...
+            </div>
+        </div>
+        <!-- Compact Bottom Dock -->
         <div class="absolute bottom-3 left-1/2 -translate-x-1/2 w-full max-w-xl px-2 md:px-3 z-30 pointer-events-none">
-            <div class="bg-slate-900/95 backdrop-blur-xl border border-blue-500/40 p-2 rounded-xl shadow-[0_0_40px_rgba(14,165,233,0.2)] pointer-events-auto flex items-center gap-1.5 md:gap-2">
-                
+            <div class="maths-dock bg-slate-900/90 backdrop-blur-xl border border-indigo-500/30 p-2 rounded-2xl shadow-[0_0_30px_rgba(0,0,0,0.5)] pointer-events-auto flex items-center gap-1.5 md:gap-2">
+
                 <!-- Winner Trophy Selector (Custom UI) -->
                 <div class="relative shrink-0" id="customTrophyDropdown">
-                    <button type="button" onclick="toggleTrophyMenu(event)" class="flex items-center justify-between w-[68px] md:w-[75px] pl-2.5 pr-2 py-2 md:py-2.5 bg-slate-800 border border-amber-500/40 hover:bg-slate-700 hover:border-amber-400/60 rounded-lg text-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all cursor-pointer shadow-inner">
-                        <i class="fa-solid fa-medal"></i>
-                        <span id="trophySelectedValue" class="font-math font-bold text-sm md:text-base ml-1.5">0</span>
-                        <i class="fa-solid fa-caret-up text-amber-400/50 text-[10px] ml-1"></i>
+                    <button type="button" onclick="toggleTrophyMenu(event)" class="flex items-center justify-between w-[68px] md:w-[75px] pl-2.5 pr-2 py-2 md:py-2.5 bg-emerald-900/30 border border-emerald-500/40 hover:bg-emerald-900/50 hover:border-emerald-400/60 rounded-xl text-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer shadow-inner">
+                        <i class="fa-solid fa-trophy"></i>
+                        <span id="trophySelectedValue" class="font-bold text-sm md:text-base ml-1.5">Off</span>
+                        <i class="fa-solid fa-caret-up text-emerald-400/50 text-[10px] ml-1"></i>
                     </button>
-                    
+
                     <!-- Custom Dropdown Grid -->
-                    <div id="trophyMenu" class="hidden absolute bottom-full left-0 mb-3 w-56 bg-slate-900 backdrop-blur-xl border border-amber-500/40 shadow-[0_10px_40px_rgba(0,0,0,0.8)] rounded-xl p-2.5 z-50 animate-in zoom-in-95 duration-200 origin-bottom-left">
-                        <div class="text-center mb-2 pb-2 border-b border-amber-500/20">
-                            <span class="text-[10px] font-black text-amber-400/80 uppercase tracking-widest flex items-center justify-center gap-1.5"><i class="fa-solid fa-star text-amber-400"></i> Top Mathematicians</span>
+                    <div id="trophyMenu" class="hidden absolute bottom-full left-0 mb-3 w-56 bg-slate-800/95 backdrop-blur-xl border border-emerald-500/40 shadow-[0_10px_40px_rgba(0,0,0,0.6)] rounded-2xl p-2.5 z-50 animate-in zoom-in-95 duration-200 origin-bottom-left">
+                        <div class="text-center mb-2 pb-2 border-b border-emerald-500/20">
+                            <span class="text-[10px] font-black text-emerald-400/80 uppercase tracking-widest flex items-center justify-center gap-1.5"><i class="fa-solid fa-crown text-amber-400"></i> Top Mathematicians</span>
                         </div>
-                        <div class="grid grid-cols-5 gap-1.5 mb-2 font-math">
-                            <button type="button" onclick="selectTopX(1)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">1</button>
-                            <button type="button" onclick="selectTopX(2)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">2</button>
-                            <button type="button" onclick="selectTopX(3)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">3</button>
-                            <button type="button" onclick="selectTopX(4)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">4</button>
-                            <button type="button" onclick="selectTopX(5)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">5</button>
-                            <button type="button" onclick="selectTopX(6)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">6</button>
-                            <button type="button" onclick="selectTopX(7)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">7</button>
-                            <button type="button" onclick="selectTopX(8)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">8</button>
-                            <button type="button" onclick="selectTopX(9)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">9</button>
-                            <button type="button" onclick="selectTopX(10)" class="w-full aspect-square flex items-center justify-center rounded-lg font-bold text-sm text-slate-200 bg-slate-800 hover:bg-amber-500/40 hover:text-white transition-all border border-amber-500/10 hover:border-amber-400/50 shadow-sm active:scale-95">10</button>
+                        <div class="grid grid-cols-5 gap-1.5 mb-2">
+                            <button type="button" onclick="selectTopX(1)" class="w-full aspect-square flex items-center justify-center rounded-xl font-bold text-sm text-slate-200 bg-slate-700/50 hover:bg-emerald-500/40 hover:text-white transition-all border border-emerald-500/10 hover:border-emerald-400/50 shadow-sm active:scale-95">1</button>
+                            <button type="button" onclick="selectTopX(2)" class="w-full aspect-square flex items-center justify-center rounded-xl font-bold text-sm text-slate-200 bg-slate-700/50 hover:bg-emerald-500/40 hover:text-white transition-all border border-emerald-500/10 hover:border-emerald-400/50 shadow-sm active:scale-95">2</button>
+                            <button type="button" onclick="selectTopX(3)" class="w-full aspect-square flex items-center justify-center rounded-xl font-bold text-sm text-slate-200 bg-slate-700/50 hover:bg-emerald-500/40 hover:text-white transition-all border border-emerald-500/10 hover:border-emerald-400/50 shadow-sm active:scale-95">3</button>
+                            <button type="button" onclick="selectTopX(4)" class="w-full aspect-square flex items-center justify-center rounded-xl font-bold text-sm text-slate-200 bg-slate-700/50 hover:bg-emerald-500/40 hover:text-white transition-all border border-emerald-500/10 hover:border-emerald-400/50 shadow-sm active:scale-95">4</button>
+                            <button type="button" onclick="selectTopX(5)" class="w-full aspect-square flex items-center justify-center rounded-xl font-bold text-sm text-slate-200 bg-slate-700/50 hover:bg-emerald-500/40 hover:text-white transition-all border border-emerald-500/10 hover:border-emerald-400/50 shadow-sm active:scale-95">5</button>
+                            <button type="button" onclick="selectTopX(6)" class="w-full aspect-square flex items-center justify-center rounded-xl font-bold text-sm text-slate-200 bg-slate-700/50 hover:bg-emerald-500/40 hover:text-white transition-all border border-emerald-500/10 hover:border-emerald-400/50 shadow-sm active:scale-95">6</button>
+                            <button type="button" onclick="selectTopX(7)" class="w-full aspect-square flex items-center justify-center rounded-xl font-bold text-sm text-slate-200 bg-slate-700/50 hover:bg-emerald-500/40 hover:text-white transition-all border border-emerald-500/10 hover:border-emerald-400/50 shadow-sm active:scale-95">7</button>
+                            <button type="button" onclick="selectTopX(8)" class="w-full aspect-square flex items-center justify-center rounded-xl font-bold text-sm text-slate-200 bg-slate-700/50 hover:bg-emerald-500/40 hover:text-white transition-all border border-emerald-500/10 hover:border-emerald-400/50 shadow-sm active:scale-95">8</button>
+                            <button type="button" onclick="selectTopX(9)" class="w-full aspect-square flex items-center justify-center rounded-xl font-bold text-sm text-slate-200 bg-slate-700/50 hover:bg-emerald-500/40 hover:text-white transition-all border border-emerald-500/10 hover:border-emerald-400/50 shadow-sm active:scale-95">9</button>
+                            <button type="button" onclick="selectTopX(10)" class="w-full aspect-square flex items-center justify-center rounded-xl font-bold text-sm text-slate-200 bg-slate-700/50 hover:bg-emerald-500/40 hover:text-white transition-all border border-emerald-500/10 hover:border-emerald-400/50 shadow-sm active:scale-95">10</button>
                         </div>
-                        <button type="button" onclick="selectTopX(0)" class="w-full text-center py-2 rounded-lg font-bold text-slate-400 bg-slate-800 hover:bg-slate-700 hover:text-white transition-all text-xs border border-slate-700/50 shadow-inner">Turn Off Highlight</button>
+                        <button type="button" onclick="selectTopX(0)" class="w-full text-center py-2 rounded-xl font-bold text-slate-400 bg-slate-900/50 hover:bg-slate-700 hover:text-white transition-all text-xs border border-slate-700/50 shadow-inner">Turn Off Highlight</button>
                     </div>
                 </div>
 
                 <div class="flex-1 relative min-w-0">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fa-solid fa-terminal text-blue-400"></i>
+                        <i class="fa-solid fa-calculator text-indigo-400"></i>
                     </div>
-                    <input type="text" id="studentNameInput" placeholder="Name..." class="block w-full pl-9 pr-2 py-2 md:py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-bold font-math text-sm md:text-base transition-all">
+                    <input type="text" id="studentNameInput" placeholder="Name..." class="block w-full pl-9 pr-2 py-2 md:py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-bold text-sm md:text-base transition-all">
                 </div>
 
                 <div class="w-16 md:w-20 relative shrink-0">
-                    <input type="number" id="pointsInput" placeholder="Pts" class="block w-full px-2 py-2 md:py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-white text-center placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-bold font-math text-sm md:text-base transition-all">
+                    <input type="number" id="pointsInput" placeholder="Pts" class="block w-full px-2 py-2 md:py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white text-center placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-bold text-sm md:text-base transition-all">
                 </div>
 
-                <button id="mainActionBtn" onclick="handleAddNew()" class="w-10 h-10 md:w-11 md:h-11 shrink-0 bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-[0_0_15px_rgba(37,99,235,0.4)] flex items-center justify-center transition-all calc-btn border border-blue-400/50">
+                <button id="mainActionBtn" onclick="handleAddNew()" class="w-10 h-10 md:w-11 md:h-11 shrink-0 bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-xl shadow-lg shadow-indigo-500/30 flex items-center justify-center transition-all active:scale-95 border border-indigo-400/50">
                     <i class="fa-solid fa-plus text-lg"></i>
                 </button>
             </div>
         </div>
     </div>
-    
-    <!-- Tiny Popover for Existing Students (Math themed) -->
-    <div id="actionPopover" class="hidden fixed z-50 bg-slate-900 border border-sky-500/30 shadow-[0_0_30px_rgba(0,0,0,0.8)] rounded-xl p-3 w-64 text-sm animate-in zoom-in-95 duration-200">
+
+    <!-- Fixed student launcher (bottom-right) -->
+    <button id="bonusLaunchButton" onclick="openBonusStage()" disabled class="bonus-launch-button group" title="The teacher needs to arm today's multiplier first">
+        <span class="bonus-launch-light h-2 w-2 rounded-full bg-slate-500 transition"></span>
+        <i class="fa-solid fa-atom text-amber-300 transition duration-500 group-hover:rotate-180"></i>
+        <span class="font-display text-xs font-black uppercase tracking-[.16em]"><span class="bonus-launch-full-label">Maths Bonus </span>Reactor · <span id="bonusLaunchState">Standby</span></span>
+        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-cyan-300/60"></i>
+    </button>
+
+    <!-- Invisible teacher hotspot (bottom-left); only whispers its location on hover/focus -->
+    <button onclick="openBonusTeacherPanel()" class="bonus-teacher-hotspot" title="Teacher multiplier settings" aria-label="Open teacher multiplier settings">
+        <span><i class="fa-solid fa-gear text-[10px]"></i></span>
+    </button>
+
+    <!-- Tiny Popover for Existing Students -->
+    <div id="actionPopover" class="hidden fixed z-50 bg-slate-800/95 backdrop-blur-xl border border-slate-600 shadow-2xl rounded-2xl p-3 w-64 text-sm animate-in zoom-in-95 duration-200">
         <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-700">
-            <span id="popoverStudentName" class="font-math font-bold text-sky-300 truncate text-base">Name</span>
-            <button onclick="closePopover()" class="text-slate-400 hover:text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-slate-800 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+            <span id="popoverStudentName" class="font-display text-white truncate text-base">Name</span>
+            <button onclick="closePopover()" class="text-slate-400 hover:text-white w-6 h-6 flex items-center justify-center rounded-full hover:bg-slate-700 transition-colors"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        
-        <div class="grid grid-cols-3 gap-2 mb-2 font-math">
-            <button onclick="quickAddPoints(1)" class="bg-slate-800 hover:bg-sky-600 text-sky-400 hover:text-white py-2 rounded-lg font-bold border border-sky-500/20 transition-all calc-btn">+1</button>
-            <button onclick="quickAddPoints(5)" class="bg-slate-800 hover:bg-sky-600 text-sky-400 hover:text-white py-2 rounded-lg font-bold border border-sky-500/20 transition-all calc-btn">+5</button>
-            <button onclick="quickAddPoints(10)" class="bg-slate-800 hover:bg-sky-600 text-sky-400 hover:text-white py-2 rounded-lg font-bold border border-sky-500/20 transition-all calc-btn">+10</button>
+
+        <div class="grid grid-cols-3 gap-2 mb-2">
+            <button onclick="quickAddPoints(1)" class="bg-indigo-500/20 hover:bg-indigo-500 text-indigo-300 hover:text-white py-2 rounded-xl font-bold border border-indigo-500/30 transition-all">+1</button>
+            <button onclick="quickAddPoints(5)" class="bg-indigo-500/20 hover:bg-indigo-500 text-indigo-300 hover:text-white py-2 rounded-xl font-bold border border-indigo-500/30 transition-all">+5</button>
+            <button onclick="quickAddPoints(10)" class="bg-indigo-500/20 hover:bg-indigo-500 text-indigo-300 hover:text-white py-2 rounded-xl font-bold border border-indigo-500/30 transition-all">+10</button>
         </div>
 
         <div class="flex gap-2 items-center">
-            <input type="number" id="popoverCustomPoints" placeholder="Value" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-white font-math font-bold text-center focus:outline-none focus:border-sky-400">
-            <button onclick="applyCustomUpdate('add')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1.5 rounded-lg font-bold transition-all shadow-sm calc-btn" title="Add"><i class="fa-solid fa-plus"></i></button>
-            <button onclick="applyCustomUpdate('set')" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1.5 rounded-lg font-bold transition-all shadow-sm calc-btn" title="Set exact score"><i class="fa-solid fa-equals"></i></button>
+            <input type="number" id="popoverCustomPoints" placeholder="Custom" class="flex-1 min-w-0 bg-slate-900 border border-slate-600 rounded-lg px-2 py-1.5 text-white font-bold text-center focus:outline-none focus:border-indigo-400">
+            <button onclick="applyCustomUpdate('add')" class="shrink-0 bg-emerald-500 hover:bg-emerald-400 text-white px-2.5 py-1.5 rounded-lg font-bold transition-all shadow-sm shadow-emerald-500/20" title="Add points" aria-label="Add custom points"><i class="fa-solid fa-plus"></i></button>
+            <button onclick="applyCustomUpdate('deduct')" class="shrink-0 bg-rose-500 hover:bg-rose-400 text-white px-2.5 py-1.5 rounded-lg font-bold transition-all shadow-sm shadow-rose-500/20" title="Deduct points" aria-label="Deduct custom points"><i class="fa-solid fa-minus"></i></button>
+            <button onclick="applyCustomUpdate('set')" class="shrink-0 bg-amber-500 hover:bg-amber-400 text-white px-2.5 py-1.5 rounded-lg font-bold transition-all shadow-sm shadow-amber-500/20" title="Set exact score" aria-label="Set exact score"><i class="fa-solid fa-check"></i></button>
         </div>
+
+        <form id="tokenForm" class="mt-3 p-3 rounded-xl border border-amber-400/30 bg-amber-400/10">
+            <label for="tokenCountInput" class="block font-bold text-amber-200 mb-2"><i class="fa-solid fa-ticket mr-1"></i> Hand in tokens</label>
+            <input id="tokenCountInput" type="number" min="1" step="1" required inputmode="numeric" placeholder="Number of tokens" aria-describedby="tokenPreview" class="w-full bg-slate-900 border border-amber-400/40 rounded-lg px-2 py-2 text-white font-bold">
+            <p id="tokenPreview" class="my-2 text-xs text-amber-100" aria-live="polite"></p>
+            <button id="redeemTokensButton" type="submit" disabled class="w-full bg-amber-400 text-slate-950 rounded-lg py-2 font-black disabled:opacity-40 disabled:cursor-not-allowed">Convert &amp; award points</button>
+            <button id="tokenSetupButton" type="button" onclick="openBonusTeacherPanel()" class="hidden mt-2 w-full text-xs text-amber-200 underline">Set today’s Maths Bonus value</button>
+        </form>
+        <button onclick="openDeleteModal()" class="mt-2 w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 hover:border-rose-400 font-bold transition-all" title="Delete this name">
+            <i class="fa-solid fa-user-minus"></i> Delete name
+        </button>
     </div>
 
     <!-- Reset Confirmation Modal -->
-    <div id="resetModal" class="hidden fixed inset-0 z-[100] items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm transition-opacity">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 md:p-8 max-w-sm w-full text-center shadow-2xl relative overflow-hidden">
+    <div id="resetModal" class="hidden fixed inset-0 z-[100] items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm transition-opacity">
+        <div class="bg-slate-800 border border-slate-600 rounded-3xl p-6 md:p-8 max-w-sm w-full text-center shadow-2xl relative overflow-hidden">
             <div class="absolute -top-10 -right-10 w-32 h-32 bg-red-500/10 rounded-full blur-2xl pointer-events-none"></div>
-            
-            <div class="w-16 h-16 bg-slate-800 rounded-xl flex items-center justify-center mx-auto mb-4 border border-red-500/30 text-red-400 text-3xl">
-                <i class="fa-solid fa-eraser"></i>
+
+            <div class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/30 text-red-400 text-3xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
-            
-            <h2 class="text-2xl font-display font-bold text-white mb-2">Clear Data?</h2>
-            <p class="text-slate-400 mb-6 font-semibold text-sm">This will permanently erase all student scores for the current week. Proceed?</p>
-            
-            <div class="flex gap-3 justify-center font-math">
-                <button onclick="closeResetModal()" class="px-5 py-2.5 rounded-lg font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-600 transition-colors w-full">Cancel</button>
-                <button onclick="confirmReset()" class="px-5 py-2.5 rounded-lg font-bold text-white bg-red-600 hover:bg-red-500 shadow-lg shadow-red-500/20 transition-colors w-full">Erase</button>
+
+            <h2 class="text-2xl font-display text-white mb-2">New Week?</h2>
+            <p class="text-slate-300 mb-6 font-semibold">This will permanently delete all student scores for the current week. Are you sure?</p>
+
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeResetModal()" class="px-5 py-2.5 rounded-xl font-bold text-slate-300 bg-slate-700 hover:bg-slate-600 border border-slate-500 transition-colors w-full">Cancel</button>
+                <button onclick="confirmReset()" class="px-5 py-2.5 rounded-xl font-bold text-white bg-red-500 hover:bg-red-400 shadow-lg shadow-red-500/30 transition-colors w-full">Yes, Clear</button>
             </div>
         </div>
     </div>
-    
+
+    <!-- Delete Student Confirmation Modal -->
+    <div id="deleteStudentModal" class="hidden fixed inset-0 z-[110] items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm transition-opacity">
+        <div class="bg-slate-800 border border-rose-500/40 rounded-3xl p-6 max-w-sm w-full text-center shadow-[0_24px_80px_rgba(0,0,0,.65)] relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-36 h-36 bg-rose-500/15 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="w-16 h-16 bg-rose-500/15 rounded-full flex items-center justify-center mx-auto mb-4 border border-rose-500/35 text-rose-400 text-2xl">
+                <i class="fa-solid fa-user-minus"></i>
+            </div>
+            <h2 class="text-2xl font-display text-white mb-2">Delete this name?</h2>
+            <p class="text-slate-300 mb-6 font-semibold">Remove <span id="deleteStudentName" class="text-rose-300 font-black"></span> and their points from this week?</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeDeleteModal()" class="px-5 py-2.5 rounded-xl font-bold text-slate-300 bg-slate-700 hover:bg-slate-600 border border-slate-500 transition-colors w-full">Cancel</button>
+                <button onclick="confirmDeleteStudent()" class="px-5 py-2.5 rounded-xl font-bold text-white bg-rose-500 hover:bg-rose-400 shadow-lg shadow-rose-500/30 transition-colors w-full"><i class="fa-solid fa-trash-can mr-1.5"></i>Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Discreet teacher setup for the controlled Maths Bonus reveal -->
+    <div id="bonusTeacherModal" class="hidden fixed inset-0 z-[120] items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="bonusTeacherTitle">
+        <div class="w-full max-w-sm overflow-hidden rounded-3xl border border-amber-400/35 bg-slate-900 shadow-[0_25px_90px_rgba(0,0,0,.8)]">
+            <div class="relative border-b border-white/10 bg-gradient-to-r from-amber-500/15 via-fuchsia-500/10 to-cyan-500/10 px-6 py-5">
+                <button onclick="closeBonusTeacherPanel()" class="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-white/10 hover:text-white" aria-label="Close Maths Bonus controls"><i class="fa-solid fa-xmark"></i></button>
+                <div class="mb-1 text-[10px] font-black uppercase tracking-[.28em] text-amber-300">Teacher controls</div>
+                <h2 id="bonusTeacherTitle" class="text-2xl font-display font-black">Set the Reactor Value</h2>
+                <p class="mt-1 text-sm font-semibold text-slate-400">Save the result quietly. The separate launch button will then be ready for your student.</p>
+            </div>
+            <div class="p-6">
+                <label for="bonusTargetInput" class="mb-2 block text-xs font-black uppercase tracking-widest text-slate-400">Today, each Maths Bonus is worth…</label>
+                <div class="relative mb-4">
+                    <span class="absolute inset-y-0 left-4 flex items-center font-display text-2xl font-black text-amber-300">×</span>
+                    <input id="bonusTargetInput" type="number" min="1" max="1000" inputmode="numeric" autocomplete="off" placeholder="5" class="w-full rounded-2xl border-2 border-slate-700 bg-slate-950 py-4 pl-11 pr-5 text-center font-display text-4xl font-black text-white outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15">
+                </div>
+                <p id="bonusTeacherError" class="hidden mb-3 text-center text-sm font-bold text-rose-400">Enter a whole number from 1 to 1,000.</p>
+                <button onclick="armBonusMachine()" class="w-full rounded-2xl border border-amber-300/50 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 px-5 py-3.5 font-display text-lg font-black uppercase tracking-wide text-white shadow-lg shadow-orange-500/25 transition hover:brightness-110 active:scale-[.98]">
+                    <i class="fa-solid fa-lock mr-2"></i>Save &amp; arm reactor
+                </button>
+                <div class="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
+                    <span id="bonusCurrentValue" class="text-xs font-bold text-slate-500">No value set today</span>
+                    <button onclick="clearBonusForToday()" class="text-xs font-bold text-slate-500 transition hover:text-rose-300">Clear today</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full-screen student-facing Maths Bonus show -->
+    <div id="bonusStage" class="bonus-stage hidden fixed inset-0 z-[130] flex-col items-center justify-center overflow-hidden px-4 py-6 text-center" role="dialog" aria-modal="true" aria-labelledby="bonusStageTitle">
+        <button id="bonusStageClose" onclick="closeBonusStage()" class="absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/25 text-white/55 backdrop-blur transition hover:bg-white/10 hover:text-white" aria-label="Close multiplier stage"><i class="fa-solid fa-xmark"></i></button>
+
+        <div class="relative z-10 mb-3 md:mb-6">
+            <div class="mb-1 text-[10px] md:text-xs font-black uppercase tracking-[.42em] text-amber-300">Daily energy challenge</div>
+            <h2 id="bonusStageTitle" class="font-display text-4xl md:text-6xl font-black uppercase italic tracking-tight text-white drop-shadow-[0_5px_0_rgba(88,28,135,.9)]">Maths Bonus Reactor</h2>
+            <p id="bonusStageStatus" class="mt-2 font-bold uppercase tracking-[.18em] text-cyan-200" aria-live="assertive">Power the reactor to begin!</p>
+        </div>
+
+        <div id="bonusMachine" class="bonus-machine z-10 flex items-center justify-center px-5 py-6 md:px-10 md:py-7">
+            <div class="bonus-energy-trace"></div>
+            <div class="bonus-meter bonus-meter-left" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="bonus-reactor">
+                <div class="bonus-orbit bonus-orbit-a"></div>
+                <div class="bonus-orbit bonus-orbit-b"></div>
+                <div class="bonus-core">
+                    <span class="relative z-[2] text-[9px] font-black uppercase tracking-[.3em] text-cyan-100">Multiplier</span>
+                    <span id="bonusReactorValue" class="bonus-reactor-value">×?</span>
+                    <span class="relative z-[2] text-[8px] font-black uppercase tracking-[.24em] text-white/60">Energy core</span>
+                </div>
+            </div>
+            <div class="bonus-meter bonus-meter-right" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+
+        <div id="bonusPowerTransfer" class="bonus-power-transfer">
+            <div class="bonus-conduit" aria-hidden="true"></div>
+            <button id="bonusPowerCell" class="bonus-power-cell" aria-label="Drag the power cell into the reactor dock">
+                <i class="fa-solid fa-bolt text-xl drop-shadow-[0_0_8px_rgba(255,255,255,.8)]"></i>
+                <span class="mt-0.5 text-[7px] font-black uppercase tracking-wider">Power cell</span>
+            </button>
+            <div id="bonusPowerDock" class="bonus-power-dock" aria-hidden="true">
+                <i class="fa-solid fa-plug-circle-bolt text-xl"></i>
+                <span class="mt-0.5 text-[7px] font-black uppercase tracking-wider">Drop here</span>
+            </div>
+        </div>
+
+        <div id="bonusTransferHint" class="bonus-transfer-hint relative z-10 mt-3 flex items-center gap-2 text-sm font-black uppercase tracking-widest text-rose-300">
+            <i class="fa-solid fa-hand-pointer"></i> Drag the power cell into the reactor dock
+        </div>
+
+        <div id="bonusResultCard" class="bonus-result-card relative z-10 mt-4 hidden max-w-3xl rounded-3xl border border-amber-300/50 bg-amber-400/10 px-6 py-4 backdrop-blur-xl shadow-[0_0_45px_rgba(251,191,36,.28)]">
+            <p class="font-display text-2xl md:text-4xl font-black text-white">Today, each <span class="text-amber-300">Maths Bonus</span> is worth <span class="whitespace-nowrap text-cyan-300"><span id="bonusResultValue">1</span> points!</span></p>
+            <button onclick="closeBonusStage()" class="mt-3 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm font-black uppercase tracking-wider text-white transition hover:bg-white/20">Back to the leaderboard</button>
+        </div>
+    </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
@@ -346,29 +1145,56 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- MATH THEME DB COLLECTION ---
-        // Using a different collection to avoid mixing scores with the normal class
-        const DB_COLLECTION = "math_class_leaderboard"; 
+        // Keep maths scores separate from the regular leaderboard.
+        const DB_COLLECTION = "math_class_leaderboard";
         const DB_DOCUMENT = "current_week";
 
         // State
         let students = [];
         let currentlyEditingId = null;
+        let studentPendingDeletionId = null;
         let previousTopStudentId = null;
-        let topWinnersCount = 0; 
-        let previousStudentOrder = []; 
+        let topWinnersCount = 0; // Defines how many top students get highlighted
+        let previousStudentOrder = [];
+        let pointsAudioContext = null;
+        const scoreAnimations = new Map();
+        let awardFrame = null;
+        let awardFeedbackTimer = null;
+        let latestAwardId = null;
+        let awardSoundMuted = false;
+        try { awardSoundMuted = localStorage.getItem('leaderboard-maths:award-muted') === 'true'; } catch {}
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        let pendingDeduction = null;
+        let deductionFeedbackTimer = null;
+        let bassBonusMultiplier = null;
+        let bassBonusDate = null;
+        let armedBonusMultiplier = null;
+        let bonusArmedDate = null;
+        let pendingBonusMultiplier = null;
+        let bonusRevealInProgress = false;
+        let bonusSpinIntervals = [];
+        let bonusRevealTimers = [];
+        let bonusWindupAudio = null;
 
         // DOM Elements
         const leaderboardList = document.getElementById('leaderboardList');
         const nameInput = document.getElementById('studentNameInput');
         const pointsInput = document.getElementById('pointsInput');
         const actionPopover = document.getElementById('actionPopover');
+        const bonusTeacherModal = document.getElementById('bonusTeacherModal');
+        const bonusTargetInput = document.getElementById('bonusTargetInput');
+        const bonusStage = document.getElementById('bonusStage');
+        const bonusMachine = document.getElementById('bonusMachine');
+        const bonusPowerTransfer = document.getElementById('bonusPowerTransfer');
+        const bonusPowerCell = document.getElementById('bonusPowerCell');
+        const bonusPowerDock = document.getElementById('bonusPowerDock');
+        const bonusReactorValue = document.getElementById('bonusReactorValue');
 
-        // Color Array for assigning consistent dynamic colors based on name (Tech/Math Theme palette)
+        // Color Array for assigning consistent dynamic colors based on name
         const nameColors = [
-            'text-sky-400', 'text-cyan-400', 'text-blue-400', 
-            'text-emerald-400', 'text-teal-400', 'text-indigo-400', 
-            'text-amber-400', 'text-rose-400'
+            'text-pink-400', 'text-cyan-400', 'text-amber-400',
+            'text-emerald-400', 'text-fuchsia-400', 'text-blue-400',
+            'text-rose-400', 'text-violet-400'
         ];
 
         // Helper to consistently assign a color to a string (name)
@@ -381,10 +1207,596 @@
             return nameColors[index];
         }
 
-        // --- STREAMING_CHUNK:Initializing Application... ---
+        // A short, bright ascending C-major chime for positive score changes.
+        function playPointsEarnedSound() {
+            if (awardSoundMuted) return;
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+
+            if (!pointsAudioContext) pointsAudioContext = new AudioContext();
+
+            const playChime = () => {
+                const now = pointsAudioContext.currentTime;
+                const masterGain = pointsAudioContext.createGain();
+                const warmthFilter = pointsAudioContext.createBiquadFilter();
+
+                warmthFilter.type = 'lowpass';
+                warmthFilter.frequency.setValueAtTime(3200, now);
+                masterGain.gain.setValueAtTime(0.0001, now);
+                masterGain.gain.exponentialRampToValueAtTime(0.075, now + 0.025);
+                masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.38);
+                warmthFilter.connect(masterGain);
+                masterGain.connect(pointsAudioContext.destination);
+
+                [523.25, 659.25, 783.99].forEach((frequency, index) => {
+                    const oscillator = pointsAudioContext.createOscillator();
+                    const noteGain = pointsAudioContext.createGain();
+                    const startTime = now + (index * 0.055);
+
+                    oscillator.type = index === 0 ? 'triangle' : 'sine';
+                    oscillator.frequency.setValueAtTime(frequency, startTime);
+                    noteGain.gain.setValueAtTime([0.5, 0.42, 0.35][index], startTime);
+                    oscillator.connect(noteGain);
+                    noteGain.connect(warmthFilter);
+                    oscillator.start(startTime);
+                    oscillator.stop(now + 0.4);
+                });
+            };
+
+            if (pointsAudioContext.state === 'suspended') {
+                pointsAudioContext.resume().then(playChime).catch(() => {});
+            } else {
+                playChime();
+            }
+        }
+
+        function updateAwardSoundButton() {
+            const button = document.getElementById('awardSoundButton');
+            button.setAttribute('aria-pressed', String(awardSoundMuted));
+            button.title = awardSoundMuted ? 'Unmute award sounds' : 'Mute award sounds';
+            button.setAttribute('aria-label', button.title);
+            button.innerHTML = `<i class="fa-solid fa-volume-${awardSoundMuted ? 'xmark' : 'high'} text-sm md:text-base"></i>`;
+        }
+
+        function toggleAwardSound() {
+            awardSoundMuted = !awardSoundMuted;
+            try { localStorage.setItem('leaderboard-maths:award-muted', String(awardSoundMuted)); } catch {}
+            updateAwardSoundButton();
+        }
+
+        function prepareAwardAudio() {
+            if (awardSoundMuted) return;
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                if (!pointsAudioContext) pointsAudioContext = new AudioContext();
+                if (pointsAudioContext.state === 'suspended') pointsAudioContext.resume().catch(() => {});
+            } catch { /* Awards still work without audio support. */ }
+        }
+
+        function playScoreTick(progress) {
+            if (awardSoundMuted || pointsAudioContext?.state !== 'running') return;
+            const now = pointsAudioContext.currentTime;
+            const oscillator = pointsAudioContext.createOscillator();
+            const gain = pointsAudioContext.createGain();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(330 * Math.pow(4, progress), now);
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.exponentialRampToValueAtTime(0.045, now + 0.008);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
+            oscillator.connect(gain);
+            gain.connect(pointsAudioContext.destination);
+            oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
+            oscillator.start(now);
+            oscillator.stop(now + 0.08);
+        }
+
+        function getTokenRate() {
+            return bassBonusDate === getTodayKey() && Number.isInteger(bassBonusMultiplier)
+                && bassBonusMultiplier >= 1 && bassBonusMultiplier <= 1000 ? bassBonusMultiplier : null;
+        }
+
+        function updateTokenPreview() {
+            const rate = getTokenRate();
+            const input = document.getElementById('tokenCountInput');
+            const count = Number(input.value);
+            const student = students.find(s => s.id === currentlyEditingId);
+            const valid = Number.isSafeInteger(count) && count > 0 && rate !== null
+                && Number.isSafeInteger(count * rate) && Number.isSafeInteger((student?.points ?? 0) + count * rate);
+            document.getElementById('redeemTokensButton').disabled = !valid || !student;
+            document.getElementById('tokenSetupButton').classList.toggle('hidden', rate !== null);
+            document.getElementById('tokenPreview').textContent = rate === null
+                ? 'Set and reveal today’s Maths Bonus value first.'
+                : valid ? `${count} token${count === 1 ? '' : 's'} × ${rate} = +${count * rate} points`
+                : input.value ? 'Enter a positive whole number within the score limit.'
+                : `Each token is worth ${rate} point${rate === 1 ? '' : 's'} today.`;
+        }
+
+        function redeemTokens(event) {
+            event.preventDefault();
+            updateTokenPreview();
+            if (document.getElementById('redeemTokensButton').disabled) return;
+            const count = Number(document.getElementById('tokenCountInput').value);
+            const rate = getTokenRate();
+            awardPoints(currentlyEditingId, count * rate, `${count} token${count === 1 ? '' : 's'} × ${rate} points`);
+            closePopover();
+        }
+
+        function displayedPoints(student) {
+            return scoreAnimations.get(student.id)?.value ?? student.points;
+        }
+
+        function displayOrder() {
+            return [...students].sort((a, b) => displayedPoints(b) - displayedPoints(a));
+        }
+
+        // Persist the complete award once. Intermediate scores only exist on screen.
+        function awardPoints(id, amount, detail = 'Bonus points') {
+            const student = students.find(s => s.id === id);
+            if (!student || !Number.isSafeInteger(amount) || amount <= 0
+                || !Number.isSafeInteger(student.points + amount)) return;
+            const previousPoints = student.points;
+            const from = displayedPoints(student);
+            student.points += amount;
+            const animation = {
+                from, value: from, target: student.points, start: performance.now(), lastTick: 0,
+                duration: reducedMotion.matches ? 0 : Math.min(6000, Math.max(700, (student.points - from) * 35))
+            };
+            scoreAnimations.set(id, animation);
+            latestAwardId = id;
+            clearTimeout(awardFeedbackTimer);
+            document.getElementById('awardName').textContent = student.name;
+            document.getElementById('awardAmount').textContent = `+${amount}`;
+            document.getElementById('awardDetail').textContent = `${detail} · ${previousPoints} → ${student.points}`;
+            document.getElementById('awardProgress').style.transform = 'scaleX(0)';
+            document.getElementById('awardFeedback').classList.remove('hidden');
+            prepareAwardAudio();
+            renderLeaderboard();
+            Array.from(leaderboardList.children).find(el => el.dataset.id === id)?.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+            saveData().then(saved => {
+                if (saved) return;
+                const current = students.find(s => s.id === id);
+                if (current?.points === animation.target) current.points = previousPoints;
+                if (scoreAnimations.get(id) === animation) scoreAnimations.delete(id);
+                renderLeaderboard();
+            });
+            if (awardFrame === null) awardFrame = requestAnimationFrame(advanceAwards);
+        }
+
+        function advanceAwards(now) {
+            awardFrame = null;
+            let completed = false;
+            for (const [id, animation] of scoreAnimations) {
+                const student = students.find(s => s.id === id);
+                // A remote edit, deletion or reset supersedes this local presentation.
+                if (!student || student.points !== animation.target) {
+                    scoreAnimations.delete(id);
+                    continue;
+                }
+                const progress = animation.duration === 0 || reducedMotion.matches ? 1 : Math.min(1, (now - animation.start) / animation.duration);
+                const value = animation.from + Math.floor((animation.target - animation.from) * progress);
+                if (value !== animation.value && now - animation.lastTick >= 45) {
+                    playScoreTick(progress);
+                    animation.lastTick = now;
+                }
+                animation.value = value;
+                if (id === latestAwardId) document.getElementById('awardProgress').style.transform = `scaleX(${progress})`;
+                if (progress === 1) {
+                    scoreAnimations.delete(id);
+                    completed = true;
+                    document.getElementById('awardAnnouncement').textContent = `${student.name} now has ${student.points} points.`;
+                }
+            }
+            const order = displayOrder().map(s => s.id);
+            const rendered = Array.from(leaderboardList.querySelectorAll('.student-row')).map(el => el.dataset.id);
+            if (completed || order.join('|') !== rendered.join('|')) renderLeaderboard();
+            else leaderboardList.querySelectorAll('.student-row').forEach(el => {
+                const student = students.find(s => s.id === el.dataset.id);
+                if (student) el.querySelector('.score-value').textContent = displayedPoints(student);
+            });
+            if (completed) {
+                try { playPointsEarnedSound(); } catch {}
+                if (!reducedMotion.matches) fireConfetti();
+            }
+            if (scoreAnimations.size) awardFrame = requestAnimationFrame(advanceAwards);
+            else awardFeedbackTimer = setTimeout(() => document.getElementById('awardFeedback').classList.add('hidden'), 1200);
+        }
+
+        function showDeductionFeedback(studentName, amount) {
+            const feedback = document.getElementById('deductionFeedback');
+            document.getElementById('deductionAlertAmount').textContent = amount;
+            document.getElementById('deductionAlertName').textContent = studentName;
+
+            if (deductionFeedbackTimer) clearTimeout(deductionFeedbackTimer);
+            feedback.classList.remove('is-active');
+            void feedback.offsetWidth; // Restart the effect for consecutive deductions.
+            feedback.classList.add('is-active');
+
+            deductionFeedbackTimer = setTimeout(() => {
+                feedback.classList.remove('is-active');
+            }, 1600);
+        }
+
+        function getTodayKey() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function updateBonusBadge() {
+            updateTokenPreview();
+            const badge = document.getElementById('bonusDailyBadge');
+            const hasTodaysValue = bassBonusDate === getTodayKey() && Number.isInteger(bassBonusMultiplier);
+            const hasArmedValue = bonusArmedDate === getTodayKey() && Number.isInteger(armedBonusMultiplier);
+            const currentArmHasBeenRevealed = hasTodaysValue && hasArmedValue && bassBonusMultiplier === armedBonusMultiplier;
+            badge.classList.toggle('hidden', !hasTodaysValue);
+            badge.classList.toggle('flex', hasTodaysValue);
+            if (hasTodaysValue) document.getElementById('bonusBadgeValue').textContent = bassBonusMultiplier;
+
+            const launchButton = document.getElementById('bonusLaunchButton');
+            launchButton.disabled = !hasArmedValue;
+            launchButton.classList.toggle('is-ready', hasArmedValue);
+            launchButton.title = hasArmedValue
+                ? 'Open the student Maths Bonus experience'
+                : 'The teacher needs to arm today’s multiplier first';
+            document.getElementById('bonusLaunchState').textContent = hasArmedValue
+                ? (currentArmHasBeenRevealed ? 'Replay' : 'Ready')
+                : 'Standby';
+
+            const currentValue = document.getElementById('bonusCurrentValue');
+            if (hasArmedValue && hasTodaysValue) currentValue.textContent = `Armed ×${armedBonusMultiplier} · Live ×${bassBonusMultiplier}`;
+            else if (hasArmedValue) currentValue.textContent = `Armed at ×${armedBonusMultiplier} · Not revealed yet`;
+            else currentValue.textContent = 'No value armed today';
+        }
+
+        function openBonusTeacherPanel() {
+            closePopover();
+            updateBonusBadge();
+            bonusTargetInput.value = bonusArmedDate === getTodayKey() && Number.isInteger(armedBonusMultiplier)
+                ? armedBonusMultiplier
+                : '';
+            document.getElementById('bonusTeacherError').classList.add('hidden');
+            bonusTeacherModal.classList.remove('hidden');
+            bonusTeacherModal.classList.add('flex');
+            setTimeout(() => bonusTargetInput.focus(), 50);
+        }
+
+        function closeBonusTeacherPanel() {
+            bonusTeacherModal.classList.add('hidden');
+            bonusTeacherModal.classList.remove('flex');
+        }
+
+        function armBonusMachine() {
+            const target = Number(bonusTargetInput.value);
+            if (!Number.isInteger(target) || target < 1 || target > 1000) {
+                document.getElementById('bonusTeacherError').classList.remove('hidden');
+                bonusTargetInput.focus();
+                return;
+            }
+
+            armedBonusMultiplier = target;
+            bonusArmedDate = getTodayKey();
+            pendingBonusMultiplier = target;
+            updateBonusBadge();
+            saveData();
+            closeBonusTeacherPanel();
+        }
+
+        function clearBonusForToday() {
+            bassBonusMultiplier = null;
+            bassBonusDate = null;
+            armedBonusMultiplier = null;
+            bonusArmedDate = null;
+            pendingBonusMultiplier = null;
+            updateBonusBadge();
+            saveData();
+        }
+
+        function clearBonusAnimationTimers() {
+            bonusSpinIntervals.forEach(clearInterval);
+            bonusRevealTimers.forEach(clearTimeout);
+            bonusSpinIntervals = [];
+            bonusRevealTimers = [];
+            stopBonusWindupSound();
+        }
+
+        function setBonusReactorValue(value) {
+            bonusReactorValue.textContent = `×${value}`;
+            bonusReactorValue.classList.toggle('is-long', String(value).length >= 3);
+            bonusReactorValue.classList.toggle('is-very-long', String(value).length >= 4);
+        }
+
+        function openBonusStage() {
+            const hasArmedValue = bonusArmedDate === getTodayKey() && Number.isInteger(armedBonusMultiplier);
+            if (!hasArmedValue) return;
+            pendingBonusMultiplier = armedBonusMultiplier;
+            clearBonusAnimationTimers();
+            bonusRevealInProgress = false;
+            bonusStage.classList.remove('has-result');
+            bonusMachine.classList.remove('is-spinning', 'is-settling', 'is-winner');
+            bonusPowerTransfer.classList.remove('is-complete');
+            bonusPowerCell.classList.remove('is-dragging', 'is-docked');
+            bonusPowerCell.style.setProperty('--cell-x', '0px');
+            bonusPowerCell.style.setProperty('--cell-y', '0px');
+            bonusPowerCell.disabled = false;
+            bonusPowerDock.classList.remove('is-near', 'is-charged');
+            setBonusReactorValue('?');
+            bonusReactorValue.style.animation = '';
+            document.getElementById('bonusStageStatus').textContent = 'Power the reactor to begin!';
+            const transferHint = document.getElementById('bonusTransferHint');
+            transferHint.innerHTML = '<i class="fa-solid fa-hand-pointer"></i> Drag the power cell into the reactor dock';
+            transferHint.classList.remove('hidden');
+            document.getElementById('bonusResultCard').classList.add('hidden');
+            document.getElementById('bonusStageClose').classList.remove('hidden');
+            bonusStage.classList.remove('hidden');
+            bonusStage.classList.add('flex');
+            bonusStage.scrollTop = 0;
+            bonusPowerCell.focus();
+        }
+
+        function closeBonusStage() {
+            clearBonusAnimationTimers();
+            bonusRevealInProgress = false;
+            bonusStage.classList.add('hidden');
+            bonusStage.classList.remove('flex');
+            bonusStage.classList.remove('has-result');
+            bonusMachine.classList.remove('is-spinning', 'is-settling', 'is-winner');
+        }
+
+        function randomReactorValue() {
+            return Math.floor(Math.random() * 1000) + 1;
+        }
+
+        function playBonusTick(channel = 0) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            if (!pointsAudioContext) pointsAudioContext = new AudioContext();
+            if (pointsAudioContext.state === 'suspended') pointsAudioContext.resume().catch(() => {});
+
+            const now = pointsAudioContext.currentTime;
+            const oscillator = pointsAudioContext.createOscillator();
+            const gain = pointsAudioContext.createGain();
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(150 + channel * 28, now);
+            gain.gain.setValueAtTime(.018, now);
+            gain.gain.exponentialRampToValueAtTime(.0001, now + .045);
+            oscillator.connect(gain);
+            gain.connect(pointsAudioContext.destination);
+            oscillator.start(now);
+            oscillator.stop(now + .05);
+        }
+
+        function startBonusWindupSound() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            stopBonusWindupSound();
+            if (!pointsAudioContext) pointsAudioContext = new AudioContext();
+            if (pointsAudioContext.state === 'suspended') pointsAudioContext.resume().catch(() => {});
+
+            const now = pointsAudioContext.currentTime;
+            const master = pointsAudioContext.createGain();
+            const filter = pointsAudioContext.createBiquadFilter();
+            const lowOscillator = pointsAudioContext.createOscillator();
+            const highOscillator = pointsAudioContext.createOscillator();
+
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(480, now);
+            filter.frequency.exponentialRampToValueAtTime(2800, now + 4.2);
+            master.gain.setValueAtTime(.0001, now);
+            master.gain.exponentialRampToValueAtTime(.045, now + .16);
+            master.gain.exponentialRampToValueAtTime(.085, now + 4.15);
+
+            lowOscillator.type = 'sawtooth';
+            lowOscillator.frequency.setValueAtTime(72, now);
+            lowOscillator.frequency.exponentialRampToValueAtTime(185, now + 4.2);
+            highOscillator.type = 'sine';
+            highOscillator.frequency.setValueAtTime(145, now);
+            highOscillator.frequency.exponentialRampToValueAtTime(520, now + 4.2);
+
+            lowOscillator.connect(filter);
+            highOscillator.connect(filter);
+            filter.connect(master);
+            master.connect(pointsAudioContext.destination);
+            lowOscillator.start(now);
+            highOscillator.start(now);
+            bonusWindupAudio = { master, oscillators: [lowOscillator, highOscillator] };
+        }
+
+        function stopBonusWindupSound() {
+            if (!bonusWindupAudio || !pointsAudioContext) return;
+            const now = pointsAudioContext.currentTime;
+            const { master, oscillators } = bonusWindupAudio;
+            master.gain.cancelScheduledValues(now);
+            master.gain.setValueAtTime(Math.max(master.gain.value, .0001), now);
+            master.gain.exponentialRampToValueAtTime(.0001, now + .12);
+            oscillators.forEach(oscillator => {
+                try { oscillator.stop(now + .14); } catch (_) {}
+            });
+            bonusWindupAudio = null;
+        }
+
+        function playBonusFanfare() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            if (!pointsAudioContext) pointsAudioContext = new AudioContext();
+            const now = pointsAudioContext.currentTime;
+            const notes = [261.63, 329.63, 392, 523.25, 659.25, 783.99];
+
+            notes.forEach((frequency, index) => {
+                const oscillator = pointsAudioContext.createOscillator();
+                const gain = pointsAudioContext.createGain();
+                const start = now + (index < 3 ? index * .08 : .36 + (index - 3) * .035);
+                oscillator.type = index < 3 ? 'triangle' : 'sine';
+                oscillator.frequency.setValueAtTime(frequency, start);
+                gain.gain.setValueAtTime(.0001, start);
+                gain.gain.exponentialRampToValueAtTime(.11, start + .025);
+                gain.gain.exponentialRampToValueAtTime(.0001, start + .55);
+                oscillator.connect(gain);
+                gain.connect(pointsAudioContext.destination);
+                oscillator.start(start);
+                oscillator.stop(start + .58);
+            });
+        }
+
+        function fireBonusConfetti() {
+            if (typeof confetti !== 'function') return;
+            const end = Date.now() + 3200;
+            const colors = ['#fde047', '#fb7185', '#22d3ee', '#c084fc', '#ffffff'];
+            (function frame() {
+                confetti({ particleCount: 7, angle: 62, spread: 70, startVelocity: 48, origin: { x: 0, y: .72 }, colors });
+                confetti({ particleCount: 7, angle: 118, spread: 70, startVelocity: 48, origin: { x: 1, y: .72 }, colors });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        }
+
+        function startBonusReveal() {
+            if (bonusRevealInProgress || !Number.isInteger(pendingBonusMultiplier)) return;
+            bonusRevealInProgress = true;
+            bonusPowerCell.blur();
+            bonusPowerCell.disabled = true;
+            bonusPowerTransfer.classList.add('is-complete');
+            document.getElementById('bonusTransferHint').classList.add('hidden');
+            document.getElementById('bonusStageStatus').textContent = 'Multiplier reactor activated!';
+            bonusMachine.classList.add('is-spinning');
+            startBonusWindupSound();
+
+            bonusSpinIntervals[0] = setInterval(() => {
+                setBonusReactorValue(randomReactorValue());
+                playBonusTick(0);
+            }, 78);
+
+            bonusRevealTimers.push(setTimeout(() => {
+                bonusMachine.classList.add('is-settling');
+                document.getElementById('bonusStageStatus').textContent = 'Locking in today’s value…';
+            }, 2300));
+
+            bonusRevealTimers.push(setTimeout(() => {
+                clearInterval(bonusSpinIntervals[0]);
+                bonusReactorValue.style.animation = 'none';
+                setBonusReactorValue(pendingBonusMultiplier);
+                bonusReactorValue.parentElement.animate(
+                    [
+                        { transform: 'scale(.82)', filter: 'brightness(2.2)' },
+                        { transform: 'scale(1.08)', filter: 'brightness(1.5)' },
+                        { transform: 'scale(1)', filter: 'brightness(1)' }
+                    ],
+                    { duration: 650, easing: 'cubic-bezier(.2,1.4,.3,1)' }
+                );
+            }, 4050));
+
+            bonusRevealTimers.push(setTimeout(() => {
+                bonusMachine.classList.remove('is-spinning', 'is-settling');
+                bonusMachine.classList.add('is-winner');
+                stopBonusWindupSound();
+                document.getElementById('bonusStageStatus').textContent = 'Maths Bonus multiplier confirmed!';
+                document.getElementById('bonusResultValue').textContent = pendingBonusMultiplier;
+                document.getElementById('bonusResultCard').classList.remove('hidden');
+                bonusStage.classList.add('has-result');
+                requestAnimationFrame(() => { bonusStage.scrollTop = 0; });
+
+                bassBonusMultiplier = pendingBonusMultiplier;
+                bassBonusDate = getTodayKey();
+                updateBonusBadge();
+                saveData();
+                playBonusFanfare();
+                fireBonusConfetti();
+                bonusRevealInProgress = false;
+            }, 4400));
+        }
+
+        function setupBonusPowerCellListeners() {
+            let startX = 0;
+            let startY = 0;
+            let pointerActive = false;
+            let suppressClick = false;
+            let dragProgress = 0;
+
+            const resetPowerCell = () => {
+                bonusPowerCell.classList.remove('is-dragging');
+                bonusPowerCell.style.setProperty('--cell-x', '0px');
+                bonusPowerCell.style.setProperty('--cell-y', '0px');
+                bonusPowerDock.classList.remove('is-near');
+            };
+
+            const dockPowerCell = () => {
+                if (bonusRevealInProgress || bonusPowerCell.disabled) return;
+                const targetX = bonusPowerDock.offsetLeft + (bonusPowerDock.offsetWidth / 2) - bonusPowerCell.offsetLeft - (bonusPowerCell.offsetWidth / 2);
+                const targetY = bonusPowerDock.offsetTop + (bonusPowerDock.offsetHeight / 2) - bonusPowerCell.offsetTop - (bonusPowerCell.offsetHeight / 2);
+                bonusPowerCell.classList.remove('is-dragging');
+                bonusPowerCell.classList.add('is-docked');
+                bonusPowerCell.style.setProperty('--cell-x', `${targetX}px`);
+                bonusPowerCell.style.setProperty('--cell-y', `${targetY}px`);
+                bonusPowerCell.disabled = true;
+                bonusPowerDock.classList.remove('is-near');
+                bonusPowerDock.classList.add('is-charged');
+                document.getElementById('bonusStageStatus').textContent = 'Power cell connected!';
+                document.getElementById('bonusTransferHint').innerHTML = '<i class="fa-solid fa-circle-check"></i> Connection successful — charging reactor';
+                playBonusTick(8);
+                bonusRevealTimers.push(setTimeout(startBonusReveal, 650));
+            };
+
+            bonusPowerCell.addEventListener('pointerdown', (event) => {
+                if (bonusRevealInProgress) return;
+                event.preventDefault();
+                pointerActive = true;
+                suppressClick = false;
+                dragProgress = 0;
+                startX = event.clientX;
+                startY = event.clientY;
+                bonusPowerCell.classList.add('is-dragging');
+                bonusPowerCell.setPointerCapture(event.pointerId);
+            });
+
+            bonusPowerCell.addEventListener('pointermove', (event) => {
+                if (!pointerActive || bonusRevealInProgress) return;
+                event.preventDefault();
+                const maxX = bonusPowerTransfer.clientWidth - bonusPowerCell.offsetWidth - 20;
+                const x = Math.max(0, Math.min(maxX, event.clientX - startX));
+                const y = Math.max(-7, Math.min(7, event.clientY - startY));
+                dragProgress = maxX > 0 ? x / maxX : 0;
+                if (x > 5 || Math.abs(y) > 4) suppressClick = true;
+                bonusPowerCell.style.setProperty('--cell-x', `${x}px`);
+                bonusPowerCell.style.setProperty('--cell-y', `${y}px`);
+
+                const cellRect = bonusPowerCell.getBoundingClientRect();
+                const dockRect = bonusPowerDock.getBoundingClientRect();
+                const nearDock = cellRect.right >= dockRect.left - 28 && cellRect.left <= dockRect.right;
+                bonusPowerDock.classList.toggle('is-near', nearDock);
+            });
+
+            const releasePowerCell = () => {
+                if (!pointerActive) return;
+                pointerActive = false;
+                const cellRect = bonusPowerCell.getBoundingClientRect();
+                const dockRect = bonusPowerDock.getBoundingClientRect();
+                const overlapsDock = cellRect.right >= dockRect.left && cellRect.left <= dockRect.right && cellRect.bottom >= dockRect.top && cellRect.top <= dockRect.bottom;
+                if (overlapsDock || dragProgress >= .72) dockPowerCell();
+                else resetPowerCell();
+                setTimeout(() => { suppressClick = false; }, 0);
+            };
+
+            bonusPowerCell.addEventListener('pointerup', releasePowerCell);
+            bonusPowerCell.addEventListener('pointercancel', () => {
+                pointerActive = false;
+                if (dragProgress >= .72) dockPowerCell();
+                else resetPowerCell();
+            });
+            bonusPowerCell.addEventListener('click', () => {
+                if (!suppressClick) dockPowerCell();
+            });
+        }
+
+        // --- Initialization ---
         function init() {
+            updateAwardSoundButton();
             setupInputListeners();
-            
+            setupBonusPowerCellListeners();
+            updateBonusBadge();
+
+            window.setInterval(updateBonusBadge, 60000);
+
             // Close popovers and custom menus when clicking outside
             document.addEventListener('click', (e) => {
                 if(!actionPopover.contains(e.target) && !e.target.closest('.student-row')) {
@@ -396,7 +1808,13 @@
                     trophyMenu.classList.add('hidden');
                 }
             });
-            
+            document.addEventListener('keydown', (e) => {
+                if (e.shiftKey && e.key.toLowerCase() === 'b') openBonusTeacherPanel();
+                if (e.key === 'Escape' && !bonusRevealInProgress) {
+                    closeBonusTeacherPanel();
+                    closeBonusStage();
+                }
+            });
             // Connect to Firebase realtime updates
             signInAnonymously(auth).then(() => {
                 const docRef = doc(db, DB_COLLECTION, DB_DOCUMENT);
@@ -405,8 +1823,21 @@
                         const data = docSnap.data();
                         students = data.students || [];
                         topWinnersCount = data.topWinnersCount || 0;
-                        updateTopXUI(topWinnersCount); 
-                        
+                        const storedMultiplier = Number(data.bassBonusMultiplier);
+                        bassBonusMultiplier = Number.isInteger(storedMultiplier) ? storedMultiplier : null;
+                        bassBonusDate = typeof data.bassBonusDate === 'string' ? data.bassBonusDate : null;
+                        const storedArmedMultiplier = Number(data.armedBonusMultiplier);
+                        armedBonusMultiplier = Number.isInteger(storedArmedMultiplier) ? storedArmedMultiplier : null;
+                        bonusArmedDate = typeof data.bonusArmedDate === 'string' ? data.bonusArmedDate : null;
+
+                        // Backwards compatibility for a value revealed before the separate launch control existed.
+                        if (bonusArmedDate !== getTodayKey() && bassBonusDate === getTodayKey() && Number.isInteger(bassBonusMultiplier)) {
+                            armedBonusMultiplier = bassBonusMultiplier;
+                            bonusArmedDate = bassBonusDate;
+                        }
+                        updateTopXUI(topWinnersCount); // Sync UI
+                        updateBonusBadge();
+
                         if (students.length > 0) {
                             sortStudents();
                             if(!previousTopStudentId) previousTopStudentId = students[0].id;
@@ -414,29 +1845,43 @@
                     } else {
                         students = [];
                         topWinnersCount = 0;
+                        bassBonusMultiplier = null;
+                        bassBonusDate = null;
+                        armedBonusMultiplier = null;
+                        bonusArmedDate = null;
+                        updateBonusBadge();
                     }
                     renderLeaderboard();
                 });
             }).catch((error) => {
                 console.error("Firebase Auth Error:", error);
-                leaderboardList.innerHTML = `<div class="text-rose-400 text-center py-10 font-bold font-math">Database connection failed.</div>`;
+                leaderboardList.innerHTML = `<div class="text-rose-400 text-center py-10 font-bold">Failed to connect to database. Please check your internet connection.</div>`;
             });
         }
 
         function saveData() {
             if (auth.currentUser) {
-                setDoc(doc(db, DB_COLLECTION, DB_DOCUMENT), { 
+                return setDoc(doc(db, DB_COLLECTION, DB_DOCUMENT), {
                     students: students,
-                    topWinnersCount: topWinnersCount 
-                }, { merge: true });
+                    topWinnersCount: topWinnersCount,
+                    bassBonusMultiplier: bassBonusMultiplier,
+                    bassBonusDate: bassBonusDate,
+                    armedBonusMultiplier: armedBonusMultiplier,
+                    bonusArmedDate: bonusArmedDate
+                }, { merge: true }).then(() => true).catch(error => {
+                    console.error('Leaderboard save failed:', error);
+                    document.getElementById('saveError').classList.remove('hidden');
+                    return false;
+                });
             }
+            document.getElementById('saveError').classList.remove('hidden');
+            return Promise.resolve(false);
         }
 
-        // --- STREAMING_CHUNK:Event Handlers and Logic... ---
         function updateTopXUI(val) {
             const display = document.getElementById('trophySelectedValue');
             if (display) {
-                display.innerText = val == 0 ? '0' : val;
+                display.innerText = val == 0 ? 'Off' : val;
             }
         }
 
@@ -444,20 +1889,22 @@
             e.stopPropagation();
             const menu = document.getElementById('trophyMenu');
             menu.classList.toggle('hidden');
-            closePopover(); 
+            closePopover(); // Hide student edit popover if open
         }
 
         function selectTopX(val) {
             topWinnersCount = parseInt(val);
             updateTopXUI(topWinnersCount);
-            saveData(); 
+            saveData(); // Save to DB, Snapshot triggers render
             document.getElementById('trophyMenu').classList.add('hidden');
             if (topWinnersCount > 0) {
-                fireConfetti(); 
+                fireConfetti(); // Little celebration for setting the prize tier
             }
         }
 
         function setupInputListeners() {
+            document.getElementById('tokenCountInput').addEventListener('input', updateTokenPreview);
+            document.getElementById('tokenForm').addEventListener('submit', redeemTokens);
             nameInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -478,9 +1925,15 @@
                     e.preventDefault();
                     applyCustomUpdate('add');
                 }
-            })
+            });
+
+            bonusTargetInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    armBonusMachine();
+                }
+            });
         }
-        
         function sortStudents() {
             students.sort((a, b) => b.points - a.points);
         }
@@ -488,7 +1941,7 @@
         function handleAddNew() {
             const name = nameInput.value.trim();
             const pointsStr = pointsInput.value.trim();
-            const points = parseInt(pointsStr, 10);
+            const points = pointsStr === '' ? NaN : Number(pointsStr);
 
             if (!name) return;
 
@@ -501,8 +1954,8 @@
                 const rowEl = document.querySelector(`.student-row[data-id="${studentId}"]`);
                 if(rowEl) {
                     rowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    rowEl.classList.add('bg-blue-900/60');
-                    setTimeout(() => rowEl.classList.remove('bg-blue-900/60'), 1000);
+                    rowEl.classList.add('bg-indigo-500/40');
+                    setTimeout(() => rowEl.classList.remove('bg-indigo-500/40'), 1000);
                     openPopover(studentId, rowEl);
                 }
                 nameInput.value = '';
@@ -510,7 +1963,7 @@
                 return;
             }
 
-            if (isNaN(points)) {
+            if (!Number.isSafeInteger(points)) {
                 pointsInput.focus();
                 return;
             }
@@ -519,20 +1972,19 @@
             const newStudent = {
                 id: Date.now().toString(),
                 name: name,
-                points: points
+                points: points > 0 ? 0 : points
             };
 
             students.push(newStudent);
-            saveData(); 
+            if (points > 0) awardPoints(newStudent.id, points, 'Welcome to the leaderboard');
+            else { renderLeaderboard(); saveData(); }
 
             nameInput.value = '';
             pointsInput.value = '';
             nameInput.focus();
-            
-            fireConfetti();
+
         }
 
-        // --- STREAMING_CHUNK:Popover Management... ---
         function openPopover(id, el) {
             currentlyEditingId = id;
             const student = students.find(s => s.id === id);
@@ -540,26 +1992,29 @@
 
             document.getElementById('popoverStudentName').innerText = student.name;
             document.getElementById('popoverCustomPoints').value = '';
+            document.getElementById('tokenCountInput').value = '';
+            updateTokenPreview();
 
             const rect = el.getBoundingClientRect();
             actionPopover.classList.remove('hidden');
-            
+
             const popoverHeight = actionPopover.offsetHeight;
             const spaceBelow = window.innerHeight - rect.bottom;
-            
+
             let topPos = rect.bottom + 5;
             if (spaceBelow < popoverHeight + 20) {
                 topPos = rect.top - popoverHeight - 5;
             }
-            
+
             let leftPos = rect.left + (rect.width / 2) - (actionPopover.offsetWidth / 2);
             if (leftPos < 10) leftPos = 10;
             if (leftPos + actionPopover.offsetWidth > window.innerWidth - 10) {
                 leftPos = window.innerWidth - actionPopover.offsetWidth - 10;
             }
 
-            actionPopover.style.top = `${topPos}px`;
-            actionPopover.style.left = `${leftPos}px`;
+            // Viewport-relative limits also keep an open panel in view after resize.
+            actionPopover.style.top = `clamp(10px, ${topPos}px, calc(100dvh - ${popoverHeight + 10}px))`;
+            actionPopover.style.left = `clamp(10px, ${leftPos}px, calc(100vw - ${actionPopover.offsetWidth + 10}px))`;
 
             setTimeout(() => { document.getElementById('popoverCustomPoints').focus(); }, 50);
         }
@@ -571,155 +2026,201 @@
 
         function quickAddPoints(amount) {
             if(!currentlyEditingId) return;
-            const idx = students.findIndex(s => s.id === currentlyEditingId);
-            if(idx !== -1) {
-                students[idx].points += amount;
-                saveData();
-                fireConfetti();
-            }
+            awardPoints(currentlyEditingId, amount);
             closePopover();
         }
 
         function applyCustomUpdate(mode) {
             if(!currentlyEditingId) return;
-            const val = parseInt(document.getElementById('popoverCustomPoints').value);
-            if(isNaN(val)) return;
+            const rawValue = document.getElementById('popoverCustomPoints').value.trim();
+            const val = Number(rawValue);
+            if(!rawValue || !Number.isSafeInteger(val)) return;
 
             const idx = students.findIndex(s => s.id === currentlyEditingId);
             if(idx !== -1) {
-                if(mode === 'add') {
-                    students[idx].points += val;
-                } else if (mode === 'set') {
-                    students[idx].points = val;
+                const previousPoints = students[idx].points;
+                const studentName = students[idx].name;
+                const target = mode === 'add' ? previousPoints + val
+                    : mode === 'deduct' ? previousPoints - Math.abs(val) : val;
+                if (!Number.isSafeInteger(target) || !Number.isSafeInteger(target - previousPoints)) return;
+                if (target > previousPoints) {
+                    awardPoints(students[idx].id, target - previousPoints);
+                    closePopover();
+                    return;
                 }
+                scoreAnimations.delete(students[idx].id);
+                students[idx].points = target;
+
+                const pointsChange = students[idx].points - previousPoints;
+                if (pointsChange < 0) {
+                    pendingDeduction = {
+                        studentId: students[idx].id,
+                        amount: Math.abs(pointsChange)
+                    };
+                    renderLeaderboard();
+                    showDeductionFeedback(studentName, Math.abs(pointsChange));
+                }
+
                 saveData();
-                if(mode === 'add' && val > 0) fireConfetti();
+                if (pointsChange === 0) renderLeaderboard();
             }
             closePopover();
         }
 
-        // --- STREAMING_CHUNK:Rendering DOM and Animations... ---
-        function getRankClass(index) {
-            // Math Theme Colors: Slate/Blue for normal, Amber/Gold for rank 1
-            if (index === 0) return 'rank-1 bg-gradient-to-r from-amber-900/30 to-amber-950/40 border-amber-500/50 shadow-[0_0_20px_rgba(250,204,21,0.15)]';
-            return 'bg-slate-900/80 border-blue-500/20 hover:border-blue-400/40';
+        function openDeleteModal() {
+            if (!currentlyEditingId) return;
+            const student = students.find(s => s.id === currentlyEditingId);
+            if (!student) return;
+
+            studentPendingDeletionId = student.id;
+            document.getElementById('deleteStudentName').innerText = student.name;
+            document.getElementById('deleteStudentModal').classList.remove('hidden');
+            document.getElementById('deleteStudentModal').classList.add('flex');
+            closePopover();
         }
-        
+
+        function closeDeleteModal() {
+            const modal = document.getElementById('deleteStudentModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            studentPendingDeletionId = null;
+        }
+
+        function confirmDeleteStudent() {
+            if (!studentPendingDeletionId) return;
+
+            students = students.filter(student => student.id !== studentPendingDeletionId);
+            topWinnersCount = Math.min(topWinnersCount, students.length);
+            sortStudents();
+            previousTopStudentId = students[0]?.id || null;
+            updateTopXUI(topWinnersCount);
+            closeDeleteModal();
+            renderLeaderboard();
+            saveData();
+        }
+
+        function getRankClass(index) {
+            if (index === 0) return 'rank-1 bg-gradient-to-r from-amber-900/40 to-amber-900/10 border-amber-400/50 shadow-[0_0_20px_rgba(251,191,36,0.15)]';
+            return 'bg-gradient-to-r from-slate-800/80 to-slate-900/60 border-indigo-500/30';
+        }
+
         function renderLeaderboard() {
+            for (const [id, animation] of scoreAnimations) {
+                if (students.find(s => s.id === id)?.points !== animation.target) scoreAnimations.delete(id);
+            }
             // FLIP Setup
             const currentPositions = new Map();
             document.querySelectorAll('.student-row').forEach(el => {
                 currentPositions.set(el.dataset.id, el.getBoundingClientRect());
             });
 
-            previousStudentOrder = students.map(s => s.id);
-            sortStudents();
+            const orderedStudents = displayOrder();
+            previousStudentOrder = orderedStudents.map(s => s.id);
 
-            if (students.length > 1 && previousTopStudentId && previousTopStudentId !== students[0].id) {
-                fireGrandConfetti();
-                previousTopStudentId = students[0].id;
+            if (students.length > 1 && previousTopStudentId && previousTopStudentId !== orderedStudents[0].id) {
+                if (!reducedMotion.matches) fireGrandConfetti();
+                previousTopStudentId = orderedStudents[0].id;
             } else if (students.length === 1) {
                 previousTopStudentId = students[0].id;
             }
 
             leaderboardList.innerHTML = '';
-            
+
             if (students.length === 0) {
                 leaderboardList.innerHTML = `
                     <div class="flex flex-col items-center justify-center h-full text-slate-500 mt-10">
-                        <i class="fa-solid fa-square-root-variable text-5xl mb-4 opacity-50"></i>
-                        <p class="font-bold font-display text-xl">Awaiting Data</p>
-                        <p class="text-sm font-math">Input calculations below.</p>
+                        <i class="fa-solid fa-users-rays text-5xl mb-4 opacity-50"></i>
+                        <p class="font-bold font-display text-xl">Your maths lab awaits!</p>
+                        <p class="text-sm">Add students below to begin.</p>
                     </div>`;
                 return;
             }
 
-            students.forEach((student, index) => {
+            orderedStudents.forEach((student, index) => {
                 const studentColor = getColorForName(student.name);
+                const deduction = pendingDeduction?.studentId === student.id ? pendingDeduction : null;
 
+                // Determine if they are a "Prize Winner"
                 let extraClasses = '';
                 if (topWinnersCount > 0 && index < topWinnersCount) {
                     extraClasses = 'prize-winner';
                 }
+                if (deduction) extraClasses += ' points-deducted';
+                if (scoreAnimations.has(student.id)) extraClasses += ' points-counting';
 
                 const el = document.createElement('div');
-                // Altered to have slightly rounded borders (rounded-lg) instead of pill (rounded-full) for tech vibe
-                el.className = `student-row flex items-center justify-between py-2 px-3 md:px-4 rounded-xl backdrop-blur-md shadow-lg border relative flip-item cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:brightness-110 group ${getRankClass(index)} ${extraClasses}`;
+                el.className = `student-row flex items-center justify-between py-1.5 md:py-2 px-2 md:px-3 rounded-full backdrop-blur-xl shadow-lg border relative flip-item cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:brightness-110 group ${getRankClass(index)} ${extraClasses}`;
                 el.dataset.id = student.id;
                 el.onclick = (e) => openPopover(student.id, e.currentTarget);
 
-                let rankIcon = `<span class="text-base md:text-xl font-math font-bold w-6 md:w-8 text-center text-slate-500 shrink-0 z-10">#${index + 1}</span>`;
-                if (index === 0) rankIcon = `<span class="text-lg md:text-2xl w-6 md:w-8 text-center drop-shadow-[0_0_8px_rgba(250,204,21,0.8)] animate-pulse-glow-gold shrink-0 z-10"><i class="fa-solid fa-trophy text-amber-400"></i></span>`;
+                let rankIcon = `<span class="text-base md:text-xl font-display font-black w-6 md:w-8 text-center text-slate-500/80 shrink-0 z-10">${index + 1}</span>`;
+                if (index === 0) rankIcon = `<span class="text-lg md:text-2xl w-6 md:w-8 text-center drop-shadow-[0_0_8px_rgba(251,191,36,0.8)] animate-pulse-glow shrink-0 z-10">👑</span>`;
 
                 el.innerHTML = `
-                    <div class="flex items-center gap-3 md:gap-4 overflow-hidden z-10 relative">
+                    <!-- 3D Glass Highlight for Pill Shape -->
+                    <div class="absolute top-0 left-[5%] right-[5%] h-[30%] bg-gradient-to-b from-white/10 to-transparent rounded-t-full pointer-events-none z-0"></div>
+                    ${deduction ? '<div class="deduction-flash absolute inset-0 rounded-full pointer-events-none z-[5]"></div>' : ''}
+
+                    <div class="flex items-center gap-2 md:gap-4 overflow-hidden z-10 relative">
                         ${rankIcon}
-                        
-                        <!-- Square-ish Avatar for Math Theme -->
+
+                        <!-- Glowing Colored Avatar Ring -->
                         <div class="relative shrink-0 ${studentColor}">
-                            <div class="absolute inset-0 bg-current opacity-20 blur-md rounded-lg"></div>
-                            <div class="h-10 w-10 md:h-12 md:w-12 rounded-lg bg-slate-950 flex items-center justify-center text-white font-display font-black text-sm md:text-lg shadow-inner border border-current z-10 relative uppercase">
+                            <div class="absolute inset-0 bg-current opacity-40 blur-md rounded-full"></div>
+                            <div class="maths-avatar h-10 w-10 md:h-12 md:w-12 rounded-full bg-slate-900 flex items-center justify-center text-white font-avatar font-bold text-sm md:text-lg shadow-[inset_0_0_15px_rgba(255,255,255,0.15)] border-2 border-current z-10 relative uppercase">
                                 ${student.name.charAt(0)}
                             </div>
                         </div>
-                        
-                        <span class="text-xl md:text-2xl font-display font-black ${studentColor} truncate tracking-wide drop-shadow-sm leading-none">${student.name}</span>
+
+                        <span class="maths-name text-2xl md:text-3xl font-display font-black ${studentColor} truncate tracking-wide drop-shadow-md leading-none">${student.name}</span>
                     </div>
-                    
-                    <!-- Digital Scoreboard Panel -->
-                    <div class="relative flex items-center justify-center bg-black/60 rounded-lg px-4 md:px-5 py-1.5 md:py-2 border border-slate-700 shadow-inner overflow-hidden shrink-0 z-10 group-hover:border-slate-500 transition-colors min-w-[70px]">
-                        <!-- Scanline Effect overlay -->
-                        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none opacity-50 z-0"></div>
-                        
-                        <span class="text-2xl md:text-3xl font-math font-bold text-emerald-400 tracking-tighter drop-shadow-[0_0_10px_rgba(52,211,153,0.5)] z-10 relative leading-none">${student.points}</span>
+
+                    <!-- Deep Inset Digital Scoreboard -->
+                    <div class="maths-score relative flex items-center justify-center bg-black/50 rounded-full px-4 md:px-5 py-1 md:py-1.5 border border-white/10 shadow-[inset_0_3px_10px_rgba(0,0,0,0.5)] overflow-hidden shrink-0 z-10 group-hover:border-white/20 transition-colors">
+                        <!-- Radar Sweep Animation -->
+                        <div class="absolute top-0 left-0 h-full w-[40%] z-0 bg-gradient-to-r from-transparent via-white/20 to-transparent sweep-effect -translate-x-[150%]"></div>
+
+                        <span class="score-value text-2xl md:text-3xl font-display font-black text-sky-400 tracking-tighter drop-shadow-[0_0_10px_rgba(56,189,248,0.5)] z-10 relative leading-none">${displayedPoints(student)}</span>
+                        <span class="text-[9px] md:text-[11px] font-bold text-sky-200/50 uppercase ml-1 mt-1 z-10 relative">Pts</span>
                     </div>
+                    ${deduction ? `<div class="deduction-badge absolute right-5 top-1/2 z-30 rounded-full border border-rose-300/70 bg-rose-500 px-3 py-1 text-lg font-black text-white shadow-[0_0_18px_rgba(244,63,94,.8)] pointer-events-none" role="status" aria-label="${deduction.amount} points deducted">&minus;${deduction.amount}</div>` : ''}
                 `;
                 leaderboardList.appendChild(el);
             });
 
-            // FLIP Execute
-            requestAnimationFrame(() => {
-                document.querySelectorAll('.student-row').forEach(el => {
+            pendingDeduction = null;
+
+            // Animate from each row's current visual position, even during another move.
+            if (!reducedMotion.matches) {
+                leaderboardList.querySelectorAll('.student-row').forEach(el => {
                     const oldRect = currentPositions.get(el.dataset.id);
                     if (oldRect) {
                         const newRect = el.getBoundingClientRect();
                         const deltaY = oldRect.top - newRect.top;
-                        
                         if (deltaY !== 0) {
-                            el.style.transform = `translateY(${deltaY}px)`;
-                            el.style.transition = 'none';
-                            
-                            requestAnimationFrame(() => {
-                                el.style.transform = '';
-                                el.style.transition = 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
-                                el.style.zIndex = '10';
-                            });
-                            setTimeout(() => { el.style.zIndex = ''; }, 600);
+                            el.animate([{ transform: `translateY(${deltaY}px)` }, { transform: 'translateY(0)' }],
+                                { duration: 400, easing: 'cubic-bezier(.2,.8,.2,1)' });
                         }
                     } else {
-                        el.style.opacity = '0';
-                        el.style.transform = 'translateY(20px)';
-                        requestAnimationFrame(() => {
-                            el.style.transition = 'all 0.4s ease-out';
-                            el.style.opacity = '1';
-                            el.style.transform = 'translateY(0)';
-                        });
+                        el.animate([{ opacity: 0, transform: 'translateY(20px)' }, { opacity: 1, transform: 'translateY(0)' }],
+                            { duration: 400, easing: 'ease-out' });
                     }
                 });
-            });
+            }
         }
 
-        // --- STREAMING_CHUNK:Confetti and Modal Helpers... ---
         function fireConfetti() {
+            if (reducedMotion.matches || typeof confetti !== 'function') return;
             confetti({
                 particleCount: 60,
                 spread: 70,
                 origin: { y: 0.8 },
-                colors: ['#0ea5e9', '#3b82f6', '#10b981', '#f59e0b'] // Tech colored confetti
+                colors: ['#4ade80', '#3b82f6', '#c084fc', '#fcd34d']
             });
         }
 
         function fireGrandConfetti() {
+            if (reducedMotion.matches || typeof confetti !== 'function') return;
             const duration = 3000;
             const end = Date.now() + duration;
 
@@ -729,14 +2230,14 @@
                     angle: 60,
                     spread: 55,
                     origin: { x: 0 },
-                    colors: ['#f59e0b', '#fbbf24', '#d97706']
+                    colors: ['#fbbf24', '#f59e0b', '#d97706']
                 });
                 confetti({
                     particleCount: 5,
                     angle: 120,
                     spread: 55,
                     origin: { x: 1 },
-                    colors: ['#f59e0b', '#fbbf24', '#d97706']
+                    colors: ['#fbbf24', '#f59e0b', '#d97706']
                 });
 
                 if (Date.now() < end) {
@@ -763,7 +2264,7 @@
             closeResetModal();
         }
 
-        // Expose functions globally for inline HTML event handlers
+        // Expose functions globally
         window.openResetModal = openResetModal;
         window.closeResetModal = closeResetModal;
         window.confirmReset = confirmReset;
@@ -771,9 +2272,19 @@
         window.openPopover = openPopover;
         window.closePopover = closePopover;
         window.quickAddPoints = quickAddPoints;
+        window.toggleAwardSound = toggleAwardSound;
         window.applyCustomUpdate = applyCustomUpdate;
+        window.openDeleteModal = openDeleteModal;
+        window.closeDeleteModal = closeDeleteModal;
+        window.confirmDeleteStudent = confirmDeleteStudent;
         window.toggleTrophyMenu = toggleTrophyMenu;
         window.selectTopX = selectTopX;
+        window.openBonusTeacherPanel = openBonusTeacherPanel;
+        window.closeBonusTeacherPanel = closeBonusTeacherPanel;
+        window.armBonusMachine = armBonusMachine;
+        window.clearBonusForToday = clearBonusForToday;
+        window.openBonusStage = openBonusStage;
+        window.closeBonusStage = closeBonusStage;
 
         // Boot app
         init();
