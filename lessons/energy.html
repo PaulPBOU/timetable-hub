@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en-AU" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How to Save Energy at Home | Informative Website WAGOLL</title>
+
+  <!--
+  =============================================================================
+  👋 TEACHER QUICK-START GUIDE (NSW Stage 3 Informative Texts — Lesson 2)
+  =============================================================================
+  Want to add your own images, YouTube videos, or custom links?
+  👉 Press Ctrl+F (Windows) or Cmd+F (Mac) and search for:
+     TEACHER_URLS
+  That takes you straight to ONE easy section near the bottom of this file
+  where you can paste all of your image URLs, video links, and source URLs!
+  If you leave any URL blank (""), the page automatically shows a clean
+  placeholder box explaining what image or video belongs there.
+  =============================================================================
+  -->
+
+  <!-- Load Inter (clean body font) and Barlow Condensed (matches the bold WAGOLL brochure headings) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Load Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Configure Tailwind with the exact WAGOLL brochure colour palette & typography -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            wagoll: {
+              dark: '#0E4C17',      /* Deep forest green from WAGOLL main headings */
+              forest: '#1B661F',    /* Medium-dark leaf green */
+              leaf: '#388E1C',      /* Vibrant leaf green for icons & borders */
+              lime: '#7BC916',      /* Bright brushstroke lime green */
+              bright: '#98E324',    /* Highlight lime green */
+              tint: '#F3FAEC',      /* Soft eco-green background wash */
+              cream: '#FAFDF7',     /* Very subtle warm page tint */
+              sun: '#EAB308'        /* Warm sunshine accent */
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            display: ['"Barlow Condensed"', 'Inter', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+</head>
+
+<body class="bg-wagoll-cream text-slate-800 font-sans antialiased selection:bg-wagoll-lime/30 selection:text-wagoll-dark">
+
+  <!-- =========================================================================
+       READING PROGRESS BAR (Website Feature: visual scroll indicator)
+  ========================================================================== -->
+  <div class="fixed top-0 left-0 right-0 z-50 h-1.5 bg-green-100" aria-hidden="true">
+    <div id="reading-progress" class="h-full w-0 bg-gradient-to-r from-wagoll-lime via-wagoll-leaf to-wagoll-dark transition-all duration-150"></div>
+  </div>
+
+  <!-- =========================================================================
+       STICKY WEBSITE HEADER & NAVIGATION BAR
+       (Website Feature: persistent menu & jump links — unlike a print brochure)
+  ========================================================================== -->
+  <header class="sticky top-1.5 z-40 mx-auto max-w-6xl px-3 sm:px-6 pt-2">
+    <nav aria-label="Main website navigation" class="bg-white/95 backdrop-blur-md border-2 border-wagoll-lime/40 shadow-md rounded-2xl px-4 py-3 flex items-center justify-between gap-3">
+      <!-- Brand / Site Logo -->
+      <a href="#top" class="flex items-center gap-2.5 group focus:outline-none focus:ring-2 focus:ring-wagoll-lime rounded-xl p-1">
+        <!-- Leaf Sprout SVG matching the WAGOLL brochure motif -->
+        <span class="w-10 h-10 rounded-xl bg-gradient-to-br from-wagoll-bright to-wagoll-leaf flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+          <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z"/>
+          </svg>
+        </span>
+        <div class="leading-tight">
+          <span class="block font-display text-xl sm:text-2xl font-extrabold tracking-wide text-wagoll-dark uppercase">Save Energy</span>
+          <span class="block text-[11px] font-semibold text-wagoll-leaf tracking-wider uppercase">At Home Guide</span>
+        </div>
+      </a>
+
+      <!-- Desktop Jump Links -->
+      <div class="hidden lg:flex items-center gap-1">
+        <a href="#why-save" class="nav-link px-3 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:bg-wagoll-tint hover:text-wagoll-dark transition-colors">Why Save Energy?</a>
+        <a href="#lights-devices" class="nav-link px-3 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:bg-wagoll-tint hover:text-wagoll-dark transition-colors">Lights &amp; Devices</a>
+        <a href="#heating-cooling" class="nav-link px-3 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:bg-wagoll-tint hover:text-wagoll-dark transition-colors">Heating &amp; Cooling</a>
+        <a href="#water-washing" class="nav-link px-3 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:bg-wagoll-tint hover:text-wagoll-dark transition-colors">Water &amp; Washing</a>
+        <a href="#glossary" class="nav-link px-3 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:bg-wagoll-tint hover:text-wagoll-dark transition-colors">Glossary</a>
+        <a href="#make-a-change" class="ml-1 px-4 py-2 rounded-xl text-sm font-bold bg-wagoll-dark text-white hover:bg-wagoll-forest shadow-sm transition-all">Make a Change</a>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button id="mobile-menu-btn" type="button" aria-expanded="false" aria-controls="mobile-menu" class="lg:hidden p-3 rounded-xl bg-wagoll-tint text-wagoll-dark hover:bg-wagoll-lime/25 focus:outline-none focus:ring-2 focus:ring-wagoll-lime transition-colors">
+        <span class="sr-only">Open navigation menu</span>
+        <svg id="menu-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+        <svg id="menu-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </nav>
+
+    <!-- Collapsible Mobile Navigation Drawer -->
+    <div id="mobile-menu" class="hidden lg:hidden mt-2 bg-white border-2 border-wagoll-lime/40 shadow-lg rounded-2xl p-3 space-y-1">
+      <a href="#why-save" class="mobile-nav-link block px-4 py-3 rounded-xl font-semibold text-slate-700 hover:bg-wagoll-tint hover:text-wagoll-dark">Why Save Energy?</a>
+      <a href="#lights-devices" class="mobile-nav-link block px-4 py-3 rounded-xl font-semibold text-slate-700 hover:bg-wagoll-tint hover:text-wagoll-dark">Lights &amp; Devices</a>
+      <a href="#heating-cooling" class="mobile-nav-link block px-4 py-3 rounded-xl font-semibold text-slate-700 hover:bg-wagoll-tint hover:text-wagoll-dark">Heating &amp; Cooling</a>
+      <a href="#water-washing" class="mobile-nav-link block px-4 py-3 rounded-xl font-semibold text-slate-700 hover:bg-wagoll-tint hover:text-wagoll-dark">Water &amp; Washing</a>
+      <a href="#make-a-change" class="mobile-nav-link block px-4 py-3 rounded-xl font-semibold text-slate-700 hover:bg-wagoll-tint hover:text-wagoll-dark">Make a Change Today</a>
+      <a href="#glossary" class="mobile-nav-link block px-4 py-3 rounded-xl font-semibold text-slate-700 hover:bg-wagoll-tint hover:text-wagoll-dark">Glossary &amp; Sources</a>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       MAIN WEBPAGE CONTENT
+  ========================================================================== -->
+  <main id="top" class="mx-auto max-w-6xl px-4 sm:px-6 pt-6 pb-20 space-y-10 sm:space-y-14">
+
+    <!-- =======================================================================
+         HERO SECTION (Matches the WAGOLL Brochure Front Cover)
+    ======================================================================== -->
+    <section class="relative overflow-hidden bg-white rounded-3xl border-2 border-wagoll-lime/50 shadow-lg p-6 sm:p-10 lg:p-12">
+      <!-- Decorative lime brushstroke glow matching WAGOLL aesthetic -->
+      <div class="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-wagoll-bright/20 blur-3xl"></div>
+      <div class="pointer-events-none absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-wagoll-lime/15 blur-3xl"></div>
+
+      <div class="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <!-- Hero Text Column -->
+        <div class="lg:col-span-7 space-y-5">
+          <!-- Tagline Pill (Exact WAGOLL Banner Text) -->
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-wagoll-tint border border-wagoll-lime/60 text-wagoll-dark font-extrabold text-xs sm:text-sm tracking-widest uppercase">
+            <span class="w-2.5 h-2.5 rounded-full bg-wagoll-lime"></span>
+            SMALL CHANGES. LESS WASTE.
+          </div>
+
+          <!-- Clear Title & Subtitle (Exact WAGOLL Text) -->
+          <div>
+            <h1 class="font-display text-5xl sm:text-6xl lg:text-7xl font-extrabold uppercase tracking-tight text-wagoll-dark leading-[0.95]">
+              HOW TO SAVE <span class="text-wagoll-leaf">ENERGY</span> AT HOME
+            </h1>
+            <!-- Curved Lime Swoosh Accent matching WAGOLL -->
+            <svg class="w-56 h-4 mt-2 text-wagoll-lime" viewBox="0 0 220 16" fill="none" aria-hidden="true">
+              <path d="M3 12C55 3 155 2 217 11" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+            </svg>
+            <p class="mt-3 text-xl sm:text-2xl font-bold text-wagoll-forest">
+              A guide to everyday energy-saving choices
+            </p>
+          </div>
+
+          <!-- Opening Statement (Exact WAGOLL Text) -->
+          <p class="text-base sm:text-lg text-slate-700 leading-relaxed max-w-xl">
+            Discover how light, warmth and water use energy — and how your family can waste less.
+          </p>
+
+          <!-- Interactive Website Action Buttons -->
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <a href="#why-save" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-wagoll-dark hover:bg-wagoll-forest text-white font-bold shadow-md hover:shadow-lg transition-all">
+              Start Exploring
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </a>
+            <a href="#make-a-change" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-wagoll-tint hover:bg-wagoll-lime/25 text-wagoll-dark border-2 border-wagoll-lime font-bold transition-all">
+              Take the Family Checklist
+            </a>
+          </div>
+
+          <!-- Helpful Tip for Stage 3 Readers about Website Interactivity -->
+          <p class="text-xs sm:text-sm text-slate-500 flex items-center gap-2 pt-1">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-wagoll-lime/30 text-wagoll-dark font-bold text-xs">i</span>
+            Tip: Click any <button type="button" data-glossary="efficient" class="glossary-trigger font-semibold text-wagoll-forest underline decoration-dotted decoration-2 underline-offset-4 hover:text-wagoll-dark">dotted green word</button> to read its definition right away!
+          </p>
+        </div>
+
+        <!-- Hero Image Placeholder Column -->
+        <div class="lg:col-span-5">
+          <!-- ===============================================================
+               👇 IMAGE SLOT 1: HERO / COVER IMAGE
+               To add your image, paste its URL into TEACHER_URLS.images.heroCover
+               in the <script> section near the bottom of this file!
+          ================================================================ -->
+          <figure class="rounded-3xl bg-wagoll-tint border-2 border-dashed border-wagoll-leaf/60 p-5 text-center shadow-inner">
+            <div id="slot-heroCover" class="media-slot">
+              <!-- Default Placeholder Visual & Teacher Description -->
+              <div class="aspect-[4/3] rounded-2xl bg-white/90 border border-wagoll-lime/40 flex flex-col items-center justify-center p-5 space-y-3">
+                <span class="px-3 py-1 rounded-full bg-wagoll-dark text-white text-xs font-bold tracking-wider uppercase">Image Placeholder #1 (Hero)</span>
+                <!-- Simple Eco Lightbulb & House SVG Icon -->
+                <svg class="w-16 h-16 text-wagoll-leaf" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <path d="M22 44h12M24 50h8M28 12c-8.8 0-16 7.2-16 16 0 5.5 2.8 10.4 7 13.3V44h18v-2.7c4.2-2.9 7-7.8 7-13.3 0-8.8-7.2-16-16-16z" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M28 36V26m0 0c0-4 4-7 8-7 0 4-3 7-8 7zm0 3c0-3-3-6-7-6 0 3 3 6 7 6z" stroke="#7BC916" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M40 48h18V33l-9-7-9 7v15z" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <p class="text-sm font-bold text-wagoll-dark">Suggested Image:</p>
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  An illustration or bright photo of a <strong>green lightbulb with a sprouting plant inside</strong> beside a cosy family house (matching the brochure cover).
+                </p>
+                <p class="text-[11px] font-mono text-wagoll-forest bg-wagoll-tint px-2.5 py-1 rounded-lg">
+                  Code slot: TEACHER_URLS.images.heroCover
+                </p>
+              </div>
+            </div>
+            <figcaption class="mt-3 text-sm font-semibold italic text-wagoll-dark">
+              Small changes at home help save energy every day.
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         INTERACTIVE TOPIC FILTER BAR
+         (Website Feature: filter or jump to specific rooms/topics with buttons!)
+    ======================================================================== -->
+    <section aria-label="Filter energy-saving rooms" class="bg-white rounded-2xl border border-wagoll-lime/50 shadow-sm p-4 sm:p-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-sm font-extrabold uppercase tracking-wider text-wagoll-dark">Explore Rooms &amp; Topics</h2>
+          <p class="text-xs sm:text-sm text-slate-600">Use these website buttons to view all sections or focus on one room at a time.</p>
+        </div>
+        <div class="flex flex-wrap gap-2" role="tablist" aria-label="Room filter buttons">
+          <button type="button" data-filter="all" class="room-filter-btn active-filter px-4 py-2.5 rounded-xl text-sm font-bold bg-wagoll-dark text-white shadow-sm transition-all">
+            Show All Sections
+          </button>
+          <button type="button" data-filter="lights-devices" class="room-filter-btn px-4 py-2.5 rounded-xl text-sm font-bold bg-wagoll-tint text-wagoll-dark hover:bg-wagoll-lime/30 transition-all">
+            💡 Lights &amp; Devices
+          </button>
+          <button type="button" data-filter="heating-cooling" class="room-filter-btn px-4 py-2.5 rounded-xl text-sm font-bold bg-wagoll-tint text-wagoll-dark hover:bg-wagoll-lime/30 transition-all">
+            🌡️ Heating &amp; Cooling
+          </button>
+          <button type="button" data-filter="water-washing" class="room-filter-btn px-4 py-2.5 rounded-xl text-sm font-bold bg-wagoll-tint text-wagoll-dark hover:bg-wagoll-lime/30 transition-all">
+            💧 Water &amp; Washing
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         SECTION 1: WHY SAVE ENERGY? (Exact WAGOLL Content + Image & Video Slots)
+    ======================================================================== -->
+    <section id="why-save" class="scroll-mt-28 bg-white rounded-3xl border-2 border-wagoll-lime/40 shadow-md p-6 sm:p-10">
+      <!-- WAGOLL-Style Heading with Leaf Badge -->
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-wagoll-bright to-wagoll-leaf flex items-center justify-center shadow-md shrink-0">
+          <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="font-display text-4xl sm:text-5xl font-extrabold uppercase text-wagoll-dark tracking-tight leading-none">
+            WHY SAVE ENERGY?
+          </h2>
+          <div class="h-1.5 w-28 bg-wagoll-lime rounded-full mt-2"></div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Text Content (100% Exact WAGOLL Wording) -->
+        <div class="lg:col-span-6 space-y-5 text-base sm:text-lg leading-relaxed text-slate-700">
+          <p>
+            Homes use energy for lighting, heating, cooling and
+            <button type="button" data-glossary="appliance" class="glossary-trigger font-semibold text-wagoll-forest underline decoration-dotted decoration-2 underline-offset-4 hover:text-wagoll-dark">appliances</button>.
+            Saving energy means using less to do everyday jobs.
+          </p>
+
+          <p>
+            Many power stations burn fossil fuels, such as coal and gas. This releases greenhouse gases that warm the planet. Using less energy can reduce these emissions.
+          </p>
+
+          <!-- Subheading Callout Box (Exact WAGOLL Subheading & Text) -->
+          <div class="rounded-2xl bg-wagoll-tint border-l-4 border-wagoll-leaf p-5 space-y-2">
+            <h3 class="font-display text-2xl font-extrabold uppercase text-wagoll-dark tracking-wide">
+              SMALL CHANGES ADD UP
+            </h3>
+            <p class="text-slate-700">
+              Simple daily habits can reduce wasted energy and lower household bills.
+            </p>
+          </div>
+        </div>
+
+        <!-- Visuals Column: Image Placeholder + Video Placeholder -->
+        <div class="lg:col-span-6 space-y-6">
+          <!-- ===============================================================
+               👇 IMAGE SLOT 2: HOME ENERGY ILLUSTRATION
+               Paste URL in TEACHER_URLS.images.whySaveHouse
+          ================================================================ -->
+          <figure class="rounded-2xl bg-wagoll-tint border-2 border-dashed border-wagoll-leaf/60 p-4 text-center">
+            <div id="slot-whySaveHouse" class="media-slot">
+              <div class="aspect-[16/10] rounded-xl bg-white border border-wagoll-lime/40 flex flex-col items-center justify-center p-4 space-y-2">
+                <span class="px-3 py-1 rounded-full bg-wagoll-dark text-white text-xs font-bold uppercase tracking-wider">Image Placeholder #2</span>
+                <p class="text-sm font-bold text-wagoll-dark">Suggested Image:</p>
+                <p class="text-xs sm:text-sm text-slate-600 max-w-md">
+                  An eco-friendly house surrounded by a <strong>lightbulb, sun, green leaves, and a power plug</strong> showing how different parts of a home use energy.
+                </p>
+                <p class="text-[11px] font-mono text-wagoll-forest bg-wagoll-tint px-2.5 py-1 rounded-lg">
+                  Code slot: TEACHER_URLS.images.whySaveHouse
+                </p>
+              </div>
+            </div>
+            <!-- Exact WAGOLL Caption -->
+            <figcaption class="mt-3 text-base font-bold italic text-wagoll-dark">
+              Every room offers a chance to save energy.
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <!-- =====================================================================
+           👇 VIDEO SLOT 1: MULTIMEDIA EXPLAINER (Website-Only Feature!)
+           Paste a YouTube link or MP4 URL in TEACHER_URLS.videos.whySaveVideo
+      ====================================================================== -->
+      <div class="mt-8 pt-8 border-t-2 border-wagoll-tint">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div class="flex items-center gap-2">
+            <span class="px-3 py-1 rounded-full bg-wagoll-lime/30 text-wagoll-dark text-xs font-extrabold uppercase tracking-wider">
+              Website Feature: Video
+            </span>
+            <h3 class="font-display text-2xl font-extrabold uppercase text-wagoll-dark">
+              WATCH: HOW SAVING ENERGY HELPS THE PLANET
+            </h3>
+          </div>
+        </div>
+
+        <figure class="rounded-2xl bg-slate-900/5 border-2 border-dashed border-wagoll-dark/40 p-4 sm:p-5">
+          <div id="slot-whySaveVideo" class="media-slot">
+            <div class="aspect-video max-h-[380px] mx-auto rounded-xl bg-gradient-to-br from-wagoll-dark to-wagoll-forest text-white flex flex-col items-center justify-center p-6 text-center space-y-3 shadow-inner">
+              <div class="w-16 h-16 rounded-full bg-wagoll-lime text-wagoll-dark flex items-center justify-center shadow-lg">
+                <svg class="w-8 h-8 ml-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+              </div>
+              <span class="px-3 py-1 rounded-full bg-white/15 text-wagoll-bright text-xs font-bold uppercase tracking-wider">
+                Video Placeholder #1 (YouTube or MP4)
+              </span>
+              <p class="text-sm sm:text-base font-semibold max-w-xl">
+                Suggested Video: A short (1–3 minute) Stage 3-friendly clip explaining how electricity is generated from fossil fuels, what greenhouse gases are, and why using less energy helps the Earth (e.g., ABC Education / Behind The News / NSW Energy).
+              </p>
+              <p class="text-xs font-mono text-green-100 bg-black/25 px-3 py-1.5 rounded-lg">
+                Code slot: TEACHER_URLS.videos.whySaveVideo
+              </p>
+            </div>
+          </div>
+          <figcaption class="mt-3 text-sm font-medium text-slate-600 text-center">
+            Informative websites can include videos alongside written facts to help explain tricky ideas clearly.
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         SECTION 2: LIGHTS & DEVICES (Exact WAGOLL Content)
+    ======================================================================== -->
+    <section id="lights-devices" data-room="lights-devices" class="room-section scroll-mt-28 bg-white rounded-3xl border-2 border-wagoll-lime/40 shadow-md p-6 sm:p-10">
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div>
+          <span class="inline-block text-xs font-extrabold uppercase tracking-widest text-wagoll-leaf mb-1">Room Guide 01</span>
+          <h2 class="font-display text-4xl sm:text-5xl font-extrabold uppercase text-wagoll-dark tracking-tight leading-none">
+            LIGHTS &amp; DEVICES
+          </h2>
+          <div class="h-1.5 w-28 bg-wagoll-lime rounded-full mt-2"></div>
+        </div>
+        <span class="px-4 py-2 rounded-2xl bg-wagoll-tint border border-wagoll-lime/50 text-wagoll-dark font-bold text-sm">
+          💡 Electricity &amp; Standby Power
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Left Column: Factual Paragraph & Action Tips -->
+        <div class="lg:col-span-7 space-y-6">
+          <!-- Exact WAGOLL Paragraph -->
+          <p class="text-base sm:text-lg leading-relaxed text-slate-700">
+            Lights and electronic devices use electricity. Some devices still draw power on
+            <button type="button" data-glossary="standby" class="glossary-trigger font-semibold text-wagoll-forest underline decoration-dotted decoration-2 underline-offset-4 hover:text-wagoll-dark">standby</button>,
+            even when their screens are dark.
+          </p>
+
+          <!-- Subheading & Tips List (Exact WAGOLL Text) -->
+          <div class="rounded-2xl bg-wagoll-tint p-5 sm:p-6 border border-wagoll-lime/40">
+            <h3 class="font-display text-2xl font-extrabold uppercase text-wagoll-dark tracking-wide mb-4">
+              SIMPLE WAYS TO SAVE
+            </h3>
+            <ul class="space-y-3 text-slate-700 text-base">
+              <li class="flex items-start gap-3">
+                <span class="mt-0.5 w-6 h-6 rounded-full bg-wagoll-leaf text-white flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                <span>Turn off lights when you leave a room.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="mt-0.5 w-6 h-6 rounded-full bg-wagoll-leaf text-white flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                <span>Use natural daylight when possible.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="mt-0.5 w-6 h-6 rounded-full bg-wagoll-leaf text-white flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                <span>Ask an adult to switch unused devices off at the wall.</span>
+              </li>
+              <li class="flex items-start gap-3 bg-white/80 rounded-xl p-3 border border-wagoll-lime/50">
+                <span class="mt-0.5 w-6 h-6 rounded-full bg-wagoll-dark text-white flex items-center justify-center shrink-0 text-xs font-bold">!</span>
+                <span class="font-medium text-wagoll-dark">Keep fridges, freezers and essential medical equipment switched on.</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- A BRIGHTER CHOICE + Interactive Bulb Comparison Toggle -->
+          <div class="rounded-2xl bg-white border-2 border-wagoll-leaf/40 p-5 sm:p-6 shadow-sm space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="font-display text-2xl font-extrabold uppercase text-wagoll-dark tracking-wide">
+                A BRIGHTER CHOICE
+              </h3>
+              <!-- Interactive Website Button Toggle -->
+              <div class="inline-flex rounded-xl bg-wagoll-tint p-1 border border-wagoll-lime/50" role="group" aria-label="Compare light bulbs">
+                <button type="button" id="btn-bulb-led" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-wagoll-dark text-white transition-all">
+                  LED Bulb
+                </button>
+                <button type="button" id="btn-bulb-old" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold text-wagoll-dark hover:bg-wagoll-lime/25 transition-all">
+                  Old Bulb
+                </button>
+              </div>
+            </div>
+
+            <!-- Exact WAGOLL Text -->
+            <p class="text-base text-slate-700 leading-relaxed">
+              An <button type="button" data-glossary="efficient" class="glossary-trigger font-semibold text-wagoll-forest underline decoration-dotted decoration-2 underline-offset-4 hover:text-wagoll-dark">efficient</button>
+              LED light bulb uses less electricity than an old incandescent bulb.
+            </p>
+
+            <!-- Interactive Visual Energy Meter (Website Feature) -->
+            <div id="bulb-meter-box" class="rounded-xl bg-wagoll-tint p-4 transition-all">
+              <div class="flex items-center justify-between text-xs sm:text-sm font-bold text-wagoll-dark mb-1.5">
+                <span id="bulb-meter-label">Efficient LED Bulb — Electricity Used</span>
+                <span id="bulb-meter-badge" class="px-2.5 py-0.5 rounded-full bg-wagoll-leaf text-white">Low Energy Use</span>
+              </div>
+              <div class="w-full h-3.5 bg-white rounded-full overflow-hidden border border-wagoll-lime/50">
+                <div id="bulb-meter-bar" class="h-full w-1/4 bg-gradient-to-r from-wagoll-lime to-wagoll-leaf rounded-full transition-all duration-500"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Image Placeholder #3 -->
+        <div class="lg:col-span-5">
+          <!-- ===============================================================
+               👇 IMAGE SLOT 3: LED LIGHT BULB & SUNLIT WINDOW
+               Paste URL in TEACHER_URLS.images.lightsAndDaylight
+          ================================================================ -->
+          <figure class="rounded-2xl bg-wagoll-tint border-2 border-dashed border-wagoll-leaf/60 p-4 text-center">
+            <div id="slot-lightsAndDaylight" class="media-slot">
+              <div class="aspect-[4/3] rounded-xl bg-white border border-wagoll-lime/40 flex flex-col items-center justify-center p-5 space-y-3">
+                <span class="px-3 py-1 rounded-full bg-wagoll-dark text-white text-xs font-bold uppercase tracking-wider">Image Placeholder #3</span>
+                <svg class="w-14 h-14 text-wagoll-lime" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 18h6m-5 3h4M12 2a7 7 0 00-4 12.74V16a1 1 0 001 1h6a1 1 0 001-1v-1.26A7 7 0 0012 2z"/>
+                </svg>
+                <p class="text-sm font-bold text-wagoll-dark">Suggested Image:</p>
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  An <strong>LED light bulb beside a bright window with open curtains</strong> letting natural sunshine into a room.
+                </p>
+                <p class="text-[11px] font-mono text-wagoll-forest bg-wagoll-tint px-2.5 py-1 rounded-lg">
+                  Code slot: TEACHER_URLS.images.lightsAndDaylight
+                </p>
+              </div>
+            </div>
+            <!-- Exact WAGOLL Caption -->
+            <figcaption class="mt-3 text-base font-bold italic text-wagoll-dark">
+              Daylight can reduce the need for electric lights.
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         SECTION 3: HEATING & COOLING (Exact WAGOLL Content + Interactive Diagram)
+    ======================================================================== -->
+    <section id="heating-cooling" data-room="heating-cooling" class="room-section scroll-mt-28 bg-white rounded-3xl border-2 border-wagoll-lime/40 shadow-md p-6 sm:p-10">
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div>
+          <span class="inline-block text-xs font-extrabold uppercase tracking-widest text-wagoll-leaf mb-1">Room Guide 02</span>
+          <h2 class="font-display text-4xl sm:text-5xl font-extrabold uppercase text-wagoll-dark tracking-tight leading-none">
+            HEATING &amp; COOLING
+          </h2>
+          <div class="h-1.5 w-28 bg-wagoll-lime rounded-full mt-2"></div>
+        </div>
+        <span class="px-4 py-2 rounded-2xl bg-wagoll-tint border border-wagoll-lime/50 text-wagoll-dark font-bold text-sm">
+          🌡️ Indoor Comfort &amp; Heat Transfer
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Left Column: Factual Paragraph & Seasonal Tips -->
+        <div class="lg:col-span-6 space-y-6">
+          <!-- Exact WAGOLL Paragraph -->
+          <p class="text-base sm:text-lg leading-relaxed text-slate-700">
+            Heaters and air conditioners use energy to change indoor temperatures. Thick, well-fitted curtains help slow heat transfer through windows.
+          </p>
+
+          <!-- Subheading + Interactive Season Highlight Buttons -->
+          <div class="rounded-2xl bg-wagoll-tint p-5 sm:p-6 border border-wagoll-lime/40 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="font-display text-2xl font-extrabold uppercase text-wagoll-dark tracking-wide">
+                KEEP COMFORTABLE
+              </h3>
+              <div class="inline-flex rounded-xl bg-white p-1 border border-wagoll-lime/50" role="group" aria-label="Highlight season tips">
+                <button type="button" data-season="all" class="season-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-wagoll-dark text-white transition-all">All</button>
+                <button type="button" data-season="summer" class="season-btn px-2.5 py-1 rounded-lg text-xs font-bold text-wagoll-dark hover:bg-amber-100 transition-all">☀️ Summer</button>
+                <button type="button" data-season="winter" class="season-btn px-2.5 py-1 rounded-lg text-xs font-bold text-wagoll-dark hover:bg-sky-100 transition-all">❄️ Winter</button>
+              </div>
+            </div>
+
+            <!-- Exact WAGOLL Tips -->
+            <ul class="space-y-3 text-slate-700 text-base">
+              <li id="tip-summer" class="season-tip flex items-start gap-3 p-3 rounded-xl bg-white/80 border-2 border-transparent transition-all">
+                <span class="mt-0.5 w-6 h-6 rounded-full bg-amber-400 text-slate-900 flex items-center justify-center shrink-0 text-xs font-bold">☀️</span>
+                <span>In summer, close blinds during the hottest part of the day.</span>
+              </li>
+              <li id="tip-winter" class="season-tip flex items-start gap-3 p-3 rounded-xl bg-white/80 border-2 border-transparent transition-all">
+                <span class="mt-0.5 w-6 h-6 rounded-full bg-sky-500 text-white flex items-center justify-center shrink-0 text-xs font-bold">❄️</span>
+                <span>In winter, let sunshine in during the day.</span>
+              </li>
+              <li id="tip-both" class="season-tip flex items-start gap-3 p-3 rounded-xl bg-white/80 border-2 border-transparent transition-all">
+                <span class="mt-0.5 w-6 h-6 rounded-full bg-wagoll-leaf text-white flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                <span>Close doors to rooms that are not being heated or cooled.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Right Column: Interactive Labelled Diagram (Exact WAGOLL Labels!) -->
+        <div class="lg:col-span-6">
+          <!-- ===============================================================
+               👇 IMAGE SLOT 4: LABELLED LIVING ROOM DIAGRAM
+               Paste URL in TEACHER_URLS.images.heatingDiagram
+          ================================================================ -->
+          <figure class="rounded-2xl bg-wagoll-tint border-2 border-dashed border-wagoll-leaf/60 p-4 text-center space-y-3">
+            <!-- Interactive WAGOLL Diagram Labels (Clickable Buttons!) -->
+            <div class="flex flex-wrap items-center justify-center gap-3">
+              <button type="button" data-diagram-label="curtains" class="diagram-label-btn px-4 py-2 rounded-full bg-white border-2 border-wagoll-leaf text-wagoll-dark font-bold text-sm shadow-sm hover:bg-wagoll-dark hover:text-white transition-all">
+                📍 Thick curtains
+              </button>
+              <button type="button" data-diagram-label="door" class="diagram-label-btn px-4 py-2 rounded-full bg-white border-2 border-wagoll-leaf text-wagoll-dark font-bold text-sm shadow-sm hover:bg-wagoll-dark hover:text-white transition-all">
+                📍 Closed door
+              </button>
+            </div>
+
+            <!-- Interactive Diagram Explanation Box (updates when students click a label) -->
+            <div id="diagram-info-box" class="rounded-xl bg-white border border-wagoll-lime/60 px-4 py-2.5 text-xs sm:text-sm text-wagoll-dark font-medium">
+              👆 Click <strong>Thick curtains</strong> or <strong>Closed door</strong> above to explore this labelled diagram!
+            </div>
+
+            <div id="slot-heatingDiagram" class="media-slot">
+              <div class="aspect-[16/10] rounded-xl bg-white border border-wagoll-lime/40 flex flex-col items-center justify-center p-5 space-y-2.5">
+                <span class="px-3 py-1 rounded-full bg-wagoll-dark text-white text-xs font-bold uppercase tracking-wider">Diagram Placeholder #4</span>
+                <p class="text-sm font-bold text-wagoll-dark">Suggested Labelled Diagram:</p>
+                <p class="text-xs sm:text-sm text-slate-600 max-w-md leading-relaxed">
+                  A living room diagram showing <strong>thick green curtains</strong> over a window (with a blue cold snowflake outside), <strong>warm orange heat lines</strong> inside, and a <strong>closed door</strong> keeping warmth in.
+                </p>
+                <p class="text-[11px] font-mono text-wagoll-forest bg-wagoll-tint px-2.5 py-1 rounded-lg">
+                  Code slot: TEACHER_URLS.images.heatingDiagram
+                </p>
+              </div>
+            </div>
+
+            <!-- Exact WAGOLL Caption -->
+            <figcaption class="text-base font-bold italic text-wagoll-dark">
+              Closed curtains and doors help keep warmth inside.
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         SECTION 4: WATER & WASHING (Exact WAGOLL Content)
+    ======================================================================== -->
+    <section id="water-washing" data-room="water-washing" class="room-section scroll-mt-28 bg-white rounded-3xl border-2 border-wagoll-lime/40 shadow-md p-6 sm:p-10">
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div>
+          <span class="inline-block text-xs font-extrabold uppercase tracking-widest text-wagoll-leaf mb-1">Room Guide 03</span>
+          <h2 class="font-display text-4xl sm:text-5xl font-extrabold uppercase text-wagoll-dark tracking-tight leading-none">
+            WATER &amp; WASHING
+          </h2>
+          <div class="h-1.5 w-28 bg-wagoll-lime rounded-full mt-2"></div>
+        </div>
+        <span class="px-4 py-2 rounded-2xl bg-wagoll-tint border border-wagoll-lime/50 text-wagoll-dark font-bold text-sm">
+          💧 Hot Water &amp; Laundry
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Left Column: Factual Paragraph, Wash Wisely & Dry Naturally -->
+        <div class="lg:col-span-7 space-y-6">
+          <!-- Exact WAGOLL Paragraph -->
+          <p class="text-base sm:text-lg leading-relaxed text-slate-700">
+            Heating water uses energy. Shorter showers use less hot water, so less energy is needed to heat it.
+          </p>
+
+          <!-- Subheading: WASH WISELY (Exact WAGOLL Text) -->
+          <div class="rounded-2xl bg-wagoll-tint p-5 sm:p-6 border border-wagoll-lime/40">
+            <h3 class="font-display text-2xl font-extrabold uppercase text-wagoll-dark tracking-wide mb-4">
+              WASH WISELY
+            </h3>
+            <ul class="space-y-3 text-slate-700 text-base">
+              <li class="flex items-start gap-3">
+                <span class="mt-0.5 w-6 h-6 rounded-full bg-wagoll-leaf text-white flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                <span>Keep showers short.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="mt-0.5 w-6 h-6 rounded-full bg-wagoll-leaf text-white flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                <span>Ask an adult to choose a cold wash when suitable.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="mt-0.5 w-6 h-6 rounded-full bg-wagoll-leaf text-white flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                <span>Wait for a full load before running the washing machine.</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Subheading: LET CLOTHES DRY NATURALLY (Exact WAGOLL Text) -->
+          <div class="rounded-2xl bg-white border-2 border-wagoll-leaf/40 p-5 sm:p-6 shadow-sm space-y-2">
+            <h3 class="font-display text-2xl font-extrabold uppercase text-wagoll-dark tracking-wide">
+              LET CLOTHES DRY NATURALLY
+            </h3>
+            <p class="text-base text-slate-700 leading-relaxed">
+              A sunny, breezy clothesline dries wet clothes without using an electric tumble dryer.
+            </p>
+          </div>
+        </div>
+
+        <!-- Right Column: Clothesline Image Placeholder #5 + Evaporation Definition -->
+        <div class="lg:col-span-5 space-y-4">
+          <!-- ===============================================================
+               👇 IMAGE SLOT 5: SUNNY CLOTHESLINE
+               Paste URL in TEACHER_URLS.images.clothesline
+          ================================================================ -->
+          <figure class="rounded-2xl bg-wagoll-tint border-2 border-dashed border-wagoll-leaf/60 p-4 text-center">
+            <div id="slot-clothesline" class="media-slot">
+              <div class="aspect-[4/3] rounded-xl bg-white border border-wagoll-lime/40 flex flex-col items-center justify-center p-5 space-y-3">
+                <span class="px-3 py-1 rounded-full bg-wagoll-dark text-white text-xs font-bold uppercase tracking-wider">Image Placeholder #5</span>
+                <svg class="w-14 h-14 text-wagoll-leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <circle cx="18" cy="5" r="3" stroke="#EAB308"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M12 10v11M7 10l-1 6h5l-1-6M14 10l-1 5h4l-1-5"/>
+                </svg>
+                <p class="text-sm font-bold text-wagoll-dark">Suggested Image:</p>
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  A sunny, breezy Australian <strong>rotary clothesline (Hills Hoist)</strong> with wet shirts, shorts, towels, and socks drying naturally in the sunshine.
+                </p>
+                <p class="text-[11px] font-mono text-wagoll-forest bg-wagoll-tint px-2.5 py-1 rounded-lg">
+                  Code slot: TEACHER_URLS.images.clothesline
+                </p>
+              </div>
+            </div>
+            <!-- Exact WAGOLL Caption -->
+            <figcaption class="mt-3 text-base font-bold italic text-wagoll-dark">
+              Sunshine and moving air help water
+              <button type="button" data-glossary="evaporate" class="glossary-trigger font-bold text-wagoll-forest underline decoration-dotted decoration-2 underline-offset-4 hover:text-wagoll-dark">evaporate</button>.
+            </figcaption>
+          </figure>
+
+          <!-- Exact WAGOLL Technical Vocabulary Callout -->
+          <div class="rounded-2xl bg-wagoll-dark text-white p-4 shadow-sm flex items-start gap-3">
+            <span class="px-2.5 py-1 rounded-lg bg-wagoll-lime text-wagoll-dark font-extrabold text-xs uppercase shrink-0">Word Check</span>
+            <p class="text-sm leading-relaxed">
+              <strong>Evaporate</strong> means to change from liquid water into water vapour.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         SECTION 5: MAKE A CHANGE TODAY (Exact WAGOLL Persuasive Call to Action
+         + Interactive Web Checklist!)
+    ======================================================================== -->
+    <section id="make-a-change" class="scroll-mt-28 relative overflow-hidden bg-gradient-to-br from-wagoll-dark via-wagoll-forest to-wagoll-dark text-white rounded-3xl shadow-xl p-6 sm:p-10 lg:p-12">
+      <!-- Subtle Decorative Circles -->
+      <div class="pointer-events-none absolute -top-20 -right-20 w-72 h-72 rounded-full bg-wagoll-bright/15 blur-2xl"></div>
+
+      <div class="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <!-- Left Column: Closing Statement & Interactive Checklist -->
+        <div class="lg:col-span-7 space-y-5">
+          <div class="flex items-center gap-3">
+            <span class="w-12 h-12 rounded-2xl bg-wagoll-lime text-wagoll-dark flex items-center justify-center shadow-md shrink-0">
+              <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z"/>
+              </svg>
+            </span>
+            <h2 class="font-display text-4xl sm:text-5xl font-extrabold uppercase tracking-tight leading-none">
+              MAKE A CHANGE TODAY
+            </h2>
+          </div>
+
+          <!-- Exact WAGOLL Closing Statement -->
+          <p class="text-base sm:text-lg text-green-50 leading-relaxed">
+            Saving energy starts with everyday choices. Together, small changes can make a difference.
+          </p>
+
+          <!-- Exact WAGOLL Direct Question -->
+          <p class="text-xl sm:text-2xl font-extrabold text-wagoll-bright">
+            What could your family change?
+          </p>
+
+          <!-- Interactive Family Habit Checkboxes (Exact WAGOLL Items) -->
+          <div class="space-y-3" role="group" aria-label="Energy-saving family habits checklist">
+            <label class="habit-option flex items-center gap-4 p-4 rounded-2xl bg-white/10 hover:bg-white/15 border-2 border-white/20 cursor-pointer transition-all">
+              <input type="checkbox" value="Switch off unused lights." class="habit-checkbox w-6 h-6 rounded-md accent-lime-400 cursor-pointer" />
+              <span class="text-base sm:text-lg font-semibold">Switch off unused lights.</span>
+            </label>
+
+            <label class="habit-option flex items-center gap-4 p-4 rounded-2xl bg-white/10 hover:bg-white/15 border-2 border-white/20 cursor-pointer transition-all">
+              <input type="checkbox" value="Keep showers short." class="habit-checkbox w-6 h-6 rounded-md accent-lime-400 cursor-pointer" />
+              <span class="text-base sm:text-lg font-semibold">Keep showers short.</span>
+            </label>
+
+            <label class="habit-option flex items-center gap-4 p-4 rounded-2xl bg-white/10 hover:bg-white/15 border-2 border-white/20 cursor-pointer transition-all">
+              <input type="checkbox" value="Dry washing on the line." class="habit-checkbox w-6 h-6 rounded-md accent-lime-400 cursor-pointer" />
+              <span class="text-base sm:text-lg font-semibold">Dry washing on the line.</span>
+            </label>
+          </div>
+
+          <!-- Call to Action Button (Exact WAGOLL Call to Action Text!) -->
+          <div class="pt-2 flex flex-wrap items-center gap-3">
+            <button id="pledge-btn" type="button" class="px-6 py-4 rounded-2xl bg-wagoll-bright hover:bg-wagoll-lime text-wagoll-dark font-display text-2xl font-extrabold uppercase tracking-wide shadow-lg hover:scale-[1.02] active:scale-[0.99] transition-all">
+              CHOOSE ONE HABIT TO START TODAY!
+            </button>
+            <button id="copy-pledge-btn" type="button" class="hidden px-4 py-3.5 rounded-2xl bg-white/15 hover:bg-white/25 text-white text-sm font-bold border border-white/30 transition-all">
+              📋 Copy My Pledge
+            </button>
+          </div>
+
+          <!-- Inline Interactive Feedback Message Box (No alert() used!) -->
+          <div id="pledge-feedback" class="hidden rounded-2xl bg-white text-wagoll-dark p-4 shadow-md border-2 border-wagoll-bright">
+            <p id="pledge-feedback-text" class="text-sm sm:text-base font-bold"></p>
+          </div>
+        </div>
+
+        <!-- Right Column: Optional Video Placeholder #2 (Kids Taking Action) -->
+        <div class="lg:col-span-5">
+          <!-- ===============================================================
+               👇 VIDEO SLOT 2: PRACTICAL HABITS IN ACTION
+               Paste a YouTube link or MP4 URL in TEACHER_URLS.videos.habitsVideo
+          ================================================================ -->
+          <figure class="rounded-2xl bg-white/10 border-2 border-dashed border-wagoll-bright/70 p-4 text-center">
+            <div id="slot-habitsVideo" class="media-slot">
+              <div class="aspect-video rounded-xl bg-black/30 flex flex-col items-center justify-center p-5 space-y-2.5">
+                <div class="w-14 h-14 rounded-full bg-wagoll-bright text-wagoll-dark flex items-center justify-center shadow-md">
+                  <svg class="w-7 h-7 ml-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                </div>
+                <span class="px-3 py-1 rounded-full bg-white/15 text-wagoll-bright text-xs font-bold uppercase tracking-wider">
+                  Video Placeholder #2 (Optional)
+                </span>
+                <p class="text-xs sm:text-sm text-green-50 leading-relaxed">
+                  <strong>Suggested Video:</strong> A quick (30–60 sec) clip showing families or students doing everyday energy-saving habits like turning off lights and hanging washing outside.
+                </p>
+                <p class="text-[11px] font-mono text-wagoll-bright bg-black/30 px-2.5 py-1 rounded-lg">
+                  Code slot: TEACHER_URLS.videos.habitsVideo
+                </p>
+              </div>
+            </div>
+            <figcaption class="mt-3 text-xs sm:text-sm text-green-100 font-medium">
+              Small everyday actions add up when everyone pitches in!
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         SECTION 6 & 7: GLOSSARY & FIND OUT MORE (Exact WAGOLL Content)
+    ======================================================================== -->
+    <section id="glossary" class="scroll-mt-28 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <!-- GLOSSARY Card -->
+      <div class="lg:col-span-7 bg-white rounded-3xl border-2 border-wagoll-lime/40 shadow-md p-6 sm:p-8 space-y-5">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h2 class="font-display text-3xl sm:text-4xl font-extrabold uppercase text-wagoll-dark tracking-tight">
+              GLOSSARY
+            </h2>
+            <div class="h-1.5 w-20 bg-wagoll-lime rounded-full mt-1.5"></div>
+          </div>
+          <span class="text-xs font-bold text-wagoll-forest bg-wagoll-tint px-3 py-1.5 rounded-full">Key Terms</span>
+        </div>
+
+        <!-- Exact WAGOLL Glossary Terms (Interactive Cards) -->
+        <dl class="space-y-3">
+          <div id="glossary-card-appliance" class="glossary-card rounded-2xl bg-wagoll-tint border-2 border-transparent p-4 transition-all">
+            <dt class="text-lg font-extrabold text-wagoll-dark">Appliance:</dt>
+            <dd class="text-slate-700 mt-0.5">a machine used for a household task.</dd>
+          </div>
+
+          <div id="glossary-card-efficient" class="glossary-card rounded-2xl bg-wagoll-tint border-2 border-transparent p-4 transition-all">
+            <dt class="text-lg font-extrabold text-wagoll-dark">Efficient:</dt>
+            <dd class="text-slate-700 mt-0.5">doing a job with less wasted energy.</dd>
+          </div>
+
+          <div id="glossary-card-standby" class="glossary-card rounded-2xl bg-wagoll-tint border-2 border-transparent p-4 transition-all">
+            <dt class="text-lg font-extrabold text-wagoll-dark">Standby:</dt>
+            <dd class="text-slate-700 mt-0.5">a waiting mode that still uses power.</dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- FIND OUT MORE (Sources with Clickable Website Hyperlinks!) -->
+      <div id="sources" class="lg:col-span-5 bg-white rounded-3xl border-2 border-wagoll-lime/40 shadow-md p-6 sm:p-8 flex flex-col justify-between space-y-5">
+        <div class="space-y-5">
+          <div>
+            <h2 class="font-display text-3xl sm:text-4xl font-extrabold uppercase text-wagoll-dark tracking-tight">
+              FIND OUT MORE
+            </h2>
+            <div class="h-1.5 w-20 bg-wagoll-lime rounded-full mt-1.5"></div>
+            <p class="mt-3 text-sm text-slate-600">
+              Click these reliable government sources to check facts and learn more energy-saving tips:
+            </p>
+          </div>
+
+          <!-- ===============================================================
+               👇 EXTERNAL SOURCE LINKS (Pre-filled from WAGOLL!)
+               You can also edit these URLs in TEACHER_URLS.sources below.
+          ================================================================ -->
+          <div class="space-y-3">
+            <a id="source-nsw" href="https://www.energy.nsw.gov.au/households/tips/save" target="_blank" rel="noopener noreferrer" class="group block rounded-2xl bg-wagoll-tint hover:bg-wagoll-lime/25 border-2 border-wagoll-lime/50 p-4 transition-all">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-extrabold text-wagoll-dark group-hover:underline">NSW Government</span>
+                <svg class="w-5 h-5 text-wagoll-leaf shrink-0 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+              </div>
+              <span class="block text-xs sm:text-sm text-wagoll-forest font-medium break-all mt-1">
+                energy.nsw.gov.au/households/tips/save
+              </span>
+            </a>
+
+            <a id="source-aus" href="https://www.energy.gov.au/households/quick-wins" target="_blank" rel="noopener noreferrer" class="group block rounded-2xl bg-wagoll-tint hover:bg-wagoll-lime/25 border-2 border-wagoll-lime/50 p-4 transition-all">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-extrabold text-wagoll-dark group-hover:underline">Australian Government</span>
+                <svg class="w-5 h-5 text-wagoll-leaf shrink-0 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+              </div>
+              <span class="block text-xs sm:text-sm text-wagoll-forest font-medium break-all mt-1">
+                energy.gov.au/households/quick-wins
+              </span>
+            </a>
+          </div>
+        </div>
+
+        <p class="text-xs text-slate-500 pt-2 border-t border-wagoll-tint">
+          🔗 Hyperlinks let website readers visit reliable sources with one click.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================================
+       FOOTER
+  ========================================================================== -->
+  <footer class="bg-wagoll-dark text-green-100 py-8 px-4">
+    <div class="mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+      <div>
+        <p class="font-display text-2xl font-extrabold uppercase tracking-wide text-white">
+          HOW TO SAVE ENERGY AT HOME
+        </p>
+        <p class="text-sm text-green-200">
+          SMALL CHANGES. LESS WASTE. — Stage 3 Informative Website Model Text
+        </p>
+      </div>
+      <a href="#top" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-bold transition-colors">
+        ↑ Back to Top
+      </a>
+    </div>
+  </footer>
+
+  <!-- =========================================================================
+       FLOATING "BACK TO TOP" BUTTON (Website Navigation Affordance)
+  ========================================================================== -->
+  <button id="back-to-top" type="button" aria-label="Scroll back to top" class="fixed bottom-5 right-5 z-40 hidden p-3.5 rounded-2xl bg-wagoll-dark hover:bg-wagoll-forest text-white shadow-lg border-2 border-wagoll-bright transition-all">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>
+    </svg>
+  </button>
+
+  <!-- =========================================================================
+       INTERACTIVE GLOSSARY POP-UP MODAL (Triggered by dotted green words)
+  ========================================================================== -->
+  <div id="glossary-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4" role="dialog" aria-modal="true" aria-labelledby="glossary-modal-title">
+    <div class="bg-white rounded-3xl border-2 border-wagoll-lime max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <span class="text-xs font-extrabold uppercase tracking-wider text-wagoll-leaf">Glossary Definition</span>
+          <h3 id="glossary-modal-title" class="font-display text-3xl font-extrabold uppercase text-wagoll-dark mt-0.5">Word</h3>
+        </div>
+        <button id="close-glossary-modal" type="button" aria-label="Close definition" class="p-2 rounded-xl bg-wagoll-tint hover:bg-wagoll-lime/30 text-wagoll-dark transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <p id="glossary-modal-def" class="text-base text-slate-700 leading-relaxed"></p>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <a id="glossary-modal-jump" href="#glossary" class="px-4 py-2.5 rounded-xl bg-wagoll-tint hover:bg-wagoll-lime/30 text-wagoll-dark text-sm font-bold transition-colors">
+          View Full Glossary
+        </a>
+        <button id="ok-glossary-modal" type="button" class="px-5 py-2.5 rounded-xl bg-wagoll-dark hover:bg-wagoll-forest text-white text-sm font-bold transition-colors">
+          Got it!
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       JAVASCRIPT: MEDIA LOADER + ALL INTERACTIVE WEBSITE FEATURES
+  ========================================================================== -->
+  <script>
+    /* =========================================================================
+       ✏️✏️✏️  TEACHER_URLS — PUT ALL YOUR IMAGE, VIDEO & SOURCE URLS HERE!  ✏️✏️✏️
+       =========================================================================
+       INSTRUCTIONS:
+       • To replace ANY placeholder with your own picture or video, paste the
+         link or file name inside the quotes "" below.
+       • Example online image:   "https://images.unsplash.com/photo-12345"
+       • Example local image:    "images/clothesline.png"
+       • Example YouTube video:  "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+       • Example local MP4:      "videos/energy-tips.mp4"
+       • Leave "" empty if you want to keep showing the placeholder description!
+       ========================================================================= */
+    const TEACHER_URLS = {
+      images: {
+        // 👇 IMAGE #1 (Hero Cover): Green lightbulb with plant + eco house
+        heroCover: "",
+
+        // 👇 IMAGE #2 (Why Save Energy?): House with lightbulb, sun & power plug
+        whySaveHouse: "",
+
+        // 👇 IMAGE #3 (Lights & Devices): Efficient LED bulb & sunny window
+        lightsAndDaylight: "",
+
+        // 👇 IMAGE #4 (Heating & Cooling): Living room diagram (Thick curtains & Closed door)
+        heatingDiagram: "",
+
+        // 👇 IMAGE #5 (Water & Washing): Sunny, breezy clothesline (Hills Hoist)
+        clothesline: ""
+      },
+
+      videos: {
+        // 👇 VIDEO #1 (Why Save Energy?): Paste a YouTube link OR .mp4 path
+        whySaveVideo: "",
+
+        // 👇 VIDEO #2 (Make a Change Today): Paste a YouTube link OR .mp4 path
+        habitsVideo: ""
+      },
+
+      sources: {
+        // 👇 EXTERNAL WEBSITES (Already filled with the exact WAGOLL links!)
+        nswGovernment: "https://www.energy.nsw.gov.au/households/tips/save",
+        australianGovernment: "https://www.energy.gov.au/households/quick-wins"
+      }
+    };
+    /* ==================== END OF TEACHER_URLS SECTION ===================== */
+
+    /**
+     * Converts standard YouTube links (watch?v=..., youtu.be/..., shorts/...)
+     * into a clean embeddable iframe URL. Returns null if not a YouTube URL.
+     */
+    function getYouTubeEmbedUrl(url) {
+      try {
+        const trimmed = url.trim();
+        const ytRegex = /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+        const match = trimmed.match(ytRegex);
+        if (match && match[1]) {
+          return `https://www.youtube.com/embed/${match[1]}`;
+        }
+        return null;
+      } catch (err) {
+        return null;
+      }
+    }
+
+    /**
+     * Loads any teacher-provided image URLs into their matching placeholder slots.
+     * Includes a graceful error fallback so broken links never ruin the page.
+     */
+    function loadTeacherImages() {
+      const imageMeta = {
+        heroCover: "How to save energy at home illustration",
+        whySaveHouse: "Every room offers a chance to save energy",
+        lightsAndDaylight: "LED light bulb next to a sunlit window",
+        heatingDiagram: "Labelled diagram showing thick curtains and a closed door",
+        clothesline: "Clothes drying on a sunny, breezy clothesline"
+      };
+
+      Object.keys(TEACHER_URLS.images).forEach((key) => {
+        const url = (TEACHER_URLS.images[key] || "").trim();
+        if (!url) return; // Keep the descriptive placeholder when blank
+
+        const slot = document.getElementById(`slot-${key}`);
+        if (!slot) return;
+
+        const originalPlaceholderHTML = slot.innerHTML;
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = imageMeta[key] || "Energy saving illustration";
+        img.className = "w-full h-auto max-h-[420px] object-cover rounded-xl border border-wagoll-lime/50 shadow-sm mx-auto";
+
+        // Graceful fallback if the pasted URL cannot be loaded
+        img.onerror = function () {
+          slot.innerHTML = originalPlaceholderHTML;
+          const warn = document.createElement("p");
+          warn.className = "mt-2 text-xs font-bold text-amber-800 bg-amber-100 rounded-lg px-3 py-1.5";
+          warn.textContent = `Could not load image from "${url}". Check the URL in TEACHER_URLS.images.${key}.`;
+          slot.appendChild(warn);
+        };
+
+        slot.innerHTML = "";
+        slot.appendChild(img);
+      });
+    }
+
+    /**
+     * Loads any teacher-provided YouTube or MP4 video URLs into video slots.
+     */
+    function loadTeacherVideos() {
+      Object.keys(TEACHER_URLS.videos).forEach((key) => {
+        const url = (TEACHER_URLS.videos[key] || "").trim();
+        if (!url) return; // Keep the descriptive placeholder when blank
+
+        const slot = document.getElementById(`slot-${key}`);
+        if (!slot) return;
+
+        const youtubeEmbed = getYouTubeEmbedUrl(url);
+
+        if (youtubeEmbed) {
+          slot.innerHTML = `
+            <div class="aspect-video w-full overflow-hidden rounded-xl shadow-md bg-black">
+              <iframe
+                src="${youtubeEmbed}"
+                title="Educational video about saving energy at home"
+                class="w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+              </iframe>
+            </div>
+          `;
+        } else {
+          // Treat as a direct MP4 / WebM video URL or local video file
+          slot.innerHTML = `
+            <div class="aspect-video w-full overflow-hidden rounded-xl shadow-md bg-black">
+              <video controls class="w-full h-full">
+                <source src="${url}" />
+                Your browser does not support embedded video playback.
+              </video>
+            </div>
+          `;
+        }
+      });
+    }
+
+    /**
+     * Applies any custom external source URLs from TEACHER_URLS.sources.
+     */
+    function loadTeacherSources() {
+      const nswLink = document.getElementById("source-nsw");
+      const ausLink = document.getElementById("source-aus");
+      if (nswLink && TEACHER_URLS.sources.nswGovernment) {
+        nswLink.href = TEACHER_URLS.sources.nswGovernment;
+      }
+      if (ausLink && TEACHER_URLS.sources.australianGovernment) {
+        ausLink.href = TEACHER_URLS.sources.australianGovernment;
+      }
+    }
+
+    /**
+     * Initialises all interactive Stage 3 website features safely after DOM load.
+     */
+    document.addEventListener("DOMContentLoaded", () => {
+      try {
+        // 1. Load any custom URLs added by the teacher
+        loadTeacherImages();
+        loadTeacherVideos();
+        loadTeacherSources();
+
+        // 2. Reading Progress Bar & Floating Back-to-Top Button
+        const progressBar = document.getElementById("reading-progress");
+        const backToTopBtn = document.getElementById("back-to-top");
+
+        window.addEventListener("scroll", () => {
+          const scrollTop = window.scrollY || document.documentElement.scrollTop;
+          const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+          const percent = docHeight > 0 ? Math.min(100, Math.round((scrollTop / docHeight) * 100)) : 0;
+          if (progressBar) progressBar.style.width = `${percent}%`;
+
+          if (backToTopBtn) {
+            if (scrollTop > 400) {
+              backToTopBtn.classList.remove("hidden");
+            } else {
+              backToTopBtn.classList.add("hidden");
+            }
+          }
+        });
+
+        if (backToTopBtn) {
+          backToTopBtn.addEventListener("click", () => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          });
+        }
+
+        // 3. Mobile Navigation Drawer Toggle
+        const mobileMenuBtn = document.getElementById("mobile-menu-btn");
+        const mobileMenu = document.getElementById("mobile-menu");
+        const iconOpen = document.getElementById("menu-icon-open");
+        const iconClose = document.getElementById("menu-icon-close");
+
+        if (mobileMenuBtn && mobileMenu) {
+          mobileMenuBtn.addEventListener("click", () => {
+            const isHidden = mobileMenu.classList.toggle("hidden");
+            mobileMenuBtn.setAttribute("aria-expanded", String(!isHidden));
+            iconOpen.classList.toggle("hidden", !isHidden);
+            iconClose.classList.toggle("hidden", isHidden);
+          });
+
+          // Close drawer when any mobile link is tapped
+          document.querySelectorAll(".mobile-nav-link").forEach((link) => {
+            link.addEventListener("click", () => {
+              mobileMenu.classList.add("hidden");
+              mobileMenuBtn.setAttribute("aria-expanded", "false");
+              iconOpen.classList.remove("hidden");
+              iconClose.classList.add("hidden");
+            });
+          });
+        }
+
+        // 4. Interactive Room Filter Buttons (Show All or Focus on One Room)
+        const filterBtns = document.querySelectorAll(".room-filter-btn");
+        const roomSections = document.querySelectorAll(".room-section");
+
+        filterBtns.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const selected = btn.getAttribute("data-filter");
+
+            // Update button active styles
+            filterBtns.forEach((b) => {
+              b.classList.remove("bg-wagoll-dark", "text-white", "shadow-sm");
+              b.classList.add("bg-wagoll-tint", "text-wagoll-dark");
+            });
+            btn.classList.remove("bg-wagoll-tint", "text-wagoll-dark");
+            btn.classList.add("bg-wagoll-dark", "text-white", "shadow-sm");
+
+            // Show or filter room sections
+            roomSections.forEach((sec) => {
+              const room = sec.getAttribute("data-room");
+              if (selected === "all" || room === selected) {
+                sec.classList.remove("hidden");
+              } else {
+                sec.classList.add("hidden");
+              }
+            });
+
+            // Smoothly scroll to the chosen room if a specific room was picked
+            if (selected !== "all") {
+              const target = document.getElementById(selected);
+              if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          });
+        });
+
+        // Also ensure top navigation links un-hide any filtered room section
+        document.querySelectorAll(".nav-link, .mobile-nav-link").forEach((link) => {
+          link.addEventListener("click", () => {
+            roomSections.forEach((sec) => sec.classList.remove("hidden"));
+            filterBtns.forEach((b) => {
+              const isAll = b.getAttribute("data-filter") === "all";
+              b.classList.toggle("bg-wagoll-dark", isAll);
+              b.classList.toggle("text-white", isAll);
+              b.classList.toggle("bg-wagoll-tint", !isAll);
+              b.classList.toggle("text-wagoll-dark", !isAll);
+            });
+          });
+        });
+
+        // 5. Interactive LED vs. Old Incandescent Bulb Comparison
+        const btnLed = document.getElementById("btn-bulb-led");
+        const btnOld = document.getElementById("btn-bulb-old");
+        const meterLabel = document.getElementById("bulb-meter-label");
+        const meterBadge = document.getElementById("bulb-meter-badge");
+        const meterBar = document.getElementById("bulb-meter-bar");
+
+        if (btnLed && btnOld && meterBar) {
+          btnLed.addEventListener("click", () => {
+            btnLed.className = "px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-wagoll-dark text-white transition-all";
+            btnOld.className = "px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold text-wagoll-dark hover:bg-wagoll-lime/25 transition-all";
+            meterLabel.textContent = "Efficient LED Bulb — Electricity Used";
+            meterBadge.textContent = "Low Energy Use";
+            meterBadge.className = "px-2.5 py-0.5 rounded-full bg-wagoll-leaf text-white";
+            meterBar.style.width = "25%";
+            meterBar.className = "h-full bg-gradient-to-r from-wagoll-lime to-wagoll-leaf rounded-full transition-all duration-500";
+          });
+
+          btnOld.addEventListener("click", () => {
+            btnOld.className = "px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-amber-600 text-white transition-all";
+            btnLed.className = "px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold text-wagoll-dark hover:bg-wagoll-lime/25 transition-all";
+            meterLabel.textContent = "Old Incandescent Bulb — Electricity Used";
+            meterBadge.textContent = "High Energy Use";
+            meterBadge.className = "px-2.5 py-0.5 rounded-full bg-amber-600 text-white";
+            meterBar.style.width = "90%";
+            meterBar.className = "h-full bg-gradient-to-r from-amber-400 to-orange-600 rounded-full transition-all duration-500";
+          });
+        }
+
+        // 6. Interactive Summer / Winter Highlight in Heating & Cooling
+        const seasonBtns = document.querySelectorAll(".season-btn");
+        const tipSummer = document.getElementById("tip-summer");
+        const tipWinter = document.getElementById("tip-winter");
+        const tipBoth = document.getElementById("tip-both");
+
+        seasonBtns.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const season = btn.getAttribute("data-season");
+
+            seasonBtns.forEach((b) => {
+              b.classList.remove("bg-wagoll-dark", "text-white");
+              b.classList.add("text-wagoll-dark");
+            });
+            btn.classList.add("bg-wagoll-dark", "text-white");
+
+            [tipSummer, tipWinter, tipBoth].forEach((el) => {
+              if (!el) return;
+              el.classList.remove("border-amber-400", "border-sky-500", "bg-amber-50", "bg-sky-50", "opacity-45");
+              el.classList.add("border-transparent", "bg-white/80");
+            });
+
+            if (season === "summer") {
+              tipSummer.classList.replace("border-transparent", "border-amber-400");
+              tipSummer.classList.replace("bg-white/80", "bg-amber-50");
+              tipWinter.classList.add("opacity-45");
+            } else if (season === "winter") {
+              tipWinter.classList.replace("border-transparent", "border-sky-500");
+              tipWinter.classList.replace("bg-white/80", "bg-sky-50");
+              tipSummer.classList.add("opacity-45");
+            }
+          });
+        });
+
+        // 7. Interactive Diagram Labels (Thick curtains / Closed door)
+        const diagramBtns = document.querySelectorAll(".diagram-label-btn");
+        const diagramInfoBox = document.getElementById("diagram-info-box");
+        const diagramDescriptions = {
+          curtains: "<strong>Thick curtains:</strong> Thick, well-fitted curtains help slow heat transfer through windows, keeping rooms warmer in winter and cooler in summer.",
+          door: "<strong>Closed door:</strong> Closing doors to rooms that are not being heated or cooled traps comfortable air inside the room you are using."
+        };
+
+        diagramBtns.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const labelKey = btn.getAttribute("data-diagram-label");
+
+            diagramBtns.forEach((b) => {
+              b.classList.remove("bg-wagoll-dark", "text-white");
+              b.classList.add("bg-white", "text-wagoll-dark");
+            });
+            btn.classList.remove("bg-white", "text-wagoll-dark");
+            btn.classList.add("bg-wagoll-dark", "text-white");
+
+            if (diagramInfoBox && diagramDescriptions[labelKey]) {
+              diagramInfoBox.innerHTML = diagramDescriptions[labelKey];
+            }
+          });
+        });
+
+        // 8. Interactive Glossary Pop-Up Definitions
+        const glossaryDefinitions = {
+          appliance: {
+            word: "Appliance",
+            definition: "A machine used for a household task (for example, a fridge, toaster, washing machine, or television)."
+          },
+          efficient: {
+            word: "Efficient",
+            definition: "Doing a job with less wasted energy (for example, an LED light bulb gives bright light while using less electricity)."
+          },
+          standby: {
+            word: "Standby",
+            definition: "A waiting mode that still uses power, even when a device's screen looks dark."
+          },
+          evaporate: {
+            word: "Evaporate",
+            definition: "To change from liquid water into water vapour (sunshine and moving air help wet clothes dry naturally)."
+          }
+        };
+
+        const modal = document.getElementById("glossary-modal");
+        const modalTitle = document.getElementById("glossary-modal-title");
+        const modalDef = document.getElementById("glossary-modal-def");
+        const closeModalBtn = document.getElementById("close-glossary-modal");
+        const okModalBtn = document.getElementById("ok-glossary-modal");
+        const jumpGlossaryLink = document.getElementById("glossary-modal-jump");
+
+        function openGlossaryModal(termKey) {
+          const item = glossaryDefinitions[termKey];
+          if (!item || !modal) return;
+          modalTitle.textContent = item.word;
+          modalDef.textContent = item.definition;
+          modal.classList.remove("hidden");
+          modal.classList.add("flex");
+
+          // Highlight the matching card in the bottom Glossary section too
+          document.querySelectorAll(".glossary-card").forEach((c) => {
+            c.classList.remove("border-wagoll-leaf", "ring-2", "ring-wagoll-lime/50");
+            c.classList.add("border-transparent");
+          });
+          const card = document.getElementById(`glossary-card-${termKey}`);
+          if (card) {
+            card.classList.remove("border-transparent");
+            card.classList.add("border-wagoll-leaf", "ring-2", "ring-wagoll-lime/50");
+          }
+        }
+
+        function closeGlossaryModal() {
+          if (!modal) return;
+          modal.classList.add("hidden");
+          modal.classList.remove("flex");
+        }
+
+        document.querySelectorAll(".glossary-trigger").forEach((trigger) => {
+          trigger.addEventListener("click", () => {
+            const key = trigger.getAttribute("data-glossary");
+            openGlossaryModal(key);
+          });
+        });
+
+        if (closeModalBtn) closeModalBtn.addEventListener("click", closeGlossaryModal);
+        if (okModalBtn) okModalBtn.addEventListener("click", closeGlossaryModal);
+        if (jumpGlossaryLink) jumpGlossaryLink.addEventListener("click", closeGlossaryModal);
+        if (modal) {
+          modal.addEventListener("click", (e) => {
+            if (e.target === modal) closeGlossaryModal();
+          });
+        }
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") closeGlossaryModal();
+        });
+
+        // 9. Interactive "Make a Change Today" Family Checklist & Pledge Button
+        const habitCheckboxes = document.querySelectorAll(".habit-checkbox");
+        const pledgeBtn = document.getElementById("pledge-btn");
+        const copyPledgeBtn = document.getElementById("copy-pledge-btn");
+        const pledgeFeedback = document.getElementById("pledge-feedback");
+        const pledgeFeedbackText = document.getElementById("pledge-feedback-text");
+
+        // Highlight checked rows visually
+        habitCheckboxes.forEach((box) => {
+          box.addEventListener("change", () => {
+            const label = box.closest(".habit-option");
+            if (!label) return;
+            if (box.checked) {
+              label.classList.add("bg-wagoll-bright/20", "border-wagoll-bright");
+              label.classList.remove("bg-white/10", "border-white/20");
+            } else {
+              label.classList.remove("bg-wagoll-bright/20", "border-wagoll-bright");
+              label.classList.add("bg-white/10", "border-white/20");
+            }
+          });
+        });
+
+        if (pledgeBtn && pledgeFeedback && pledgeFeedbackText) {
+          pledgeBtn.addEventListener("click", () => {
+            const chosen = Array.from(habitCheckboxes)
+              .filter((cb) => cb.checked)
+              .map((cb) => cb.value);
+
+            pledgeFeedback.classList.remove("hidden");
+
+            if (chosen.length === 0) {
+              pledgeFeedbackText.textContent = "👆 Tick at least one habit above so your family has a goal to start today!";
+              if (copyPledgeBtn) copyPledgeBtn.classList.add("hidden");
+            } else if (chosen.length === 1) {
+              pledgeFeedbackText.textContent = `🌟 Great choice! Your family habit to start today is: "${chosen[0]}" Small changes really do add up!`;
+              if (copyPledgeBtn) copyPledgeBtn.classList.remove("hidden");
+            } else {
+              pledgeFeedbackText.textContent = `🌟 Awesome work! You chose ${chosen.length} energy-saving habits: ${chosen.join(" ")} Together, small changes can make a difference!`;
+              if (copyPledgeBtn) copyPledgeBtn.classList.remove("hidden");
+            }
+          });
+        }
+
+        // Copy Pledge to Clipboard using iframe-safe document.execCommand('copy')
+        if (copyPledgeBtn) {
+          copyPledgeBtn.addEventListener("click", () => {
+            const chosen = Array.from(habitCheckboxes)
+              .filter((cb) => cb.checked)
+              .map((cb) => `- ${cb.value}`);
+            if (chosen.length === 0) return;
+
+            const textToCopy = `My Family Energy-Saving Pledge:\n${chosen.join("\n")}\nSmall changes. Less waste!`;
+            const tempArea = document.createElement("textarea");
+            tempArea.value = textToCopy;
+            tempArea.style.position = "fixed";
+            tempArea.style.opacity = "0";
+            document.body.appendChild(tempArea);
+            tempArea.select();
+            try {
+              document.execCommand("copy");
+              copyPledgeBtn.textContent = "✅ Pledge Copied!";
+              setTimeout(() => {
+                copyPledgeBtn.textContent = "📋 Copy My Pledge";
+              }, 2500);
+            } catch (err) {
+              copyPledgeBtn.textContent = "Unable to copy";
+            }
+            document.body.removeChild(tempArea);
+          });
+        }
+      } catch (error) {
+        console.error("Interactive webpage setup encountered an error:", error);
+      }
+    });
+  </script>
+</body>
+</html>
