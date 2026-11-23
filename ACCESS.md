@@ -1,6 +1,6 @@
 # Browser password lock
 
-Every HTML entry page loads `site-access.js` synchronously at the start of its
+`lessons/energy.html` opens directly for students. Protected pages load `site-access.js` synchronously at the start of their
 head, before any app scripts or resources. Locked pages keep the remaining
 markup in an inert template and redirect to `password.html`. Successful entry
 returns to the original page, including its query string and hash.

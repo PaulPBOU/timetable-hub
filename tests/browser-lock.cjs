@@ -8,7 +8,10 @@ const { chromium } = require('playwright');
 
 (async () => {
     const root = path.resolve(__dirname, '..');
-    const pages = fs.readdirSync(root, { recursive: true }).filter(file => file.endsWith('.html') && file !== 'password.html');
+    const publicLesson = 'lessons/energy.html';
+    const pages = fs.readdirSync(root, { recursive: true })
+        .map(file => file.replaceAll('\\', '/'))
+        .filter(file => file.endsWith('.html') && file !== 'password.html' && file !== publicLesson);
     const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'timetable-lock-'));
     let appExecutions = 0;
     const server = http.createServer((req, res) => {
@@ -52,7 +55,7 @@ const { chromium } = require('playwright');
         await blockRemote(context);
         let page = await context.newPage();
         for (const file of pages) {
-            await page.goto(base + file.replaceAll('\\', '/'));
+            await page.goto(base + file);
             await page.waitForURL('**/password.html?*');
             await page.locator('#password').waitFor();
             assert.equal(await page.title(), 'Enter password');
@@ -106,6 +109,10 @@ const { chromium } = require('playwright');
         const fresh = await browser.newContext();
         await blockRemote(fresh);
         const freshPage = await fresh.newPage();
+        await freshPage.goto(base + publicLesson);
+        assert.equal(freshPage.url(), base + publicLesson);
+        assert.equal(await freshPage.locator('h1').isVisible(), true);
+        console.log('PASS: a fresh browser can read the energy lesson without entering a password');
         await freshPage.goto(base + 'home.html');
         await freshPage.waitForURL('**/password.html?*');
         await freshPage.addInitScript(() => {
